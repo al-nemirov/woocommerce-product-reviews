@@ -1,9 +1,11 @@
 <?php
 /**
  * Plugin Name: Smart Product Reviews
+ * Plugin URI:  https://github.com/al-nemirov/smart-product-reviews
  * Description: WooCommerce product reviews with star ratings, emoji editor, editor notes, and shortcodes.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Alexander Nemirov
+ * Author URI:  https://github.com/al-nemirov
  * Text Domain: smart-product-reviews
  * Domain Path: /languages
  * Requires at least: 5.0
@@ -24,7 +26,7 @@ if (!defined('ABSPATH')) {
  * @since 1.0.0
  * @var string
  */
-define('NR_VERSION', '1.0.0');
+define('NR_VERSION', '1.0.1');
 
 /**
  * Plugin directory path (with trailing slash).

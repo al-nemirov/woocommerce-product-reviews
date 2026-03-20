@@ -63,7 +63,7 @@ WooCommerce product reviews plugin with star ratings, emoji editor, editor notes
 1. Download or clone this repository into your `wp-content/plugins/` directory:
    ```bash
    cd wp-content/plugins/
-   git clone https://github.com/your-username/smart-product-reviews.git
+   git clone https://github.com/al-nemirov/smart-product-reviews.git
    ```
 2. Activate the plugin in **Plugins** menu in WordPress admin.
 3. Go to **Smart Product Reviews** in the sidebar menu to configure settings.
@@ -73,7 +73,7 @@ WooCommerce product reviews plugin with star ratings, emoji editor, editor notes
 1. Скачайте или клонируйте репозиторий в директорию `wp-content/plugins/`:
    ```bash
    cd wp-content/plugins/
-   git clone https://github.com/your-username/smart-product-reviews.git
+   git clone https://github.com/al-nemirov/smart-product-reviews.git
    ```
 2. Активируйте плагин в меню **Плагины** в админке WordPress.
 3. Перейдите в **Smart Product Reviews** в боковом меню для настройки.
