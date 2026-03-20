@@ -1,12 +1,42 @@
 <?php
+/**
+ * Admin settings page.
+ *
+ * Registers the plugin menu page, handles settings save,
+ * and provides the admin UI for configuring plugin options
+ * and resetting editor login blocks.
+ *
+ * @package SmartProductReviews
+ * @since   1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Class NR_Admin
+ *
+ * Singleton class for the WordPress admin settings interface.
+ *
+ * @since 1.0.0
+ */
 class NR_Admin {
 
+    /**
+     * Singleton instance.
+     *
+     * @since 1.0.0
+     * @var NR_Admin|null
+     */
     private static $instance = null;
 
+    /**
+     * Get the singleton instance.
+     *
+     * @since  1.0.0
+     * @return NR_Admin
+     */
     public static function instance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -14,12 +44,28 @@ class NR_Admin {
         return self::$instance;
     }
 
+    /**
+     * Register admin hooks.
+     *
+     * @since  1.0.0
+     * @return void
+     */
     public function init() {
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_init', [$this, 'save']);
         add_action('admin_init', [$this, 'maybe_clear_login_blocks']);
     }
 
+    /**
+     * Handle the "clear login blocks" admin action.
+     *
+     * Verifies nonce and capabilities, then clears all stored
+     * IP blocks for the editor login form. Redirects back to
+     * the settings page with a success indicator.
+     *
+     * @since  1.0.0
+     * @return void Redirects and exits when processing the action.
+     */
     public function maybe_clear_login_blocks() {
         if (empty($_GET['nr_clear_login_blocks']) || !current_user_can('manage_options')) {
             return;
@@ -32,6 +78,14 @@ class NR_Admin {
         exit;
     }
 
+    /**
+     * Register the plugin admin menu page.
+     *
+     * Adds a top-level menu item "Smart Product Reviews" with a star icon.
+     *
+     * @since  1.0.0
+     * @return void
+     */
     public function menu() {
         add_menu_page(
             'Smart Product Reviews',
@@ -44,6 +98,15 @@ class NR_Admin {
         );
     }
 
+    /**
+     * Handle settings form submission.
+     *
+     * Validates nonce and capabilities, sanitizes input values,
+     * and saves plugin options to the database.
+     *
+     * @since  1.0.0
+     * @return void
+     */
     public function save() {
         if (!isset($_POST['nr_save']) || !current_user_can('manage_options') || !wp_verify_nonce($_POST['_wpnonce'], 'nr_options')) {
             return;
@@ -57,6 +120,15 @@ class NR_Admin {
         echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
     }
 
+    /**
+     * Render the plugin settings page HTML.
+     *
+     * Displays the settings form with sections for reviews configuration,
+     * editor notes login setup, shortcode reference, and a save button.
+     *
+     * @since  1.0.0
+     * @return void
+     */
     public function page() {
         $o = spr_instance()->get_options();
         ?>

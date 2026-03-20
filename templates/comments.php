@@ -1,4 +1,15 @@
 <?php
+/**
+ * Comments template for WooCommerce product pages.
+ *
+ * Displays the editor note block with view/edit functionality.
+ * Shows a TinyMCE editor form for users with edit capabilities.
+ * In Elementor editor context, shows a placeholder instead.
+ *
+ * @package SmartProductReviews
+ * @since   1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }

@@ -1,12 +1,43 @@
 <?php
+/**
+ * Shortcodes handler.
+ *
+ * Registers and renders shortcodes for the editor login form,
+ * latest reviews widget, and popular reviews widget.
+ * Also handles the editor login form submission with IP blocking.
+ *
+ * @package SmartProductReviews
+ * @since   1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Class NR_Shortcodes
+ *
+ * Singleton class that provides all non-review shortcodes
+ * and handles editor authentication.
+ *
+ * @since 1.0.0
+ */
 class NR_Shortcodes {
 
+    /**
+     * Singleton instance.
+     *
+     * @since 1.0.0
+     * @var NR_Shortcodes|null
+     */
     private static $instance = null;
 
+    /**
+     * Get the singleton instance.
+     *
+     * @since  1.0.0
+     * @return NR_Shortcodes
+     */
     public static function instance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -14,6 +45,12 @@ class NR_Shortcodes {
         return self::$instance;
     }
 
+    /**
+     * Register shortcodes and hooks.
+     *
+     * @since  1.0.0
+     * @return void
+     */
     public function init() {
         add_shortcode('nr_popular_comments', [$this, 'popular_comments']);
         add_shortcode('nr_latest_comments', [$this, 'latest_comments']);
@@ -22,14 +59,27 @@ class NR_Shortcodes {
     }
 
     /**
-     * Clear all editor login blocks (admin button).
+     * Clear all editor login IP blocks.
+     *
+     * Called from the admin settings page to unblock editors
+     * who have been locked out after too many failed attempts.
+     *
+     * @since  1.0.0
+     * @return void
      */
     public static function clear_login_blocks() {
         delete_option('nr_editor_login_blocks');
     }
 
     /**
-     * Handle editor login form (before page output).
+     * Handle editor login form submission (runs before page output).
+     *
+     * Validates nonce, checks IP block status, authenticates the user,
+     * verifies editor capabilities, and sets auth cookies on success.
+     * Blocks the IP for 1 hour after 3 failed attempts.
+     *
+     * @since  1.0.0
+     * @return void Redirects and exits on form submission.
      */
     public function maybe_editor_login() {
         if (empty($_POST['nr_editor_login']) || empty($_POST['nr_editor_nonce'])) {
@@ -61,6 +111,11 @@ class NR_Shortcodes {
         $password = isset($_POST['nr_editor_pass']) ? $_POST['nr_editor_pass'] : '';
         $redirect_to = isset($_POST['nr_editor_redirect']) ? esc_url_raw(wp_unslash($_POST['nr_editor_redirect'])) : '';
 
+        /**
+         * Record a failed login attempt and update the IP block counter.
+         *
+         * @since 1.0.0
+         */
         $record_fail = function () use ($hash, &$blocks) {
             if (!isset($blocks[$hash])) {
                 $blocks[$hash] = ['attempts' => 0, 'expiry' => 0];
@@ -115,8 +170,16 @@ class NR_Shortcodes {
     }
 
     /**
-     * Shortcode: editor login page.
-     * Usage: create a page, insert [nr_editor_login], share link with editor.
+     * Render the editor login form shortcode.
+     *
+     * Displays a login form for note editors, or a welcome message
+     * with links if the user is already logged in with edit capabilities.
+     *
+     * Usage: [nr_editor_login] or [nr_editor_login redirect="https://site.com/shop/"]
+     *
+     * @since  1.0.0
+     * @param  array|string $atts Shortcode attributes. Supports 'redirect' URL.
+     * @return string Rendered HTML for the login form or logged-in state.
      */
     public function editor_login($atts) {
         $atts = shortcode_atts([
@@ -202,6 +265,18 @@ class NR_Shortcodes {
         return ob_get_clean();
     }
 
+    /**
+     * Render the popular reviews shortcode.
+     *
+     * Displays a list of the most recent approved reviews across all products,
+     * sorted by date (most recent first).
+     *
+     * Usage: [nr_popular_comments count="5" title="Popular Reviews"]
+     *
+     * @since  1.0.0
+     * @param  array|string $atts Shortcode attributes. Supports 'count' and 'title'.
+     * @return string Rendered HTML for the popular reviews widget.
+     */
     public function popular_comments($atts) {
         $atts = shortcode_atts([
             'count' => 5,
@@ -241,6 +316,17 @@ class NR_Shortcodes {
         return ob_get_clean();
     }
 
+    /**
+     * Render the latest reviews shortcode.
+     *
+     * Displays a list of the most recent approved reviews across all products.
+     *
+     * Usage: [nr_latest_comments count="5" title="Latest Reviews"]
+     *
+     * @since  1.0.0
+     * @param  array|string $atts Shortcode attributes. Supports 'count' and 'title'.
+     * @return string Rendered HTML for the latest reviews widget.
+     */
     public function latest_comments($atts) {
         $atts = shortcode_atts([
             'count' => 5,
