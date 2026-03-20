@@ -9,24 +9,59 @@
  * Requires at least: 5.0
  * Requires PHP: 7.2
  * WC requires at least: 3.0
+ *
+ * @package SmartProductReviews
+ * @since   1.0.0
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Plugin version constant.
+ *
+ * @since 1.0.0
+ * @var string
+ */
 define('NR_VERSION', '1.0.0');
+
+/**
+ * Plugin directory path (with trailing slash).
+ *
+ * @since 1.0.0
+ * @var string
+ */
 define('NR_PATH', plugin_dir_path(__FILE__));
+
+/**
+ * Plugin directory URL (with trailing slash).
+ *
+ * @since 1.0.0
+ * @var string
+ */
 define('NR_URL', plugin_dir_url(__FILE__));
 
 require_once NR_PATH . 'includes/class-nr-core.php';
 
+/**
+ * Return the singleton instance of the plugin core.
+ *
+ * @since  1.0.0
+ * @return NR_Core Plugin core instance.
+ */
 function spr_instance() {
     return NR_Core::instance();
 }
 
 /**
- * Detect Elementor editor context — skip rendering review form to avoid nested HTML errors.
+ * Detect Elementor editor context -- skip rendering review form to avoid nested HTML errors.
+ *
+ * Checks multiple conditions: admin Elementor action, elementor-preview parameter,
+ * REST API edit context, and Elementor plugin edit/preview mode.
+ *
+ * @since  1.0.0
+ * @return bool True if currently in an Elementor editor or preview context.
  */
 function nr_is_editor_context() {
     if (is_admin() && isset($_GET['action']) && $_GET['action'] === 'elementor') {
@@ -48,8 +83,18 @@ function nr_is_editor_context() {
 }
 
 /**
- * Render product reviews block in theme template.
- * Usage: <?php nr_product_reviews(); ?> or <?php nr_product_reviews( 123 ); ?>
+ * Render product reviews block in a theme template.
+ *
+ * Can be called directly in template files. If no product ID is provided,
+ * it attempts to use the current product page ID.
+ *
+ * Usage:
+ *   <?php nr_product_reviews(); ?>
+ *   <?php nr_product_reviews( 123 ); ?>
+ *
+ * @since 1.0.0
+ * @param int $product_id Optional. WooCommerce product ID. Default 0 (auto-detect).
+ * @return void
  */
 function nr_product_reviews( $product_id = 0 ) {
     if ( ! class_exists( 'NR_Comments' ) ) {
@@ -63,6 +108,14 @@ function nr_product_reviews( $product_id = 0 ) {
     }
 }
 
+/**
+ * Initialize the plugin after all plugins are loaded.
+ *
+ * Checks that WooCommerce is active before initializing.
+ * Displays an admin notice if WooCommerce is not found.
+ *
+ * @since 1.0.0
+ */
 add_action('plugins_loaded', function () {
     if (!class_exists('WooCommerce')) {
         add_action('admin_notices', function () {
@@ -73,6 +126,13 @@ add_action('plugins_loaded', function () {
     spr_instance()->init();
 });
 
+/**
+ * Run activation tasks when the plugin is activated.
+ *
+ * Creates the secret editor login page and sets default options.
+ *
+ * @since 1.0.0
+ */
 register_activation_hook(__FILE__, function () {
     if (class_exists('WooCommerce')) {
         spr_instance()->activate();

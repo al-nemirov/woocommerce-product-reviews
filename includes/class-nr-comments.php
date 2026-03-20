@@ -1,12 +1,42 @@
 <?php
+/**
+ * Comments and reviews handler.
+ *
+ * Manages product review display, AJAX submission, editor note editing,
+ * review tab replacement, and asset enqueuing.
+ *
+ * @package SmartProductReviews
+ * @since   1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Class NR_Comments
+ *
+ * Singleton class responsible for the review/comment system
+ * and editor note functionality on WooCommerce product pages.
+ *
+ * @since 1.0.0
+ */
 class NR_Comments {
 
+    /**
+     * Singleton instance.
+     *
+     * @since 1.0.0
+     * @var NR_Comments|null
+     */
     private static $instance = null;
 
+    /**
+     * Get the singleton instance.
+     *
+     * @since  1.0.0
+     * @return NR_Comments
+     */
     public static function instance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -14,6 +44,12 @@ class NR_Comments {
         return self::$instance;
     }
 
+    /**
+     * Register all WordPress hooks and shortcodes.
+     *
+     * @since  1.0.0
+     * @return void
+     */
     public function init() {
         add_filter('comments_template', [$this, 'comments_template'], 99, 1);
         add_action('wp_enqueue_scripts', [$this, 'assets']);
@@ -32,8 +68,13 @@ class NR_Comments {
     }
 
     /**
-     * AJAX: editor note status (for the status bar).
-     * Status bar shown only for note editors, not admins.
+     * AJAX handler: return editor note status for the status bar.
+     *
+     * Responds with JSON indicating whether the current user is a logged-in
+     * note editor (not an admin, who has the WP toolbar instead).
+     *
+     * @since  1.0.0
+     * @return void Outputs JSON and exits.
      */
     public function ajax_editor_status() {
         header('Content-Type: application/json; charset=utf-8');
@@ -57,6 +98,15 @@ class NR_Comments {
         exit;
     }
 
+    /**
+     * AJAX handler: save an editor note for a product.
+     *
+     * Validates nonce, checks user capabilities, sanitizes content,
+     * and updates post meta for the editor note.
+     *
+     * @since  1.0.0
+     * @return void Outputs JSON response and exits.
+     */
     public function ajax_save_editor_note() {
         check_ajax_referer('nr_save_editor_note', 'nonce');
         $user = wp_get_current_user();
@@ -75,7 +125,13 @@ class NR_Comments {
     }
 
     /**
-     * Handle regular form submission (non-AJAX) on the frontend.
+     * Handle non-AJAX editor note form submission on the frontend.
+     *
+     * Processes the POST request from the editor note form, validates nonce
+     * and capabilities, saves the note, and redirects back to the product page.
+     *
+     * @since  1.0.0
+     * @return void Redirects and exits on form submission.
      */
     public function maybe_save_editor_note_form() {
         if (empty($_POST['nr_editor_note_form'])) {
@@ -105,8 +161,14 @@ class NR_Comments {
     }
 
     /**
-     * Shortcode to render the reviews block on a product page.
+     * Shortcode callback to render the reviews block on a product page.
+     *
      * Usage: [nr_product_reviews] or [nr_product_reviews id="123"]
+     * Also handles [nr_editor_note] shortcode (same output).
+     *
+     * @since  1.0.0
+     * @param  array|string $atts Shortcode attributes. Supports 'id' for product ID.
+     * @return string Rendered HTML or empty string.
      */
     public function shortcode_product_reviews($atts) {
         $atts = shortcode_atts(['id' => 0], $atts, 'nr_product_reviews');
@@ -121,7 +183,13 @@ class NR_Comments {
     }
 
     /**
-     * Render reviews block via do_action hook.
+     * Render the reviews block via do_action hook.
+     *
+     * Hooked to 'nr_single_product_reviews'. Outputs reviews HTML
+     * for the current product page.
+     *
+     * @since  1.0.0
+     * @return void
      */
     public function render_product_reviews() {
         $product_id = is_singular('product') ? get_the_ID() : 0;
@@ -131,7 +199,14 @@ class NR_Comments {
     }
 
     /**
-     * Render HTML reviews block for a given product.
+     * Build the full HTML reviews block for a given product.
+     *
+     * Loads the comments template, sets up post data for the target product,
+     * captures output via output buffering, and restores the original post.
+     *
+     * @since  1.0.0
+     * @param  int $product_id WooCommerce product ID.
+     * @return string Rendered HTML string, or empty string on failure.
      */
     public function render_product_reviews_html($product_id) {
         global $post;
@@ -159,6 +234,16 @@ class NR_Comments {
         return $html;
     }
 
+    /**
+     * Replace the default WooCommerce reviews tab with the editor note tab.
+     *
+     * Removes the standard 'reviews' tab and adds a custom 'nr_reviews' tab
+     * that loads the plugin's comments template.
+     *
+     * @since  1.0.0
+     * @param  array $tabs WooCommerce product tabs array.
+     * @return array Modified tabs array.
+     */
     public function replace_reviews_tab($tabs) {
         unset($tabs['reviews']);
         $tabs['nr_reviews'] = [
@@ -174,6 +259,15 @@ class NR_Comments {
         return $tabs;
     }
 
+    /**
+     * Override the comments template for product pages.
+     *
+     * Points to the plugin's custom comments template instead of the theme default.
+     *
+     * @since  1.0.0
+     * @param  string $template Path to the current comments template.
+     * @return string Path to the plugin's comments template, or the original.
+     */
     public function comments_template($template) {
         if (!is_singular('product')) {
             return $template;
@@ -183,7 +277,13 @@ class NR_Comments {
     }
 
     /**
-     * Editor status bar — loaded via AJAX, cache-safe.
+     * Enqueue the editor status bar CSS and JS.
+     *
+     * Loaded on all frontend pages (except admin and Elementor editor)
+     * so note editors see their status bar. The bar itself is populated via AJAX.
+     *
+     * @since  1.0.0
+     * @return void
      */
     public function enqueue_editor_status_bar() {
         if (is_admin() || self::is_elementor_editor_or_preview()) {
@@ -196,6 +296,16 @@ class NR_Comments {
         ]);
     }
 
+    /**
+     * Enqueue review form CSS and JS assets.
+     *
+     * Loaded on product pages or when forced (e.g., via shortcode on non-product pages).
+     * Skipped in Elementor editor/preview mode.
+     *
+     * @since  1.0.0
+     * @param  bool $force Whether to force enqueue regardless of page type.
+     * @return void
+     */
     public function assets($force = false) {
         if (!$force && !is_singular('product')) {
             return;
@@ -212,6 +322,12 @@ class NR_Comments {
         ]);
     }
 
+    /**
+     * Check if the current request is within an Elementor editor or preview context.
+     *
+     * @since  1.0.0
+     * @return bool True if in Elementor editor or preview mode.
+     */
     private static function is_elementor_editor_or_preview() {
         if (is_admin() && isset($_GET['action']) && $_GET['action'] === 'elementor') {
             return true;
@@ -228,6 +344,15 @@ class NR_Comments {
         return false;
     }
 
+    /**
+     * Customize WordPress comment form defaults for product pages.
+     *
+     * Changes the reply title and submit button label.
+     *
+     * @since  1.0.0
+     * @param  array $defaults Default comment form arguments.
+     * @return array Modified defaults.
+     */
     public function form_defaults($defaults) {
         if (!is_singular('product')) {
             return $defaults;
@@ -237,6 +362,15 @@ class NR_Comments {
         return $defaults;
     }
 
+    /**
+     * AJAX handler: submit a new product review.
+     *
+     * Validates nonce, sanitizes input, checks minimum content length,
+     * inserts the comment, and saves the star rating as comment meta.
+     *
+     * @since  1.0.0
+     * @return void Outputs JSON response and exits.
+     */
     public function ajax_submit() {
         check_ajax_referer('nr_comment', 'nonce');
         $post_id = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
@@ -282,6 +416,14 @@ class NR_Comments {
         ]);
     }
 
+    /**
+     * Retrieve a list of approved comments for a product.
+     *
+     * @since  1.0.0
+     * @param  int   $post_id Product post ID.
+     * @param  array $args    Optional. Additional arguments for get_comments().
+     * @return array Array of WP_Comment objects.
+     */
     public static function get_comments_list($post_id, $args = []) {
         $defaults = [
             'post_id' => $post_id,
