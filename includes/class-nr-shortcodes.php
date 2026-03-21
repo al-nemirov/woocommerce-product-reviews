@@ -85,8 +85,8 @@ class NR_Shortcodes {
         if (empty($_POST['nr_editor_login']) || empty($_POST['nr_editor_nonce'])) {
             return;
         }
-        $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-        $hash = md5($ip);
+        $ip   = nr_get_client_ip();
+        $hash = md5( $ip );
         $blocks = get_option('nr_editor_login_blocks', []);
 
         // On error always redirect to editor login page
@@ -96,6 +96,15 @@ class NR_Shortcodes {
             $login_page_url = get_permalink($page_id);
         }
         $error_redirect = $login_page_url ?: (wp_get_referer() ?: home_url('/'));
+
+        // Rate limit: max 10 login attempts per IP per 15 minutes.
+        $rl_key     = 'nr_login_rl_' . $hash;
+        $rl_count   = (int) get_transient( $rl_key );
+        if ( $rl_count >= 10 ) {
+            wp_safe_redirect( add_query_arg( 'nr_login_error', 'blocked', $error_redirect ) );
+            exit;
+        }
+        set_transient( $rl_key, $rl_count + 1, 15 * MINUTE_IN_SECONDS );
 
         // Block for 1 hour after 3 failed attempts
         if (!empty($blocks[$hash]['expiry']) && (int) $blocks[$hash]['expiry'] > time()) {
@@ -145,7 +154,7 @@ class NR_Shortcodes {
             exit;
         }
 
-        if (!user_can($user, 'edit_posts') && !user_can($user, 'edit_products')) {
+        if ( ! user_can( $user, 'manage_review_notes' ) ) {
             wp_logout();
             $record_fail();
             wp_safe_redirect(add_query_arg('nr_login_error', 'forbidden', $error_redirect));
@@ -187,10 +196,7 @@ class NR_Shortcodes {
         ], $atts, 'nr_editor_login');
 
         $user = wp_get_current_user();
-        $can_edit_notes = is_user_logged_in() && (
-            current_user_can('edit_posts') || current_user_can('edit_products') || current_user_can('edit_pages')
-            || in_array('editor', (array) $user->roles) || in_array('administrator', (array) $user->roles)
-        );
+        $can_edit_notes = is_user_logged_in() && current_user_can( 'manage_review_notes' );
         if ($can_edit_notes) {
             $redirect = $atts['redirect'] ? esc_url($atts['redirect']) : (spr_instance()->get_option('editor_login_redirect') ?: home_url('/'));
             $sample = get_posts(['post_type' => 'product', 'posts_per_page' => 1, 'post_status' => 'publish']);

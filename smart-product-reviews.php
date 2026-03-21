@@ -111,6 +111,65 @@ function nr_product_reviews( $product_id = 0 ) {
 }
 
 /**
+ * Get the client IP address with proxy-safe detection.
+ *
+ * Checks HTTP_X_FORWARDED_FOR and HTTP_X_REAL_IP headers (sanitized
+ * and validated as proper IPs) before falling back to REMOTE_ADDR.
+ * Provides the 'nr_get_client_ip' filter so site admins can customise
+ * IP detection for their environment.
+ *
+ * @since  1.0.1
+ * @return string Client IP address or '0.0.0.0' if not determinable.
+ */
+function nr_get_client_ip() {
+    $ip = '';
+
+    // Try proxy headers first, then fall back to REMOTE_ADDR.
+    $headers = [ 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR' ];
+    foreach ( $headers as $header ) {
+        if ( ! empty( $_SERVER[ $header ] ) ) {
+            $value = sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) );
+
+            // X-Forwarded-For may contain a comma-separated list; take the first.
+            if ( $header === 'HTTP_X_FORWARDED_FOR' ) {
+                $parts = array_map( 'trim', explode( ',', $value ) );
+                $value = $parts[0];
+            }
+
+            // Validate as a proper IPv4 or IPv6 address.
+            if ( filter_var( $value, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+                $ip = $value;
+                break;
+            }
+            // If a proxy header contains a private-range IP, keep looking.
+            if ( $header === 'REMOTE_ADDR' && filter_var( $value, FILTER_VALIDATE_IP ) ) {
+                $ip = $value;
+                break;
+            }
+        }
+    }
+
+    if ( empty( $ip ) && ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+        $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+    }
+
+    if ( empty( $ip ) ) {
+        $ip = '0.0.0.0';
+    }
+
+    /**
+     * Filter the detected client IP address.
+     *
+     * Allows site admins to override IP detection logic for custom
+     * proxy/load-balancer setups.
+     *
+     * @since 1.0.1
+     * @param string $ip The detected client IP.
+     */
+    return apply_filters( 'nr_get_client_ip', $ip );
+}
+
+/**
  * Initialize the plugin after all plugins are loaded.
  *
  * Checks that WooCommerce is active before initializing.
@@ -138,5 +197,13 @@ add_action('plugins_loaded', function () {
 register_activation_hook(__FILE__, function () {
     if (class_exists('WooCommerce')) {
         spr_instance()->activate();
+    }
+
+    // Grant the manage_review_notes capability to administrator and editor roles.
+    foreach ( [ 'administrator', 'editor' ] as $role_slug ) {
+        $role = get_role( $role_slug );
+        if ( $role && ! $role->has_cap( 'manage_review_notes' ) ) {
+            $role->add_cap( 'manage_review_notes' );
+        }
     }
 });

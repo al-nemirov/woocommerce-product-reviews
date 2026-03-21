@@ -80,10 +80,7 @@ class NR_Comments {
         header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: no-store, no-cache, must-revalidate');
         $user = wp_get_current_user();
-        $can_edit = $user->ID && (
-            current_user_can('edit_posts') || current_user_can('edit_products') || current_user_can('edit_pages')
-            || in_array('editor', (array) $user->roles) || in_array('administrator', (array) $user->roles)
-        );
+        $can_edit = $user->ID && current_user_can('manage_review_notes');
         // Admins don't need this — they have the WP toolbar.
         if (!$can_edit || current_user_can('manage_options')) {
             echo wp_json_encode(['logged_in' => false]);
@@ -109,9 +106,7 @@ class NR_Comments {
      */
     public function ajax_save_editor_note() {
         check_ajax_referer('nr_save_editor_note', 'nonce');
-        $user = wp_get_current_user();
-        $can = current_user_can('edit_posts') || current_user_can('edit_products') || current_user_can('edit_pages') || in_array('editor', (array) $user->roles) || in_array('administrator', (array) $user->roles);
-        if (!$can) {
+        if ( ! current_user_can( 'manage_review_notes' ) ) {
             wp_send_json_error(['message' => 'Access denied.']);
         }
         $post_id = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
@@ -119,6 +114,11 @@ class NR_Comments {
         if (!$post_id || get_post_type($post_id) !== 'product') {
             wp_send_json_error(['message' => 'Invalid product.']);
         }
+
+        $user         = wp_get_current_user();
+        $old_content  = get_post_meta( $post_id, '_nr_editor_note', true );
+        $this->log_editor_note_change( $post_id, $user, $old_content, $content );
+
         update_post_meta($post_id, '_nr_editor_note', $content);
         update_post_meta($post_id, '_nr_editor_note_author', $user->display_name);
         wp_send_json_success(['message' => 'Note saved.']);
@@ -141,9 +141,7 @@ class NR_Comments {
             wp_safe_redirect(add_query_arg('nr_note_error', 'nonce', wp_get_referer() ?: home_url('/')));
             exit;
         }
-        $user = wp_get_current_user();
-        $can = current_user_can('edit_posts') || current_user_can('edit_products') || current_user_can('edit_pages') || in_array('editor', (array) $user->roles) || in_array('administrator', (array) $user->roles);
-        if (!$can) {
+        if ( ! current_user_can( 'manage_review_notes' ) ) {
             wp_safe_redirect(add_query_arg('nr_note_error', 'cap', wp_get_referer() ?: home_url('/')));
             exit;
         }
@@ -152,8 +150,11 @@ class NR_Comments {
             wp_safe_redirect(add_query_arg('nr_note_error', 'post', wp_get_referer() ?: home_url('/')));
             exit;
         }
-        $content = isset($_POST['nr_editor_note_content']) ? wp_kses_post(wp_unslash($_POST['nr_editor_note_content'])) : '';
-        $user = wp_get_current_user();
+        $content     = isset($_POST['nr_editor_note_content']) ? wp_kses_post(wp_unslash($_POST['nr_editor_note_content'])) : '';
+        $user        = wp_get_current_user();
+        $old_content = get_post_meta( $post_id, '_nr_editor_note', true );
+        $this->log_editor_note_change( $post_id, $user, $old_content, $content );
+
         update_post_meta($post_id, '_nr_editor_note', $content);
         update_post_meta($post_id, '_nr_editor_note_author', $user->display_name);
         wp_safe_redirect(get_permalink($post_id));
@@ -373,6 +374,16 @@ class NR_Comments {
      */
     public function ajax_submit() {
         check_ajax_referer('nr_comment', 'nonce');
+
+        // Rate limit: max 5 review submissions per IP per hour.
+        $ip        = nr_get_client_ip();
+        $cache_key = 'nr_submit_rl_' . md5( $ip );
+        $attempts  = (int) get_transient( $cache_key );
+        if ( $attempts >= 5 ) {
+            wp_send_json_error( [ 'message' => 'Too many reviews submitted. Please try again later.' ] );
+        }
+        set_transient( $cache_key, $attempts + 1, HOUR_IN_SECONDS );
+
         $post_id = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
         $content = isset($_POST['content']) ? sanitize_textarea_field($_POST['content']) : '';
         $rating  = isset($_POST['rating']) ? (int) $_POST['rating'] : 0;
@@ -393,13 +404,21 @@ class NR_Comments {
         }
 
         $comment_data = [
-            'comment_post_ID'  => $post_id,
-            'comment_author'   => $author,
+            'comment_post_ID'      => $post_id,
+            'comment_author'       => $author,
             'comment_author_email' => $email,
-            'comment_content'  => wp_kses_post($content),
-            'comment_approved' => 1,
-            'user_id'          => $user->ID,
+            'comment_content'      => wp_kses_post($content),
+            'user_id'              => $user->ID,
+            'comment_author_IP'    => nr_get_client_ip(),
+            'comment_agent'        => isset($_SERVER['HTTP_USER_AGENT']) ? substr(sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])), 0, 254) : '',
         ];
+
+        // Logged-in users are auto-approved; guests go through normal WP moderation.
+        if ($user->ID) {
+            $comment_data['comment_approved'] = 1;
+        } else {
+            $comment_data['comment_approved'] = wp_allow_comment($comment_data);
+        }
 
         $comment_id = wp_insert_comment($comment_data);
         if (!$comment_id) {
@@ -410,8 +429,13 @@ class NR_Comments {
             add_comment_meta($comment_id, 'rating', $rating, true);
         }
 
+        $held_for_moderation = isset($comment_data['comment_approved']) && $comment_data['comment_approved'] !== 1 && $comment_data['comment_approved'] !== '1';
+        $message = $held_for_moderation
+            ? 'Thank you! Your review has been submitted and is awaiting moderation.'
+            : 'Thank you! Your review has been submitted.';
+
         wp_send_json_success([
-            'message' => 'Thank you! Your review has been submitted.',
+            'message'    => $message,
             'comment_id' => $comment_id,
         ]);
     }
@@ -433,5 +457,61 @@ class NR_Comments {
             'number'  => spr_instance()->get_option('comments_per_page', 10),
         ];
         return get_comments(array_merge($defaults, $args));
+    }
+
+    /**
+     * Log an editor-note change for audit purposes.
+     *
+     * Stores a timestamped entry in the '_nr_editor_note_audit_log' post meta
+     * array. Each entry records who made the change, when, the action type
+     * (added, modified, or deleted), and the previous/new content.
+     * The log is capped at the 50 most recent entries per product.
+     *
+     * @since  1.0.1
+     * @param  int     $post_id     Product post ID.
+     * @param  WP_User $user        The user making the change.
+     * @param  string  $old_content Previous note content.
+     * @param  string  $new_content New note content.
+     * @return void
+     */
+    private function log_editor_note_change( $post_id, $user, $old_content, $new_content ) {
+        $old_content = is_string( $old_content ) ? $old_content : '';
+        $new_content = is_string( $new_content ) ? $new_content : '';
+
+        // Determine the action type.
+        if ( empty( $old_content ) && ! empty( $new_content ) ) {
+            $action = 'added';
+        } elseif ( ! empty( $old_content ) && empty( $new_content ) ) {
+            $action = 'deleted';
+        } elseif ( $old_content !== $new_content ) {
+            $action = 'modified';
+        } else {
+            // No actual change — skip logging.
+            return;
+        }
+
+        $log = get_post_meta( $post_id, '_nr_editor_note_audit_log', true );
+        if ( ! is_array( $log ) ) {
+            $log = [];
+        }
+
+        $log[] = [
+            'user_id'      => $user->ID,
+            'user_login'   => $user->user_login,
+            'display_name' => $user->display_name,
+            'action'       => $action,
+            'old_content'  => $old_content,
+            'new_content'  => $new_content,
+            'timestamp'    => current_time( 'mysql' ),
+            'timestamp_gmt'=> current_time( 'mysql', true ),
+            'ip'           => nr_get_client_ip(),
+        ];
+
+        // Keep only the 50 most recent entries.
+        if ( count( $log ) > 50 ) {
+            $log = array_slice( $log, -50 );
+        }
+
+        update_post_meta( $post_id, '_nr_editor_note_audit_log', $log );
     }
 }

@@ -20,7 +20,7 @@ if (!$post_id || get_post_type($post_id) !== 'product') {
 }
 
 $user = wp_get_current_user();
-$can_edit = current_user_can('edit_posts') || current_user_can('edit_products') || current_user_can('edit_pages') || in_array('editor', (array) $user->roles) || in_array('administrator', (array) $user->roles);
+$can_edit = current_user_can( 'manage_review_notes' );
 $editor_note = get_post_meta($post_id, '_nr_editor_note', true);
 $editor_note_author = get_post_meta($post_id, '_nr_editor_note_author', true);
 if (!is_string($editor_note)) {
