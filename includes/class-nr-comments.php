@@ -36,9 +36,13 @@ class NR_Comments {
         add_shortcode('nr_editor_note', [$this, 'shortcode_editor_note']);
         add_action('nr_single_product_reviews', [$this, 'render_product_reviews']);
 
-        // Show reviews and note questions in WP admin Comments screen
+        // WP admin: show reviews/questions in Comments, add type column, edit meta box
         add_filter('admin_comment_types_dropdown', [$this, 'admin_comment_types']);
         add_action('pre_get_comments', [$this, 'admin_include_custom_types']);
+        add_filter('manage_edit-comments_columns', [$this, 'admin_columns']);
+        add_action('manage_comments_custom_column', [$this, 'admin_column_content'], 10, 2);
+        add_action('add_meta_boxes_comment', [$this, 'admin_comment_meta_box']);
+        add_action('edit_comment', [$this, 'admin_save_comment_meta'], 10, 2);
     }
 
     /**
@@ -57,14 +61,121 @@ class NR_Comments {
         if (!is_admin() || !$query->query_vars_changed) {
             return;
         }
-        // Only modify the main comments query on the Comments admin page
         global $pagenow;
         if ($pagenow !== 'edit-comments.php') {
             return;
         }
-        // If no specific type is selected, show all including ours
         if (empty($query->query_vars['type']) && empty($query->query_vars['type__in'])) {
             $query->query_vars['type__in'] = ['comment', '', 'review', 'note_question'];
+        }
+    }
+
+    /**
+     * Add "Type" column to Comments admin table.
+     */
+    public function admin_columns($columns) {
+        $new = [];
+        foreach ($columns as $key => $label) {
+            $new[$key] = $label;
+            if ($key === 'author') {
+                $new['nr_type'] = __('Type', 'woocommerce-product-reviews');
+            }
+        }
+        return $new;
+    }
+
+    /**
+     * Render content for the "Type" column.
+     */
+    public function admin_column_content($column, $comment_id) {
+        if ($column !== 'nr_type') {
+            return;
+        }
+        $comment = get_comment($comment_id);
+        $type = $comment ? $comment->comment_type : '';
+        $labels = [
+            'review'        => '&#9733; ' . __('Reviews', 'woocommerce-product-reviews'),
+            'note_question' => '&#128172; ' . __('Questions about this note', 'woocommerce-product-reviews'),
+        ];
+        echo isset($labels[$type]) ? $labels[$type] : esc_html($type ?: 'comment');
+        if ($type === 'review') {
+            $rating = (int) get_comment_meta($comment_id, 'rating', true);
+            if ($rating > 0) {
+                echo ' <strong>(' . $rating . '/5)</strong>';
+            }
+        }
+    }
+
+    /**
+     * Meta box on the Edit Comment screen for rating and type.
+     */
+    public function admin_comment_meta_box($comment) {
+        if (!in_array($comment->comment_type, ['review', 'note_question'], true)) {
+            return;
+        }
+        add_meta_box(
+            'nr_review_meta',
+            __('WC Reviews', 'woocommerce-product-reviews'),
+            [$this, 'admin_render_meta_box'],
+            'comment',
+            'normal'
+        );
+    }
+
+    public function admin_render_meta_box($comment) {
+        $rating = (int) get_comment_meta($comment->comment_ID, 'rating', true);
+        $likes  = (int) get_comment_meta($comment->comment_ID, '_nr_likes', true);
+        $dislikes = (int) get_comment_meta($comment->comment_ID, '_nr_dislikes', true);
+        wp_nonce_field('nr_edit_comment_meta', 'nr_comment_meta_nonce');
+        ?>
+        <table class="form-table">
+            <tr>
+                <th><label><?php echo esc_html__('Type', 'woocommerce-product-reviews'); ?></label></th>
+                <td><code><?php echo esc_html($comment->comment_type); ?></code></td>
+            </tr>
+            <?php if ($comment->comment_type === 'review') : ?>
+            <tr>
+                <th><label for="nr_rating"><?php echo esc_html__('Rating', 'woocommerce-product-reviews'); ?></label></th>
+                <td>
+                    <select name="nr_rating" id="nr_rating">
+                        <?php for ($i = 0; $i <= 5; $i++) : ?>
+                            <option value="<?php echo $i; ?>" <?php selected($rating, $i); ?>><?php echo $i ? str_repeat('&#9733;', $i) : '---'; ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </td>
+            </tr>
+            <?php endif; ?>
+            <tr>
+                <th>&#128077; / &#128078;</th>
+                <td>
+                    <input type="number" name="nr_likes" value="<?php echo $likes; ?>" min="0" style="width:60px"> /
+                    <input type="number" name="nr_dislikes" value="<?php echo $dislikes; ?>" min="0" style="width:60px">
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+
+    /**
+     * Save rating/votes when editing a comment in admin.
+     */
+    public function admin_save_comment_meta($comment_id, $data) {
+        if (!isset($_POST['nr_comment_meta_nonce']) || !wp_verify_nonce($_POST['nr_comment_meta_nonce'], 'nr_edit_comment_meta')) {
+            return;
+        }
+        if (isset($_POST['nr_rating'])) {
+            $rating = max(0, min(5, (int) $_POST['nr_rating']));
+            update_comment_meta($comment_id, 'rating', $rating);
+            $comment = get_comment($comment_id);
+            if ($comment && get_post_type($comment->comment_post_ID) === 'product') {
+                NR_Rating::update_product_rating($comment->comment_post_ID);
+            }
+        }
+        if (isset($_POST['nr_likes'])) {
+            update_comment_meta($comment_id, '_nr_likes', max(0, (int) $_POST['nr_likes']));
+        }
+        if (isset($_POST['nr_dislikes'])) {
+            update_comment_meta($comment_id, '_nr_dislikes', max(0, (int) $_POST['nr_dislikes']));
         }
     }
 
