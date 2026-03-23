@@ -235,6 +235,11 @@ class NR_Comments {
         wp_enqueue_script('nr-editor-status', NR_URL . 'assets/js/editor-status.js', ['jquery'], NR_VERSION, true);
         wp_localize_script('nr-editor-status', 'nrEditorStatus', [
             'ajax_url' => admin_url('admin-ajax.php'),
+            'i18n'     => [
+                'logged_as' => __('Logged in as', 'smart-product-reviews'),
+                'logout'    => __('Log out', 'smart-product-reviews'),
+                'editor'    => __('editor', 'smart-product-reviews'),
+            ],
         ]);
     }
 
@@ -251,6 +256,7 @@ class NR_Comments {
             'ajax_url'          => admin_url('admin-ajax.php'),
             'nonce'             => wp_create_nonce('nr_comment'),
             'social_nonce'      => wp_create_nonce('nr_social_login'),
+            'load_nonce'        => wp_create_nonce('nr_load_comments'),
             'editor_note_nonce' => wp_create_nonce('nr_save_editor_note'),
             'thread_depth'      => (int) NR_Core::instance()->get_option('thread_depth', 1),
             'i18n'              => [
@@ -379,10 +385,11 @@ class NR_Comments {
      * AJAX: load comments page (for pagination).
      */
     public function ajax_load_comments() {
+        check_ajax_referer('nr_load_comments', 'nonce');
         $post_id = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
         $page    = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         if (!$post_id || get_post_type($post_id) !== 'product') {
-            wp_send_json_error(['message' => 'Invalid product.']);
+            wp_send_json_error(['message' => __('Invalid product.', 'smart-product-reviews')]);
         }
         $tree = self::get_comments_tree($post_id, $page);
         $html = '';

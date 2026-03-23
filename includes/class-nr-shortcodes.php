@@ -200,65 +200,38 @@ class NR_Shortcodes {
         return ob_get_clean();
     }
 
-    public function popular_comments($atts) {
-        $atts = shortcode_atts([
-            'count' => 5,
-            'title' => __('Popular reviews', 'smart-product-reviews'),
-            'type'  => 'comments',
-        ], $atts, 'nr_popular_comments');
-
-        if ($atts['type'] === 'notes') {
-            return $this->latest_editor_notes([
-                'count' => $atts['count'],
-                'title' => $atts['title'] ?: __('Editor notes', 'smart-product-reviews'),
-            ]);
-        }
-
-        // Popular = top-level comments with highest reply count
-        $limit = max(1, (int) $atts['count']);
-        $comments = self::get_product_comments_by_popularity($limit);
-
-        ob_start();
-        echo '<div class="nr-widget nr-popular-comments">';
-        echo '<h3 class="nr-widget-title">' . esc_html($atts['title']) . '</h3>';
-        echo '<ul class="nr-comment-list">';
-        foreach ($comments as $c) {
-            $product = get_the_title($c->comment_post_ID);
-            $link = get_permalink($c->comment_post_ID);
-            echo '<li class="nr-widget-item">';
-            echo ' <a href="' . esc_url($link) . '#comment-' . esc_attr($c->comment_ID) . '">' . esc_html(wp_trim_words($c->comment_content, 15)) . '</a>';
-            echo ' <span class="nr-meta">' . esc_html($c->comment_author) . ' · ' . esc_html($product) . '</span>';
-            echo '</li>';
-        }
-        echo '</ul></div>';
-        return ob_get_clean();
-    }
-
     /**
-     * Get product comments sorted by reply count (popularity).
+     * Unified shortcode for popular/latest/rated reviews.
+     *
+     * Attributes: count, title, type (comments|notes), orderby (popular|latest|rating),
+     * order (ASC|DESC), product_id, template (compact|full), show_author (1|0),
+     * show_product (1|0), show_rating (1|0), cache_ttl (seconds, 0=off).
      */
-    private static function get_product_comments_by_popularity($limit = 5) {
-        global $wpdb;
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT c.*, COUNT(r.comment_ID) AS reply_count
-             FROM {$wpdb->comments} c
-             INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID AND p.post_type = 'product'
-             LEFT JOIN {$wpdb->comments} r ON r.comment_parent = c.comment_ID AND r.comment_approved = '1'
-             WHERE c.comment_approved = '1' AND c.comment_parent = 0
-             GROUP BY c.comment_ID
-             ORDER BY reply_count DESC, c.comment_date_gmt DESC
-             LIMIT %d",
-            $limit
-        ));
-        return $results ?: [];
+    public function popular_comments($atts) {
+        return $this->render_comments_widget($atts, 'nr_popular_comments', 'popular');
     }
 
     public function latest_comments($atts) {
-        $atts = shortcode_atts([
-            'count' => 5,
-            'title' => __('Latest reviews', 'smart-product-reviews'),
-            'type'  => 'comments',
-        ], $atts, 'nr_latest_comments');
+        return $this->render_comments_widget($atts, 'nr_latest_comments', 'latest');
+    }
+
+    private function render_comments_widget($atts, $shortcode, $default_orderby) {
+        $defaults = [
+            'count'        => 5,
+            'title'        => $default_orderby === 'popular'
+                ? __('Popular reviews', 'smart-product-reviews')
+                : __('Latest reviews', 'smart-product-reviews'),
+            'type'         => 'comments',
+            'orderby'      => $default_orderby,  // popular|latest|rating
+            'order'        => 'DESC',
+            'product_id'   => 0,
+            'template'     => 'compact',          // compact|full
+            'show_author'  => 1,
+            'show_product' => 1,
+            'show_rating'  => 0,
+            'cache_ttl'    => 300,                 // 5 min default, 0 = off
+        ];
+        $atts = shortcode_atts($defaults, $atts, $shortcode);
 
         if ($atts['type'] === 'notes') {
             return $this->latest_editor_notes([
@@ -267,41 +240,103 @@ class NR_Shortcodes {
             ]);
         }
 
-        // Direct SQL join avoids loading all product IDs
-        $comments = self::get_latest_product_comments((int) $atts['count']);
+        $limit      = max(1, min(50, (int) $atts['count']));
+        $orderby    = in_array($atts['orderby'], ['popular', 'latest', 'rating'], true) ? $atts['orderby'] : $default_orderby;
+        $order      = strtoupper($atts['order']) === 'ASC' ? 'ASC' : 'DESC';
+        $product_id = (int) $atts['product_id'];
+        $cache_ttl  = max(0, (int) $atts['cache_ttl']);
+
+        // Cache key
+        $cache_key = 'nr_widget_' . md5($shortcode . $orderby . $order . $limit . $product_id);
+        if ($cache_ttl > 0) {
+            $cached = get_transient($cache_key);
+            if ($cached !== false) {
+                return $cached;
+            }
+        }
+
+        $comments = self::query_widget_comments($orderby, $order, $limit, $product_id);
 
         ob_start();
-        echo '<div class="nr-widget nr-latest-comments">';
-        echo '<h3 class="nr-widget-title">' . esc_html($atts['title']) . '</h3>';
+        $css_class = $orderby === 'popular' ? 'nr-popular-comments' : 'nr-latest-comments';
+        echo '<div class="nr-widget ' . esc_attr($css_class) . '">';
+        if ($atts['title']) {
+            echo '<h3 class="nr-widget-title">' . esc_html($atts['title']) . '</h3>';
+        }
         echo '<ul class="nr-comment-list">';
         foreach ($comments as $c) {
-            $product = get_the_title($c->comment_post_ID);
             $link = get_permalink($c->comment_post_ID);
             echo '<li class="nr-widget-item">';
-            echo ' <a href="' . esc_url($link) . '#comment-' . esc_attr($c->comment_ID) . '">' . esc_html(wp_trim_words($c->comment_content, 15)) . '</a>';
-            echo ' <span class="nr-meta">' . esc_html($c->comment_author) . ' · ' . esc_html($product) . '</span>';
+            if (!empty($atts['show_rating']) && class_exists('NR_Rating')) {
+                $r = (int) get_comment_meta($c->comment_ID, 'rating', true);
+                if ($r > 0) echo NR_Rating::get_rating_html($r);
+            }
+            echo '<a href="' . esc_url($link) . '#comment-' . esc_attr($c->comment_ID) . '">';
+            if ($atts['template'] === 'full') {
+                echo esc_html($c->comment_content);
+            } else {
+                echo esc_html(wp_trim_words($c->comment_content, 15));
+            }
+            echo '</a>';
+            $meta_parts = [];
+            if (!empty($atts['show_author'])) {
+                $meta_parts[] = esc_html($c->comment_author);
+            }
+            if (!empty($atts['show_product'])) {
+                $meta_parts[] = esc_html(get_the_title($c->comment_post_ID));
+            }
+            if (!empty($meta_parts)) {
+                echo ' <span class="nr-meta">' . implode(' · ', $meta_parts) . '</span>';
+            }
             echo '</li>';
         }
         echo '</ul></div>';
-        return ob_get_clean();
+        $html = ob_get_clean();
+
+        if ($cache_ttl > 0) {
+            set_transient($cache_key, $html, $cache_ttl);
+        }
+
+        return $html;
     }
 
     /**
-     * Get latest approved comments on products via efficient SQL join.
+     * Unified query for widget comments.
      */
-    private static function get_latest_product_comments($limit = 5) {
+    private static function query_widget_comments($orderby, $order, $limit, $product_id = 0) {
         global $wpdb;
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT c.*
-             FROM {$wpdb->comments} c
-             INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID
-                AND p.post_type = 'product' AND p.post_status = 'publish'
-             WHERE c.comment_approved = '1'
-             ORDER BY c.comment_date_gmt DESC
-             LIMIT %d",
-            $limit
-        ));
-        return $results ?: [];
+        $where_product = $product_id > 0
+            ? $wpdb->prepare(' AND c.comment_post_ID = %d', $product_id)
+            : '';
+
+        if ($orderby === 'popular') {
+            $sql = "SELECT c.*, COUNT(r.comment_ID) AS reply_count
+                    FROM {$wpdb->comments} c
+                    INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID AND p.post_type = 'product'
+                    LEFT JOIN {$wpdb->comments} r ON r.comment_parent = c.comment_ID AND r.comment_approved = '1'
+                    WHERE c.comment_approved = '1' AND c.comment_parent = 0{$where_product}
+                    GROUP BY c.comment_ID
+                    ORDER BY reply_count {$order}, c.comment_date_gmt DESC
+                    LIMIT %d";
+        } elseif ($orderby === 'rating') {
+            $sql = "SELECT c.*, CAST(cm.meta_value AS UNSIGNED) AS rating_val
+                    FROM {$wpdb->comments} c
+                    INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID AND p.post_type = 'product'
+                    LEFT JOIN {$wpdb->commentmeta} cm ON cm.comment_id = c.comment_ID AND cm.meta_key = 'rating'
+                    WHERE c.comment_approved = '1'{$where_product}
+                    ORDER BY rating_val {$order}, c.comment_date_gmt DESC
+                    LIMIT %d";
+        } else {
+            $sql = "SELECT c.*
+                    FROM {$wpdb->comments} c
+                    INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID
+                       AND p.post_type = 'product' AND p.post_status = 'publish'
+                    WHERE c.comment_approved = '1'{$where_product}
+                    ORDER BY c.comment_date_gmt {$order}
+                    LIMIT %d";
+        }
+
+        return $wpdb->get_results($wpdb->prepare($sql, $limit)) ?: [];
     }
 
     /**

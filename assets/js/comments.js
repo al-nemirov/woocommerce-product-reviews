@@ -205,6 +205,7 @@
 
             $.get(nrData.ajax_url, {
                 action: 'nr_load_comments',
+                nonce: nrData.load_nonce || '',
                 post_id: postId,
                 page: nextPage
             }, null, 'json').done(function(r) {

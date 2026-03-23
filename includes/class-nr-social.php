@@ -84,7 +84,7 @@ class NR_Social {
     private function vk_redirect($post_id) {
         $app_id = NR_Core::instance()->get_option('vk_app_id');
         if (!$app_id) {
-            wp_send_json_error(['message' => 'VK not configured.']);
+            wp_send_json_error(['message' => __('VK not configured.', 'smart-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=vk');
         $state = wp_create_nonce('nr_vk_' . $post_id);
@@ -142,7 +142,7 @@ class NR_Social {
         $app_id = NR_Core::instance()->get_option('ok_app_id');
         $secret = NR_Core::instance()->get_option('ok_secret');
         if (!$app_id || !$secret) {
-            wp_send_json_error(['message' => 'OK not configured.']);
+            wp_send_json_error(['message' => __('OK not configured.', 'smart-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=ok');
         $state = wp_create_nonce('nr_ok_' . $post_id);
@@ -217,7 +217,7 @@ class NR_Social {
         $id = NR_Core::instance()->get_option('yandex_id');
         $secret = NR_Core::instance()->get_option('yandex_secret');
         if (!$id || !$secret) {
-            wp_send_json_error(['message' => 'Yandex not configured.']);
+            wp_send_json_error(['message' => __('Yandex not configured.', 'smart-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=yandex');
         $state = wp_create_nonce('nr_ya_' . $post_id);
@@ -266,7 +266,7 @@ class NR_Social {
         $id = NR_Core::instance()->get_option('google_id');
         $secret = NR_Core::instance()->get_option('google_secret');
         if (!$id || !$secret) {
-            wp_send_json_error(['message' => 'Google not configured.']);
+            wp_send_json_error(['message' => __('Google not configured.', 'smart-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=google');
         $state = wp_create_nonce('nr_gg_' . $post_id);
