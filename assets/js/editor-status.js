@@ -2,7 +2,7 @@
     if (typeof nrEditorStatus === 'undefined' || !nrEditorStatus.ajax_url) return;
     var i = nrEditorStatus.i18n || {};
 
-    $.post(nrEditorStatus.ajax_url, { action: 'nr_editor_status' }, null, 'json')
+    $.post(nrEditorStatus.ajax_url, { action: 'nr_editor_status', nonce: nrEditorStatus.nonce || '' }, null, 'json')
         .done(function(r) {
             if (!r || !r.logged_in || !r.can_edit) return;
             var bar = document.createElement('div');

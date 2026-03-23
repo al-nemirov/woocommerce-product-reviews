@@ -105,16 +105,24 @@ class NR_Rating {
         update_post_meta($product_id, '_wc_average_rating', round($average, 2));
         update_post_meta($product_id, '_wc_review_count', $count);
 
-        // Invalidate widget shortcode transient caches
-        self::flush_widget_caches();
+        // Bump widget cache version so shortcodes rebuild on next hit
+        self::bump_widget_cache_version();
     }
 
     /**
-     * Delete all nr_widget_* transients to keep shortcodes fresh.
+     * Increment cache version — all shortcode cache keys include this version,
+     * so old transients expire naturally without expensive SQL DELETE LIKE.
      */
-    public static function flush_widget_caches() {
-        global $wpdb;
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_nr_widget_%' OR option_name LIKE '_transient_timeout_nr_widget_%'");
+    public static function bump_widget_cache_version() {
+        $ver = (int) get_option('nr_widget_cache_ver', 0);
+        update_option('nr_widget_cache_ver', $ver + 1, true);
+    }
+
+    /**
+     * Get current widget cache version for cache key generation.
+     */
+    public static function get_widget_cache_version() {
+        return (int) get_option('nr_widget_cache_ver', 0);
     }
 
     public static function get_rating_html($rating, $size = 20) {

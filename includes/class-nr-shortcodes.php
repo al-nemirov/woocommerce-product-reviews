@@ -357,8 +357,9 @@ class NR_Shortcodes {
         $product_id = (int) $atts['product_id'];
         $cache_ttl  = max(0, (int) $atts['cache_ttl']);
 
-        // Cache key
-        $cache_key = 'nr_widget_' . md5($shortcode . $orderby . $order . $limit . $product_id);
+        // Versioned cache key — bumped on any comment lifecycle event
+        $cache_ver = class_exists('NR_Rating') ? NR_Rating::get_widget_cache_version() : 0;
+        $cache_key = 'nr_w_' . md5($shortcode . $orderby . $order . $limit . $product_id . $cache_ver);
         if ($cache_ttl > 0) {
             $cached = get_transient($cache_key);
             if ($cached !== false) {

@@ -122,7 +122,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_vk', 'VK: no access token');
+            return new WP_Error('nr_vk', __('VK: no access token', 'smart-product-reviews'));
         }
         $uid = isset($body['user_id']) ? $body['user_id'] : '';
         $user_res = wp_remote_get('https://id.vk.ru/userinfo?access_token=' . urlencode($body['access_token']));
@@ -176,7 +176,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_ok', 'OK: no access token');
+            return new WP_Error('nr_ok', __('OK: no access token', 'smart-product-reviews'));
         }
         $token = $body['access_token'];
 
@@ -201,7 +201,7 @@ class NR_Social {
         if (is_wp_error($user_res)) return $user_res;
         $user = json_decode(wp_remote_retrieve_body($user_res), true);
         if (isset($user['error_code'])) {
-            return new WP_Error('nr_ok', 'OK API: ' . (isset($user['error_msg']) ? $user['error_msg'] : 'error'));
+            return new WP_Error('nr_ok', __('OK API error', 'smart-product-reviews'));
         }
         $uid   = isset($user['uid']) ? $user['uid'] : '';
         $email = isset($user['email']) ? $user['email'] : ($uid ? $uid . '@ok.ru' : '');
@@ -247,7 +247,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_ya', 'Yandex: no access token');
+            return new WP_Error('nr_ya', __('Yandex: no access token', 'smart-product-reviews'));
         }
         $user_res = wp_remote_get('https://login.yandex.ru/info?format=json', [
             'headers' => ['Authorization' => 'OAuth ' . $body['access_token']],
@@ -299,7 +299,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_gg', 'Google: no access token');
+            return new WP_Error('nr_gg', __('Google: no access token', 'smart-product-reviews'));
         }
         $user_res = wp_remote_get('https://www.googleapis.com/oauth2/v2/userinfo', [
             'headers' => ['Authorization' => 'Bearer ' . $body['access_token']],

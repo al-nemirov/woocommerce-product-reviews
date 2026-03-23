@@ -38,6 +38,7 @@ class NR_Comments {
      * Плашка показывается только редакторам примечаний, не администраторам сайта.
      */
     public function ajax_editor_status() {
+        check_ajax_referer('nr_editor_status', 'nonce');
         header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: no-store, no-cache, must-revalidate');
         $user = wp_get_current_user();
@@ -235,6 +236,7 @@ class NR_Comments {
         wp_enqueue_script('nr-editor-status', NR_URL . 'assets/js/editor-status.js', ['jquery'], NR_VERSION, true);
         wp_localize_script('nr-editor-status', 'nrEditorStatus', [
             'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('nr_editor_status'),
             'i18n'     => [
                 'logged_as' => __('Logged in as', 'smart-product-reviews'),
                 'logout'    => __('Log out', 'smart-product-reviews'),
