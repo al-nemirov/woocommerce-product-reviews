@@ -426,3 +426,9 @@ msgstr "3. In \"Authorized redirect URIs\" add:"
 
 msgid "4. Copy \"Client ID\" and \"Client secret\" — paste above."
 msgstr "4. Copy \"Client ID\" and \"Client secret\" — paste above."
+
+msgid "Invalid vote."
+msgstr "Invalid vote."
+
+msgid "Editor login"
+msgstr "Editor login"

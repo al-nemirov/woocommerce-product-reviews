@@ -1,9 +1,11 @@
 <?php
 /**
  * Plugin Name: WooCommerce Product Reviews
+ * Plugin URI: https://github.com/al-nemirov/woocommerce-product-reviews
  * Description: Reviews and rating for WooCommerce. Social login: VK, OK, Yandex, Google. Threaded replies, pagination, editor notes and shortcodes.
- * Version: 2.7.0
+ * Version: 2.7.1
  * Author: Alexander Nemirov
+ * Author URI: https://github.com/al-nemirov
  * Text Domain: woocommerce-product-reviews
  * Domain Path: /languages
  * Requires at least: 5.0
@@ -15,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('NR_VERSION', '2.7.0');
+define('NR_VERSION', '2.7.1');
 define('NR_PATH', plugin_dir_path(__FILE__));
 define('NR_URL', plugin_dir_url(__FILE__));
 

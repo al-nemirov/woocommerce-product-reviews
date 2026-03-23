@@ -49,7 +49,7 @@ final class NR_Core {
         if (empty($options['editor_login_page_id']) || !get_post((int) $options['editor_login_page_id'])) {
             $secret_slug = 'editor-login-' . strtolower(wp_generate_password(16, false, false));
             $page_id = wp_insert_post([
-                'post_title'     => 'Вход редактора',
+                'post_title'     => __('Editor login', 'woocommerce-product-reviews'),
                 'post_name'      => $secret_slug,
                 'post_content'   => '[nr_editor_login]',
                 'post_status'    => 'publish',

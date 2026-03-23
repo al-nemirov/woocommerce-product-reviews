@@ -426,3 +426,9 @@ msgstr "3. В «Authorized redirect URIs» добавьте:"
 
 msgid "4. Copy \"Client ID\" and \"Client secret\" — paste above."
 msgstr "4. Скопируйте «Client ID» и «Client secret» — вставьте выше."
+
+msgid "Invalid vote."
+msgstr "Неверный голос."
+
+msgid "Editor login"
+msgstr "Вход редактора"

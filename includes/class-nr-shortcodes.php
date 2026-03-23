@@ -426,7 +426,7 @@ class NR_Shortcodes {
                     FROM {$wpdb->comments} c
                     INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID AND p.post_type = 'product'
                     LEFT JOIN {$wpdb->comments} r ON r.comment_parent = c.comment_ID AND r.comment_approved = '1'
-                    WHERE c.comment_approved = '1' AND c.comment_parent = 0{$where_product}
+                    WHERE c.comment_approved = '1' AND c.comment_type = 'review' AND c.comment_parent = 0{$where_product}
                     GROUP BY c.comment_ID
                     ORDER BY reply_count {$order}, c.comment_date_gmt DESC
                     LIMIT %d";
@@ -435,7 +435,7 @@ class NR_Shortcodes {
                     FROM {$wpdb->comments} c
                     INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID AND p.post_type = 'product'
                     LEFT JOIN {$wpdb->commentmeta} cm ON cm.comment_id = c.comment_ID AND cm.meta_key = 'rating'
-                    WHERE c.comment_approved = '1'{$where_product}
+                    WHERE c.comment_approved = '1' AND c.comment_type = 'review'{$where_product}
                     ORDER BY rating_val {$order}, c.comment_date_gmt DESC
                     LIMIT %d";
         } else {
@@ -443,7 +443,7 @@ class NR_Shortcodes {
                     FROM {$wpdb->comments} c
                     INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID
                        AND p.post_type = 'product' AND p.post_status = 'publish'
-                    WHERE c.comment_approved = '1'{$where_product}
+                    WHERE c.comment_approved = '1' AND c.comment_type = 'review'{$where_product}
                     ORDER BY c.comment_date_gmt {$order}
                     LIMIT %d";
         }

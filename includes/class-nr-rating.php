@@ -125,7 +125,7 @@ class NR_Rating {
         return (int) get_option('nr_widget_cache_ver', 0);
     }
 
-    public static function get_rating_html($rating, $size = 20) {
+    public static function get_rating_html($rating) {
         $rating = max(0, min(5, (float) $rating));
         $full = floor($rating);
         $half = ($rating - $full) >= 0.5;

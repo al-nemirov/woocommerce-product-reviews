@@ -664,12 +664,12 @@ class NR_Comments {
         $vote       = isset($_POST['vote']) ? sanitize_text_field($_POST['vote']) : '';
 
         if (!$comment_id || !in_array($vote, ['up', 'down'], true)) {
-            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
+            wp_send_json_error(['message' => __('Invalid vote.', 'woocommerce-product-reviews')]);
         }
 
         $comment = get_comment($comment_id);
         if (!$comment || get_post_type($comment->comment_post_ID) !== 'product') {
-            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
+            wp_send_json_error(['message' => __('Invalid vote.', 'woocommerce-product-reviews')]);
         }
 
         // IP dedup (24h)
