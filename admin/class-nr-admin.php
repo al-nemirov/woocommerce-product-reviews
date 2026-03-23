@@ -65,6 +65,8 @@ class NR_Admin {
             'google_id'      => sanitize_text_field($_POST['nr_google_id'] ?? ''),
             'google_secret'  => sanitize_text_field($_POST['nr_google_secret'] ?? ''),
             'thread_depth'   => max(0, min(1, (int) ($_POST['nr_thread_depth'] ?? 1))),
+            'rate_limit_count' => max(1, min(100, (int) ($_POST['nr_rate_limit_count'] ?? 5))),
+            'rate_limit_period' => max(60, min(86400, (int) ($_POST['nr_rate_limit_period'] ?? 60) * 60)),
             'editor_smilies' => !empty($_POST['nr_editor_smilies']) ? 1 : 0,
             'comments_per_page' => max(5, min(50, (int) ($_POST['nr_comments_per_page'] ?? 10))),
             'editor_login_redirect' => esc_url_raw($_POST['nr_editor_login_redirect'] ?? ''),
@@ -144,6 +146,15 @@ class NR_Admin {
                         <th><?php echo esc_html__('Reply threads', 'smart-product-reviews'); ?></th>
                         <td>
                             <label><input type="checkbox" name="nr_thread_depth" value="1" <?php checked(!empty($o['thread_depth'])); ?> /> <?php echo esc_html__('Enable one-level reply threads', 'smart-product-reviews'); ?></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php echo esc_html__('Rate limit', 'smart-product-reviews'); ?></th>
+                        <td>
+                            <input type="number" name="nr_rate_limit_count" value="<?php echo esc_attr($o['rate_limit_count'] ?? 5); ?>" min="1" max="100" style="width:60px" />
+                            <?php echo esc_html__('reviews per', 'smart-product-reviews'); ?>
+                            <input type="number" name="nr_rate_limit_period" value="<?php echo esc_attr(($o['rate_limit_period'] ?? 3600) / 60); ?>" min="1" max="1440" style="width:60px" />
+                            <?php echo esc_html__('minutes per IP', 'smart-product-reviews'); ?>
                         </td>
                     </tr>
                 </table>

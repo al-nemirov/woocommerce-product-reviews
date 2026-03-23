@@ -20,6 +20,8 @@ class NR_Shortcodes {
         add_shortcode('nr_latest_editor_notes', [$this, 'latest_editor_notes']);
         add_shortcode('nr_editor_login', [$this, 'editor_login']);
         add_action('template_redirect', [$this, 'maybe_editor_login'], 5);
+        add_action('wp_ajax_nr_editor_ajax_login', [$this, 'ajax_editor_login']);
+        add_action('wp_ajax_nopriv_nr_editor_ajax_login', [$this, 'ajax_editor_login']);
     }
 
     /**
@@ -116,6 +118,74 @@ class NR_Shortcodes {
     }
 
     /**
+     * AJAX editor login — no-reload alternative.
+     */
+    public function ajax_editor_login() {
+        check_ajax_referer('nr_editor_login', 'nonce');
+
+        $ip   = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+        $hash = md5($ip);
+        $blocks = get_option('nr_editor_login_blocks', []);
+
+        if (!empty($blocks[$hash]['expiry']) && (int) $blocks[$hash]['expiry'] > time()) {
+            wp_send_json_error(['message' => __('Too many failed attempts. Try again in one hour.', 'smart-product-reviews')]);
+        }
+
+        $login    = isset($_POST['user']) ? trim(sanitize_text_field(wp_unslash($_POST['user']))) : '';
+        $password = isset($_POST['pass']) ? $_POST['pass'] : '';
+        $remember = !empty($_POST['remember']);
+
+        $record_fail = function () use ($hash, &$blocks) {
+            if (!isset($blocks[$hash])) {
+                $blocks[$hash] = ['attempts' => 0, 'expiry' => 0];
+            }
+            $blocks[$hash]['attempts'] = (int) ($blocks[$hash]['attempts'] ?? 0) + 1;
+            if ($blocks[$hash]['attempts'] >= 3) {
+                $blocks[$hash]['expiry'] = time() + HOUR_IN_SECONDS;
+            }
+            update_option('nr_editor_login_blocks', $blocks, false);
+        };
+
+        if (!$login || !$password) {
+            $record_fail();
+            wp_send_json_error(['message' => __('Enter login and password.', 'smart-product-reviews')]);
+        }
+
+        $user = wp_signon([
+            'user_login'    => $login,
+            'user_password' => $password,
+            'remember'      => $remember,
+        ], is_ssl());
+
+        if (is_wp_error($user)) {
+            $record_fail();
+            wp_send_json_error(['message' => __('Invalid login or password.', 'smart-product-reviews')]);
+        }
+
+        if (!NR_Core::is_editor_user($user)) {
+            wp_logout();
+            $record_fail();
+            wp_send_json_error(['message' => __('This user has no permission to edit editor notes.', 'smart-product-reviews')]);
+        }
+
+        // Success — clear blocks
+        if (isset($blocks[$hash])) {
+            unset($blocks[$hash]);
+            update_option('nr_editor_login_blocks', $blocks, false);
+        }
+
+        wp_set_current_user($user->ID);
+        wp_set_auth_cookie($user->ID, $remember);
+
+        $redirect = NR_Core::instance()->get_option('editor_login_redirect', home_url('/'));
+        wp_send_json_success([
+            'message'  => sprintf(__('Logged in as %s.', 'smart-product-reviews'), $user->display_name),
+            'redirect' => $redirect,
+            'name'     => $user->display_name,
+        ]);
+    }
+
+    /**
      * Шорткод: страница входа для редактора примечаний.
      * Использование: создайте страницу, вставьте [nr_editor_login], дайте ссылку редактору.
      */
@@ -167,7 +237,7 @@ class NR_Shortcodes {
             <?php if ($message) : ?>
                 <p class="nr-editor-login__error"><?php echo esc_html($message); ?><?php if ($error === 'blocked') : ?> <?php echo esc_html__('Administrator can reset the lock in plugin settings.', 'smart-product-reviews'); ?><?php endif; ?></p>
             <?php endif; ?>
-            <form method="post" action="" class="nr-editor-login__form">
+            <form method="post" action="" class="nr-editor-login__form" id="nr-editor-login-form">
                 <?php wp_nonce_field('nr_editor_login', 'nr_editor_nonce'); ?>
                 <input type="hidden" name="nr_editor_login" value="1" />
                 <input type="hidden" name="nr_editor_redirect" value="<?php echo esc_attr($redirect_to); ?>" />
@@ -183,7 +253,48 @@ class NR_Shortcodes {
                     <label><input type="checkbox" name="nr_editor_remember" value="1" /> <?php echo esc_html__('Remember me', 'smart-product-reviews'); ?></label>
                 </p>
                 <p><button type="submit" class="nr-editor-login__submit"><?php echo esc_html__('Log in', 'smart-product-reviews'); ?></button></p>
+                <p class="nr-editor-login__message" style="display:none;"></p>
             </form>
+            <script>
+            (function(){
+                var form = document.getElementById('nr-editor-login-form');
+                if (!form) return;
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var btn = form.querySelector('.nr-editor-login__submit');
+                    var msg = form.querySelector('.nr-editor-login__message');
+                    btn.disabled = true;
+                    msg.style.display = 'none';
+                    var fd = new FormData();
+                    fd.append('action', 'nr_editor_ajax_login');
+                    fd.append('nonce', form.querySelector('[name="nr_editor_nonce"]').value);
+                    fd.append('user', form.querySelector('[name="nr_editor_user"]').value);
+                    fd.append('pass', form.querySelector('[name="nr_editor_pass"]').value);
+                    fd.append('remember', form.querySelector('[name="nr_editor_remember"]') && form.querySelector('[name="nr_editor_remember"]').checked ? '1' : '');
+                    fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {method:'POST', body:fd, credentials:'same-origin'})
+                        .then(function(r){return r.json();})
+                        .then(function(r){
+                            if (r.success) {
+                                msg.style.color = 'green';
+                                msg.textContent = r.data.message;
+                                msg.style.display = '';
+                                setTimeout(function(){window.location.href = r.data.redirect || '<?php echo esc_url($redirect_to); ?>';}, 500);
+                            } else {
+                                msg.style.color = '#c00';
+                                msg.textContent = r.data && r.data.message ? r.data.message : 'Error';
+                                msg.style.display = '';
+                                btn.disabled = false;
+                            }
+                        })
+                        .catch(function(){
+                            msg.style.color = '#c00';
+                            msg.textContent = 'Network error';
+                            msg.style.display = '';
+                            btn.disabled = false;
+                        });
+                });
+            })();
+            </script>
         </div>
         <style>
             .nr-editor-login { max-width: 360px; margin: 2em auto; padding: 24px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; }

@@ -122,6 +122,8 @@ final class NR_Core {
             'google_id'     => '',
             'google_secret' => '',
             'thread_depth'  => 1,
+            'rate_limit_count' => 5,
+            'rate_limit_period' => 3600,
             'editor_smilies' => 1,
             'comments_per_page' => 10,
             'editor_login_redirect' => '',

@@ -304,11 +304,13 @@ class NR_Comments {
     public function ajax_submit() {
         check_ajax_referer('nr_comment', 'nonce');
 
-        // Rate limit: max 5 reviews per IP per hour
+        // Configurable rate limit
+        $rl_max    = (int) NR_Core::instance()->get_option('rate_limit_count', 5);
+        $rl_period = (int) NR_Core::instance()->get_option('rate_limit_period', 3600);
         $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
         $transient_key = 'nr_rl_' . md5( $ip );
         $count = (int) get_transient( $transient_key );
-        if ( $count >= 5 ) {
+        if ( $count >= $rl_max ) {
             wp_send_json_error(['message' => __('Too many reviews. Please try again later.', 'smart-product-reviews')]);
         }
 
@@ -367,7 +369,7 @@ class NR_Comments {
         }
 
         // Increment rate limit counter
-        set_transient( $transient_key, $count + 1, HOUR_IN_SECONDS );
+        set_transient( $transient_key, $count + 1, $rl_period );
 
         $comment = get_comment( $comment_id );
         $status_msg = ( $comment && (int) $comment->comment_approved === 1 )

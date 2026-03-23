@@ -104,6 +104,17 @@ class NR_Rating {
         }
         update_post_meta($product_id, '_wc_average_rating', round($average, 2));
         update_post_meta($product_id, '_wc_review_count', $count);
+
+        // Invalidate widget shortcode transient caches
+        self::flush_widget_caches();
+    }
+
+    /**
+     * Delete all nr_widget_* transients to keep shortcodes fresh.
+     */
+    public static function flush_widget_caches() {
+        global $wpdb;
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_nr_widget_%' OR option_name LIKE '_transient_timeout_nr_widget_%'");
     }
 
     public static function get_rating_html($rating, $size = 20) {
