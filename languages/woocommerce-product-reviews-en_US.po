@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Product Reviews 2.6.0\n"
+"Project-Id-Version: WooCommerce Product Reviews 2.7.0\n"
 "POT-Creation-Date: 2026-03-23 00:00+0000\n"
 "PO-Revision-Date: 2026-03-23 00:00+0000\n"
 "Language: en_US\n"
@@ -336,3 +336,33 @@ msgstr "Google: no access token"
 
 msgid "See GitHub releases for details."
 msgstr "See GitHub releases for details."
+
+msgid "Questions about this note"
+msgstr "Questions about this note"
+
+msgid "Your question..."
+msgstr "Your question..."
+
+msgid "Ask a question"
+msgstr "Ask a question"
+
+msgid "Question must be at least 10 characters."
+msgstr "Question must be at least 10 characters."
+
+msgid "Thank you! Your question has been submitted."
+msgstr "Thank you! Your question has been submitted."
+
+msgid "Thank you! Your question is awaiting moderation."
+msgstr "Thank you! Your question is awaiting moderation."
+
+msgid "Only editors can reply to questions."
+msgstr "Only editors can reply to questions."
+
+msgid "Helpful"
+msgstr "Helpful"
+
+msgid "Not helpful"
+msgstr "Not helpful"
+
+msgid "Already voted."
+msgstr "Already voted."

@@ -101,6 +101,32 @@
 .nr-reply-form-wrap .nr-cancel-reply { background: none; border: none; color: #9ca3af; cursor: pointer; margin-left: 8px; font-size: 0.85em; }
 .nr-reply-form-wrap .nr-cancel-reply:hover { color: #ef4444; }
 
+/* ═══ Votes ═══ */
+.nr-votes { display: inline-flex; gap: 10px; margin-top: 0.4em; }
+.nr-vote { background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px 10px; cursor: pointer; font-size: 0.85em; color: #6b7280; transition: all 0.2s; }
+.nr-vote:hover { border-color: #07B290; color: #07B290; }
+.nr-vote.nr-voted { border-color: #07B290; color: #07B290; background: rgba(7,178,144,0.05); cursor: default; }
+.nr-vote-count { margin-left: 2px; font-size: 0.9em; }
+
+/* ═══ Note questions (chat) ═══ */
+.nr-note-questions { margin: 1.5em 0; padding-top: 1.5em; border-top: 1px solid #e5e7eb; }
+.nr-note-chat { margin-bottom: 1.5em; }
+.nr-chat-msg { padding: 0.75em 1em; margin-bottom: 0.5em; border-radius: 10px; max-width: 85%; }
+.nr-chat-customer { background: #f3f4f6; }
+.nr-chat-editor { background: #ecfdf5; margin-left: 2em; border: 1px solid #d1fae5; }
+.nr-chat-meta { margin-bottom: 0.3em; }
+.nr-chat-meta strong { font-size: 0.85em; color: #374151; }
+.nr-chat-meta .nr-date { color: #9ca3af; font-size: 0.8em; margin-left: 6px; }
+.nr-chat-text { line-height: 1.5; color: #374151; }
+.nr-chat-text p { margin: 0; }
+.nr-note-reply-btn { background: none; border: none; color: #07B290; cursor: pointer; font-size: 0.8em; padding: 0; margin-top: 0.3em; }
+.nr-note-reply-btn:hover { text-decoration: underline; }
+.nr-note-reply-wrap { margin: 0.5em 0 0.5em 2em; padding: 0.75em; background: #f9fafb; border-radius: 8px; display: none; }
+.nr-note-reply-wrap.active { display: block; }
+.nr-note-reply-wrap textarea { width: 100%; max-width: 480px; padding: 8px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9em; resize: vertical; margin-bottom: 0.4em; }
+.nr-note-reply-wrap textarea:focus { border-color: #07B290; outline: none; }
+.nr-note-question-form textarea { max-width: 640px; }
+
 /* ═══ Pagination ═══ */
 .nr-pagination { margin-top: 1.5em; text-align: center; }
 .nr-load-more { min-width: 200px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }

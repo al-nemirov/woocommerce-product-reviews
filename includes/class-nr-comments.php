@@ -25,6 +25,10 @@ class NR_Comments {
         add_action('wp_ajax_nopriv_nr_load_comments', [$this, 'ajax_load_comments']);
         add_action('wp_ajax_nr_editor_status', [$this, 'ajax_editor_status']);
         add_action('wp_ajax_nopriv_nr_editor_status', [$this, 'ajax_editor_status']);
+        add_action('wp_ajax_nr_submit_note_question', [$this, 'ajax_submit_note_question']);
+        add_action('wp_ajax_nopriv_nr_submit_note_question', [$this, 'ajax_submit_note_question']);
+        add_action('wp_ajax_nr_vote', [$this, 'ajax_vote']);
+        add_action('wp_ajax_nopriv_nr_vote', [$this, 'ajax_vote']);
         add_action('template_redirect', [$this, 'maybe_save_editor_note_form']);
         add_filter('comment_form_defaults', [$this, 'form_defaults'], 10, 1);
         add_filter('woocommerce_product_tabs', [$this, 'replace_reviews_tab'], 98);
@@ -260,6 +264,8 @@ class NR_Comments {
             'social_nonce'      => wp_create_nonce('nr_social_login'),
             'load_nonce'        => wp_create_nonce('nr_load_comments'),
             'editor_note_nonce' => wp_create_nonce('nr_save_editor_note'),
+            'note_question_nonce' => wp_create_nonce('nr_note_question'),
+            'vote_nonce'        => wp_create_nonce('nr_vote'),
             'thread_depth'      => (int) NR_Core::instance()->get_option('thread_depth', 1),
             'i18n'              => [
                 'saving'         => __('Saving...', 'woocommerce-product-reviews'),
@@ -274,6 +280,11 @@ class NR_Comments {
                 'loading'        => __('Loading...', 'woocommerce-product-reviews'),
                 'load_more'      => __('Load more reviews', 'woocommerce-product-reviews'),
                 'login_error'    => __('Login error', 'woocommerce-product-reviews'),
+                'question_placeholder' => __('Your question...', 'woocommerce-product-reviews'),
+                'question_min_length'  => __('Question must be at least 10 characters.', 'woocommerce-product-reviews'),
+                'ask_question'   => __('Ask a question', 'woocommerce-product-reviews'),
+                'already_voted'  => __('Already voted.', 'woocommerce-product-reviews'),
+                'editors_only'   => __('Only editors can reply to questions.', 'woocommerce-product-reviews'),
             ],
         ]);
     }
@@ -403,6 +414,7 @@ class NR_Comments {
         $per_page = (int) NR_Core::instance()->get_option('comments_per_page', 10);
         $total = (int) get_comments([
             'post_id' => $post_id,
+            'type'    => 'review',
             'status'  => 'approve',
             'parent'  => 0,
             'count'   => true,
@@ -421,9 +433,10 @@ class NR_Comments {
         $per_page = (int) NR_Core::instance()->get_option('comments_per_page', 10);
         $offset = ($page - 1) * $per_page;
 
-        // Fetch top-level comments
+        // Fetch top-level comments (reviews only)
         $parents = get_comments([
             'post_id' => $post_id,
+            'type'    => 'review',
             'status'  => 'approve',
             'parent'  => 0,
             'orderby' => 'comment_date_gmt',
@@ -479,6 +492,14 @@ class NR_Comments {
                 <span class="nr-date"><?php echo esc_html($date); ?></span>
             </div>
             <div class="nr-comment-content"><?php echo wpautop(esc_html($comment->comment_content)); ?></div>
+            <?php
+            $likes    = (int) get_comment_meta($comment->comment_ID, '_nr_likes', true);
+            $dislikes = (int) get_comment_meta($comment->comment_ID, '_nr_dislikes', true);
+            ?>
+            <span class="nr-votes">
+                <button type="button" class="nr-vote nr-vote-up" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="up" title="<?php echo esc_attr__('Helpful', 'woocommerce-product-reviews'); ?>">&#128077; <span class="nr-vote-count"><?php echo $likes ?: ''; ?></span></button>
+                <button type="button" class="nr-vote nr-vote-down" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="down" title="<?php echo esc_attr__('Not helpful', 'woocommerce-product-reviews'); ?>">&#128078; <span class="nr-vote-count"><?php echo $dislikes ?: ''; ?></span></button>
+            </span>
             <?php if ($thread_depth && (int) $comment->comment_parent === 0) : ?>
                 <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'woocommerce-product-reviews'); ?></button>
             <?php endif; ?>
@@ -492,6 +513,178 @@ class NR_Comments {
         </div>
         <?php
         return ob_get_clean();
+    }
+
+    // ═══ Note questions (chat under editor note) ═══
+
+    /**
+     * Get note questions with replies for a product.
+     */
+    public static function get_note_questions($post_id) {
+        $parents = get_comments([
+            'post_id' => $post_id,
+            'type'    => 'note_question',
+            'status'  => 'approve',
+            'parent'  => 0,
+            'orderby' => 'comment_date_gmt',
+            'order'   => 'ASC',
+        ]);
+        if (empty($parents)) {
+            return [];
+        }
+        $parent_ids = wp_list_pluck($parents, 'comment_ID');
+        $child_comments = get_comments([
+            'post_id'    => $post_id,
+            'type'       => 'note_question',
+            'status'     => 'approve',
+            'parent__in' => $parent_ids,
+            'orderby'    => 'comment_date_gmt',
+            'order'      => 'ASC',
+            'number'     => 0,
+        ]);
+        $children = [];
+        foreach ($child_comments as $child) {
+            $children[$child->comment_parent][] = $child;
+        }
+        foreach ($parents as $parent) {
+            $parent->children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
+        }
+        return $parents;
+    }
+
+    /**
+     * Render a single note question message (chat style).
+     */
+    public static function render_note_question_html($comment) {
+        $user_obj = $comment->user_id ? get_user_by('id', $comment->user_id) : null;
+        $is_editor = $user_obj && (user_can($user_obj, 'manage_options') || in_array('editor', (array) $user_obj->roles, true));
+        $role_class = $is_editor ? 'nr-chat-editor' : 'nr-chat-customer';
+        $date = date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($comment->comment_date));
+        $can_reply = NR_Core::can_manage_editor_notes();
+
+        ob_start();
+        ?>
+        <div class="nr-chat-msg <?php echo esc_attr($role_class); ?>" id="note-q-<?php echo (int) $comment->comment_ID; ?>">
+            <div class="nr-chat-meta">
+                <strong><?php echo esc_html($comment->comment_author); ?></strong>
+                <span class="nr-date"><?php echo esc_html($date); ?></span>
+            </div>
+            <div class="nr-chat-text"><?php echo wpautop(esc_html($comment->comment_content)); ?></div>
+            <?php if ($can_reply && (int) $comment->comment_parent === 0) : ?>
+                <button type="button" class="nr-note-reply-btn" data-qid="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'woocommerce-product-reviews'); ?></button>
+            <?php endif; ?>
+        </div>
+        <?php
+        if (!empty($comment->children)) {
+            foreach ($comment->children as $child) {
+                echo self::render_note_question_html($child);
+            }
+        }
+        return ob_get_clean();
+    }
+
+    /**
+     * AJAX: submit a note question or editor reply.
+     */
+    public function ajax_submit_note_question() {
+        check_ajax_referer('nr_note_question', 'nonce');
+
+        $post_id        = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
+        $content        = isset($_POST['content']) ? sanitize_textarea_field(wp_unslash($_POST['content'])) : '';
+        $comment_parent = isset($_POST['comment_parent']) ? (int) $_POST['comment_parent'] : 0;
+
+        if (!$post_id || get_post_type($post_id) !== 'product') {
+            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
+        }
+        if (strlen($content) < 10) {
+            wp_send_json_error(['message' => __('Question must be at least 10 characters.', 'woocommerce-product-reviews')]);
+        }
+
+        // If replying, only editors/admins allowed
+        if ($comment_parent > 0) {
+            if (!NR_Core::can_manage_editor_notes()) {
+                wp_send_json_error(['message' => __('Only editors can reply to questions.', 'woocommerce-product-reviews')]);
+            }
+        }
+
+        $user   = wp_get_current_user();
+        $author = $user->ID ? $user->display_name : (isset($_POST['author']) ? sanitize_text_field(wp_unslash($_POST['author'])) : '');
+        $email  = $user->ID ? $user->user_email : (isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '');
+
+        if (!$user->ID && (!$author || !$email)) {
+            wp_send_json_error(['message' => __('Enter name and email or log in.', 'woocommerce-product-reviews')]);
+        }
+
+        $comment_data = [
+            'comment_post_ID'      => $post_id,
+            'comment_author'       => $author,
+            'comment_author_email' => $email,
+            'comment_content'      => $content,
+            'comment_type'         => 'note_question',
+            'comment_parent'       => $comment_parent,
+            'user_id'              => $user->ID,
+        ];
+
+        $comment_id = wp_new_comment($comment_data, true);
+        if (is_wp_error($comment_id)) {
+            wp_send_json_error(['message' => $comment_id->get_error_message()]);
+        }
+        if (!$comment_id) {
+            wp_send_json_error(['message' => __('Save failed.', 'woocommerce-product-reviews')]);
+        }
+
+        $comment = get_comment($comment_id);
+        $status_msg = ($comment && (int) $comment->comment_approved === 1)
+            ? __('Thank you! Your question has been submitted.', 'woocommerce-product-reviews')
+            : __('Thank you! Your question is awaiting moderation.', 'woocommerce-product-reviews');
+
+        $html = '';
+        if ($comment && (int) $comment->comment_approved === 1) {
+            $comment->children = [];
+            $html = self::render_note_question_html($comment);
+        }
+
+        wp_send_json_success([
+            'message'    => $status_msg,
+            'comment_id' => $comment_id,
+            'approved'   => $comment ? (int) $comment->comment_approved : 0,
+            'html'       => $html,
+        ]);
+    }
+
+    // ═══ Votes (likes/dislikes) ═══
+
+    /**
+     * AJAX: vote on a review comment (like/dislike).
+     */
+    public function ajax_vote() {
+        check_ajax_referer('nr_vote', 'nonce');
+
+        $comment_id = isset($_POST['comment_id']) ? (int) $_POST['comment_id'] : 0;
+        $vote       = isset($_POST['vote']) ? sanitize_text_field($_POST['vote']) : '';
+
+        if (!$comment_id || !in_array($vote, ['up', 'down'], true)) {
+            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
+        }
+
+        $comment = get_comment($comment_id);
+        if (!$comment || get_post_type($comment->comment_post_ID) !== 'product') {
+            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
+        }
+
+        // IP dedup (24h)
+        $ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''));
+        $vote_key = 'nr_vote_' . $comment_id . '_' . md5($ip);
+        if (get_transient($vote_key)) {
+            wp_send_json_error(['message' => __('Already voted.', 'woocommerce-product-reviews')]);
+        }
+
+        $meta_key = $vote === 'up' ? '_nr_likes' : '_nr_dislikes';
+        $current  = (int) get_comment_meta($comment_id, $meta_key, true);
+        update_comment_meta($comment_id, $meta_key, $current + 1);
+        set_transient($vote_key, 1, DAY_IN_SECONDS);
+
+        wp_send_json_success(['count' => $current + 1, 'vote' => $vote]);
     }
 
     /**

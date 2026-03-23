@@ -40,6 +40,7 @@ $per_page     = (int) NR_Core::instance()->get_option('comments_per_page', 10);
 $comments_tree = NR_Comments::get_comments_tree($post_id, 1);
 $total_parents = (int) get_comments([
     'post_id' => $post_id,
+    'type'    => 'review',
     'status'  => 'approve',
     'parent'  => 0,
     'count'   => true,
@@ -83,6 +84,38 @@ $total_pages = max(1, (int) ceil($total_parents / $per_page));
             <p class="nr-form-message" style="display:none;"></p>
         </form>
     <?php endif; ?>
+</div>
+
+<!-- ═══ Note questions (chat) ═══ -->
+<?php $note_questions = NR_Comments::get_note_questions($post_id); ?>
+<div id="nr-note-questions" class="nr-note-questions" data-post-id="<?php echo (int) $post_id; ?>">
+    <h3 class="nr-title"><?php echo esc_html__('Questions about this note', 'woocommerce-product-reviews'); ?></h3>
+
+    <div class="nr-note-chat" id="nr-note-chat">
+        <?php foreach ($note_questions as $q) : ?>
+            <?php echo NR_Comments::render_note_question_html($q); ?>
+        <?php endforeach; ?>
+    </div>
+
+    <form id="nr-note-question-form" class="nr-form" data-post-id="<?php echo (int) $post_id; ?>">
+        <p>
+            <textarea name="note_question" rows="3" placeholder="<?php echo esc_attr__('Your question...', 'woocommerce-product-reviews'); ?>" required></textarea>
+        </p>
+
+        <?php if (!$is_logged_in) : ?>
+            <?php echo NR_Social::render_buttons($post_id); ?>
+            <p class="nr-or"><?php echo esc_html__('or leave a review as a guest:', 'woocommerce-product-reviews'); ?></p>
+            <p>
+                <input type="text" name="author" placeholder="<?php echo esc_attr__('Name', 'woocommerce-product-reviews'); ?>" required />
+                <input type="email" name="email" placeholder="<?php echo esc_attr__('Email', 'woocommerce-product-reviews'); ?>" required />
+            </p>
+        <?php endif; ?>
+
+        <p>
+            <button type="submit" class="nr-submit"><?php echo esc_html__('Ask a question', 'woocommerce-product-reviews'); ?></button>
+        </p>
+        <p class="nr-form-message" style="display:none;"></p>
+    </form>
 </div>
 
 <!-- ═══ Reviews section ═══ -->
