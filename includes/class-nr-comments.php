@@ -35,6 +35,37 @@ class NR_Comments {
         add_shortcode('nr_product_reviews', [$this, 'shortcode_product_reviews']);
         add_shortcode('nr_editor_note', [$this, 'shortcode_editor_note']);
         add_action('nr_single_product_reviews', [$this, 'render_product_reviews']);
+
+        // Show reviews and note questions in WP admin Comments screen
+        add_filter('admin_comment_types_dropdown', [$this, 'admin_comment_types']);
+        add_action('pre_get_comments', [$this, 'admin_include_custom_types']);
+    }
+
+    /**
+     * Add custom comment types to the admin dropdown filter.
+     */
+    public function admin_comment_types($types) {
+        $types['review']        = __('Reviews', 'woocommerce-product-reviews');
+        $types['note_question'] = __('Questions about this note', 'woocommerce-product-reviews');
+        return $types;
+    }
+
+    /**
+     * Include review and note_question types in the default admin comments list.
+     */
+    public function admin_include_custom_types($query) {
+        if (!is_admin() || !$query->query_vars_changed) {
+            return;
+        }
+        // Only modify the main comments query on the Comments admin page
+        global $pagenow;
+        if ($pagenow !== 'edit-comments.php') {
+            return;
+        }
+        // If no specific type is selected, show all including ours
+        if (empty($query->query_vars['type']) && empty($query->query_vars['type__in'])) {
+            $query->query_vars['type__in'] = ['comment', '', 'review', 'note_question'];
+        }
     }
 
     /**
