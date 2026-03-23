@@ -184,12 +184,30 @@ class NR_Social {
         if (is_wp_error($user_res)) return $user_res;
         $user = json_decode(wp_remote_retrieve_body($user_res), true);
         if (isset($user['user'])) $user = $user['user'];
-        $email = isset($user['email']) ? $user['email'] : ($uid ? $uid . '@vk.id' : '');
-        $name = trim((isset($user['given_name']) ? $user['given_name'] : '') . ' ' . (isset($user['family_name']) ? $user['family_name'] : ''));
-        if (!$name && isset($user['name'])) $name = $user['name'];
+
+        // VK ID v2: try multiple name field variants
+        $first = '';
+        $last  = '';
+        foreach (['first_name', 'given_name'] as $k) {
+            if (!empty($user[$k])) { $first = $user[$k]; break; }
+        }
+        foreach (['last_name', 'family_name'] as $k) {
+            if (!empty($user[$k])) { $last = $user[$k]; break; }
+        }
+        $name = trim($first . ' ' . $last);
+        if (!$name && !empty($user['name'])) $name = $user['name'];
         if (!$name) $name = $uid ? 'VK_' . $uid : 'VK';
+
+        $email = isset($user['email']) ? $user['email'] : ($uid ? $uid . '@vk.id' : '');
         if (!$email) $email = $uid ? $uid . '@vk.id' : uniqid('vk_') . '@temp.local';
-        return $this->get_or_create_user($email, $name, 'vk', $uid);
+
+        $avatar = isset($user['avatar']) ? $user['avatar'] : (isset($user['photo_200']) ? $user['photo_200'] : '');
+
+        $user_id = $this->get_or_create_user($email, $name, 'vk', $uid);
+        if (!is_wp_error($user_id) && $avatar) {
+            update_user_meta($user_id, 'nr_social_avatar', esc_url_raw($avatar));
+        }
+        return $user_id;
     }
 
     // ── Одноклассники (OK) ────────────────────────────

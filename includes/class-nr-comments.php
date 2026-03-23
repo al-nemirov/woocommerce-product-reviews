@@ -632,8 +632,17 @@ class NR_Comments {
 
         ob_start();
         ?>
+        <?php
+        $avatar_url = '';
+        if ($comment->user_id) {
+            $avatar_url = get_user_meta($comment->user_id, 'nr_social_avatar', true);
+        }
+        ?>
         <div class="<?php echo esc_attr($comment_class); ?>" id="comment-<?php echo (int) $comment->comment_ID; ?>">
             <div class="nr-comment-meta">
+                <?php if ($avatar_url) : ?>
+                    <img class="nr-avatar" src="<?php echo esc_url($avatar_url); ?>" alt="" width="32" height="32" loading="lazy" />
+                <?php endif; ?>
                 <?php if ($rating > 0) echo NR_Rating::get_rating_html($rating); ?>
                 <strong class="nr-author"><?php echo esc_html($comment->comment_author); ?></strong>
                 <?php if ($is_editor_comment) : ?>

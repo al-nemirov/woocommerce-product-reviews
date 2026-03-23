@@ -73,6 +73,7 @@
 .nr-comment:last-child { border-bottom: none; }
 .nr-comment-meta { margin-bottom: 0.4em; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .nr-comment-meta .nr-stars { display: inline-flex; }
+.nr-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .nr-author { font-weight: 600; color: #1f2937; font-size: 0.95em; }
 .nr-date { color: #9ca3af; font-size: 0.85em; }
 .nr-comment-content { line-height: 1.6; color: #374151; }
