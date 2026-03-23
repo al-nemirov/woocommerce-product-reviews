@@ -71,6 +71,7 @@ class NR_Admin {
             'comments_per_page' => max(5, min(50, (int) ($_POST['nr_comments_per_page'] ?? 10))),
             'editor_login_redirect' => esc_url_raw($_POST['nr_editor_login_redirect'] ?? ''),
             'editor_login_page_id' => (int) NR_Core::instance()->get_option('editor_login_page_id', 0),
+            'editor_note_title' => sanitize_text_field($_POST['nr_editor_note_title'] ?? ''),
         ];
         update_option('nr_options', $opts);
         echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'woocommerce-product-reviews') . '</p></div>';
@@ -157,6 +158,13 @@ class NR_Admin {
 
                 <h2><?php echo esc_html__('Reviews', 'woocommerce-product-reviews'); ?></h2>
                 <table class="form-table">
+                    <tr>
+                        <th><?php echo esc_html__('Editor note title', 'woocommerce-product-reviews'); ?></th>
+                        <td>
+                            <input type="text" name="nr_editor_note_title" value="<?php echo esc_attr($o['editor_note_title'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Примечание редактора', 'woocommerce-product-reviews'); ?>" />
+                            <p class="description"><?php echo esc_html__('Можно изменить на «Рецензия», «О книге» и т.д. По умолчанию: Примечание редактора', 'woocommerce-product-reviews'); ?></p>
+                        </td>
+                    </tr>
                     <tr>
                         <th><?php echo esc_html__('Editor', 'woocommerce-product-reviews'); ?></th>
                         <td>

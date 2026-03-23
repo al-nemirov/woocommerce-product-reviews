@@ -10,6 +10,8 @@
 .nr-editor-note .nr-editor-note-by { margin-bottom: 0.5em; color: #6b7280; font-size: 0.9em; }
 .nr-editor-note .nr-editor-note-form .wp-editor-wrap { max-width: 100%; }
 .nr-editor-note .nr-save-note { margin-top: 0.75em; }
+.nr-editor-note-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #374151; font-size: 0.95em; margin-bottom: 0.5em; }
+.nr-editor-note-toggle input[type="checkbox"] { accent-color: #07B290; }
 
 /* ═══ Social login ═══ */
 .nr-social-login { margin: 1em 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
@@ -22,7 +24,10 @@
 .nr-yandex { background: #FC3F1D; color: #fff; }
 .nr-google { background: #fff; color: #3c4043; border: 1px solid #dadce0; }
 .nr-google:hover { background: #f8f9fa; }
-.nr-or { color: #9ca3af; font-size: 0.85em; margin: 0.5em 0; }
+
+/* ═══ Login prompt (for non-logged-in users) ═══ */
+.nr-login-prompt { margin: 1.5em 0; padding: 1.5em; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb; }
+.nr-login-text { margin: 0 0 0.75em; color: #374151; font-weight: 500; font-size: 0.95em; }
 
 /* ═══ Rating ═══ */
 .nr-product-rating { margin-bottom: 1em; display: flex; align-items: center; gap: 8px; }
@@ -32,19 +37,13 @@
 .nr-rating-count { color: #6b7280; font-size: 0.85em; }
 
 /* ═══ Review form ═══ */
-.nr-form-wrap { margin-bottom: 2em; }
+.nr-form-wrap { margin-top: 2em; }
 .nr-form textarea {
     width: 100%; max-width: 640px; padding: 12px; box-sizing: border-box;
     border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95em;
     line-height: 1.5; resize: vertical; transition: border-color 0.2s;
 }
 .nr-form textarea:focus { border-color: #07B290; outline: none; box-shadow: 0 0 0 3px rgba(7,178,144,0.1); }
-.nr-form input[type="text"], .nr-form input[type="email"] {
-    width: 100%; max-width: 300px; padding: 10px 12px; box-sizing: border-box;
-    border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95em;
-    margin-right: 8px; transition: border-color 0.2s;
-}
-.nr-form input[type="text"]:focus, .nr-form input[type="email"]:focus { border-color: #07B290; outline: none; box-shadow: 0 0 0 3px rgba(7,178,144,0.1); }
 .nr-rating-input { margin-bottom: 0.75em; display: flex; align-items: center; gap: 8px; }
 .nr-rating-input label { font-weight: 500; color: #374151; font-size: 0.95em; }
 .nr-rating-input .nr-stars-edit { cursor: pointer; color: #d1d5db; font-size: 1.5em; letter-spacing: 2px; }
@@ -79,9 +78,19 @@
 .nr-comment-content { line-height: 1.6; color: #374151; }
 .nr-comment-content p { margin: 0 0 0.5em; }
 
+/* ═══ Editor/admin comment distinction ═══ */
+.nr-comment-editor { background: #ecfdf5; border-radius: 10px; padding: 1.25em 1em; margin: 0.25em 0; border-bottom-color: transparent; }
+.nr-comment-editor + .nr-comment { border-top: none; }
+.nr-editor-badge {
+    display: inline-block; padding: 1px 8px; border-radius: 4px;
+    background: #059377; color: #fff; font-size: 0.75em; font-weight: 600;
+    letter-spacing: 0.02em; vertical-align: middle;
+}
+
 /* ═══ Reply threads ═══ */
 .nr-replies { margin: 0.75em 0 0 2em; border-left: 2px solid #e5e7eb; padding-left: 1em; }
 .nr-replies .nr-comment { padding: 0.75em 0; border-bottom: 1px solid #f9fafb; }
+.nr-replies .nr-comment-editor { padding: 0.75em 1em; }
 .nr-reply-btn {
     background: none; border: 1px solid #d1d5db; padding: 4px 14px; border-radius: 6px;
     cursor: pointer; font-size: 0.8em; color: #6b7280; margin-top: 0.5em;
@@ -111,25 +120,6 @@
 .nr-vote-down:hover { border-color: #dc2626; background: rgba(220,38,38,0.06); }
 .nr-vote-down.nr-voted { border-color: #dc2626; background: rgba(220,38,38,0.1); cursor: default; }
 .nr-vote-count { margin-left: 2px; font-size: 0.9em; font-weight: 600; }
-
-/* ═══ Note questions (chat) ═══ */
-.nr-note-questions { margin: 1.5em 0; padding-top: 1.5em; border-top: 1px solid #e5e7eb; }
-.nr-note-chat { margin-bottom: 1.5em; }
-.nr-chat-msg { padding: 0.75em 1em; margin-bottom: 0.5em; border-radius: 10px; max-width: 85%; }
-.nr-chat-customer { background: #f3f4f6; }
-.nr-chat-editor { background: #ecfdf5; margin-left: 2em; border: 1px solid #d1fae5; }
-.nr-chat-meta { margin-bottom: 0.3em; }
-.nr-chat-meta strong { font-size: 0.85em; color: #374151; }
-.nr-chat-meta .nr-date { color: #9ca3af; font-size: 0.8em; margin-left: 6px; }
-.nr-chat-text { line-height: 1.5; color: #374151; }
-.nr-chat-text p { margin: 0; }
-.nr-note-reply-btn { background: none; border: none; color: #07B290; cursor: pointer; font-size: 0.8em; padding: 0; margin-top: 0.3em; }
-.nr-note-reply-btn:hover { text-decoration: underline; }
-.nr-note-reply-wrap { margin: 0.5em 0 0.5em 2em; padding: 0.75em; background: #f9fafb; border-radius: 8px; display: none; }
-.nr-note-reply-wrap.active { display: block; }
-.nr-note-reply-wrap textarea { width: 100%; max-width: 480px; padding: 8px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9em; resize: vertical; margin-bottom: 0.4em; }
-.nr-note-reply-wrap textarea:focus { border-color: #07B290; outline: none; }
-.nr-note-question-form textarea { max-width: 640px; }
 
 /* ═══ Pagination ═══ */
 .nr-pagination { margin-top: 1.5em; text-align: center; }

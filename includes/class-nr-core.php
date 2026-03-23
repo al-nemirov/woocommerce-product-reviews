@@ -107,6 +107,28 @@ final class NR_Core {
         return in_array('editor', (array) $u->roles, true);
     }
 
+    /**
+     * Является ли пользователь редактором или администратором (для пометки комментариев).
+     */
+    public static function is_editor_or_admin($user = null) {
+        $u = $user instanceof WP_User ? $user : wp_get_current_user();
+        if (!$u || empty($u->ID)) {
+            return false;
+        }
+        if (user_can($u, 'manage_options')) {
+            return true;
+        }
+        return in_array('editor', (array) $u->roles, true);
+    }
+
+    /**
+     * Получить заголовок примечания редактора из настроек.
+     */
+    public static function get_editor_note_title() {
+        $title = self::instance()->get_option('editor_note_title', '');
+        return $title ? $title : __('Примечание редактора', 'woocommerce-product-reviews');
+    }
+
     private function default_options() {
         return [
             'vk_app_id'     => '',
@@ -128,6 +150,7 @@ final class NR_Core {
             'comments_per_page' => 10,
             'editor_login_redirect' => '',
             'editor_login_page_id' => 0,
+            'editor_note_title' => '',
         ];
     }
 }
