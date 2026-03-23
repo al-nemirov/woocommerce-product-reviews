@@ -630,41 +630,44 @@ class NR_Comments {
         }
         $comment_class = 'nr-comment' . ($is_editor_comment ? ' nr-comment-editor' : '');
 
-        ob_start();
-        ?>
-        <?php
         $avatar_url = '';
         if ($comment->user_id) {
             $avatar_url = get_user_meta($comment->user_id, 'nr_social_avatar', true);
         }
+
+        ob_start();
         ?>
         <div class="<?php echo esc_attr($comment_class); ?>" id="comment-<?php echo (int) $comment->comment_ID; ?>">
-            <div class="nr-comment-meta">
-                <?php if ($avatar_url) : ?>
-                    <img class="nr-avatar" src="<?php echo esc_url($avatar_url); ?>" alt="" width="32" height="32" loading="lazy" />
-                <?php endif; ?>
-                <?php if ($rating > 0) echo NR_Rating::get_rating_html($rating); ?>
-                <strong class="nr-author"><?php echo esc_html($comment->comment_author); ?></strong>
-                <?php if ($is_editor_comment) : ?>
-                    <span class="nr-editor-badge"><?php echo esc_html__('Редактор', 'woocommerce-product-reviews'); ?></span>
-                <?php endif; ?>
-                <span class="nr-date"><?php echo esc_html($date); ?></span>
-            </div>
-            <div class="nr-comment-content"><?php echo wpautop(esc_html($comment->comment_content)); ?></div>
-            <span class="nr-votes">
-                <button type="button" class="nr-vote nr-vote-up" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="up" title="<?php echo esc_attr__('Helpful', 'woocommerce-product-reviews'); ?>">&#128077; <span class="nr-vote-count"><?php echo $likes ?: ''; ?></span></button>
-                <button type="button" class="nr-vote nr-vote-down" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="down" title="<?php echo esc_attr__('Not helpful', 'woocommerce-product-reviews'); ?>">&#128078; <span class="nr-vote-count"><?php echo $dislikes ?: ''; ?></span></button>
-            </span>
-            <?php if ($thread_depth && !$is_child) : ?>
-                <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'woocommerce-product-reviews'); ?></button>
+            <?php if ($avatar_url) : ?>
+                <img class="nr-avatar" src="<?php echo esc_url($avatar_url); ?>" alt="" width="40" height="40" loading="lazy" />
             <?php endif; ?>
-            <?php if (!empty($children)) : ?>
-                <div class="nr-replies">
-                    <?php foreach ($children as $child) : ?>
-                        <?php echo self::render_comment_html($child, true); ?>
-                    <?php endforeach; ?>
+            <div class="nr-comment-body">
+                <div class="nr-comment-meta">
+                    <strong class="nr-author"><?php echo esc_html($comment->comment_author); ?></strong>
+                    <?php if ($is_editor_comment) : ?>
+                        <span class="nr-editor-badge"><?php echo esc_html__('Редактор', 'woocommerce-product-reviews'); ?></span>
+                    <?php endif; ?>
+                    <?php if ($rating > 0) echo NR_Rating::get_rating_html($rating); ?>
+                    <span class="nr-date"><?php echo esc_html($date); ?></span>
                 </div>
-            <?php endif; ?>
+                <div class="nr-comment-content"><?php echo wpautop(esc_html($comment->comment_content)); ?></div>
+                <div class="nr-comment-actions">
+                    <span class="nr-votes">
+                        <button type="button" class="nr-vote nr-vote-up" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="up" title="<?php echo esc_attr__('Helpful', 'woocommerce-product-reviews'); ?>">&#128077; <span class="nr-vote-count"><?php echo $likes ?: ''; ?></span></button>
+                        <button type="button" class="nr-vote nr-vote-down" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="down" title="<?php echo esc_attr__('Not helpful', 'woocommerce-product-reviews'); ?>">&#128078; <span class="nr-vote-count"><?php echo $dislikes ?: ''; ?></span></button>
+                    </span>
+                    <?php if ($thread_depth && !$is_child) : ?>
+                        <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'woocommerce-product-reviews'); ?></button>
+                    <?php endif; ?>
+                </div>
+                <?php if (!empty($children)) : ?>
+                    <div class="nr-replies">
+                        <?php foreach ($children as $child) : ?>
+                            <?php echo self::render_comment_html($child, true); ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
         <?php
         return ob_get_clean();
