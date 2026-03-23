@@ -128,7 +128,7 @@ class NR_Shortcodes {
         $blocks = get_option('nr_editor_login_blocks', []);
 
         if (!empty($blocks[$hash]['expiry']) && (int) $blocks[$hash]['expiry'] > time()) {
-            wp_send_json_error(['message' => __('Too many failed attempts. Try again in one hour.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Too many failed attempts. Try again in one hour.', 'woocommerce-product-reviews')]);
         }
 
         $login    = isset($_POST['user']) ? trim(sanitize_text_field(wp_unslash($_POST['user']))) : '';
@@ -148,7 +148,7 @@ class NR_Shortcodes {
 
         if (!$login || !$password) {
             $record_fail();
-            wp_send_json_error(['message' => __('Enter login and password.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Enter login and password.', 'woocommerce-product-reviews')]);
         }
 
         $user = wp_signon([
@@ -159,13 +159,13 @@ class NR_Shortcodes {
 
         if (is_wp_error($user)) {
             $record_fail();
-            wp_send_json_error(['message' => __('Invalid login or password.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Invalid login or password.', 'woocommerce-product-reviews')]);
         }
 
         if (!NR_Core::is_editor_user($user)) {
             wp_logout();
             $record_fail();
-            wp_send_json_error(['message' => __('This user has no permission to edit editor notes.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('This user has no permission to edit editor notes.', 'woocommerce-product-reviews')]);
         }
 
         // Success — clear blocks
@@ -179,7 +179,7 @@ class NR_Shortcodes {
 
         $redirect = NR_Core::instance()->get_option('editor_login_redirect', home_url('/'));
         wp_send_json_success([
-            'message'  => sprintf(__('Logged in as %s.', 'smart-product-reviews'), $user->display_name),
+            'message'  => sprintf(__('Logged in as %s.', 'woocommerce-product-reviews'), $user->display_name),
             'redirect' => $redirect,
             'name'     => $user->display_name,
         ]);
@@ -203,12 +203,12 @@ class NR_Shortcodes {
             ob_start();
             ?>
             <div class="nr-editor-login nr-editor-login--logged">
-                <p><strong><?php echo esc_html(sprintf(__('Logged in as %s.', 'smart-product-reviews'), $user->display_name)); ?></strong></p>
-                <p><?php echo esc_html__('Open any product page: at the bottom you will see the editor note block and the edit button.', 'smart-product-reviews'); ?></p>
+                <p><strong><?php echo esc_html(sprintf(__('Logged in as %s.', 'woocommerce-product-reviews'), $user->display_name)); ?></strong></p>
+                <p><?php echo esc_html__('Open any product page: at the bottom you will see the editor note block and the edit button.', 'woocommerce-product-reviews'); ?></p>
                 <p>
-                    <a href="<?php echo esc_url($book_link); ?>" class="nr-editor-login__link"><?php echo esc_html__('Open sample product', 'smart-product-reviews'); ?></a> &nbsp;|&nbsp;
-                    <a href="<?php echo esc_url($redirect); ?>" class="nr-editor-login__link"><?php echo esc_html__('Go to site', 'smart-product-reviews'); ?></a> &nbsp;|&nbsp;
-                    <a href="<?php echo esc_url(wp_logout_url(get_permalink())); ?>" class="nr-editor-login__link"><?php echo esc_html__('Log out', 'smart-product-reviews'); ?></a>
+                    <a href="<?php echo esc_url($book_link); ?>" class="nr-editor-login__link"><?php echo esc_html__('Open sample product', 'woocommerce-product-reviews'); ?></a> &nbsp;|&nbsp;
+                    <a href="<?php echo esc_url($redirect); ?>" class="nr-editor-login__link"><?php echo esc_html__('Go to site', 'woocommerce-product-reviews'); ?></a> &nbsp;|&nbsp;
+                    <a href="<?php echo esc_url(wp_logout_url(get_permalink())); ?>" class="nr-editor-login__link"><?php echo esc_html__('Log out', 'woocommerce-product-reviews'); ?></a>
                 </p>
             </div>
             <?php
@@ -217,11 +217,11 @@ class NR_Shortcodes {
 
         $error = isset($_GET['nr_login_error']) ? sanitize_text_field($_GET['nr_login_error']) : '';
         $messages = [
-            'nonce'     => __('Security check failed. Please try again.', 'smart-product-reviews'),
-            'empty'     => __('Enter login and password.', 'smart-product-reviews'),
-            'invalid'   => __('Invalid login or password. Use the exact WordPress username from user profile.', 'smart-product-reviews'),
-            'forbidden' => __('This user has no permission to edit editor notes.', 'smart-product-reviews'),
-            'blocked'   => __('Too many failed attempts. Try again in one hour.', 'smart-product-reviews'),
+            'nonce'     => __('Security check failed. Please try again.', 'woocommerce-product-reviews'),
+            'empty'     => __('Enter login and password.', 'woocommerce-product-reviews'),
+            'invalid'   => __('Invalid login or password. Use the exact WordPress username from user profile.', 'woocommerce-product-reviews'),
+            'forbidden' => __('This user has no permission to edit editor notes.', 'woocommerce-product-reviews'),
+            'blocked'   => __('Too many failed attempts. Try again in one hour.', 'woocommerce-product-reviews'),
         ];
         $message = isset($messages[$error]) ? $messages[$error] : '';
 
@@ -233,26 +233,26 @@ class NR_Shortcodes {
         ob_start();
         ?>
         <div class="nr-editor-login">
-            <h3 class="nr-editor-login__title"><?php echo esc_html__('Editor note login', 'smart-product-reviews'); ?></h3>
+            <h3 class="nr-editor-login__title"><?php echo esc_html__('Editor note login', 'woocommerce-product-reviews'); ?></h3>
             <?php if ($message) : ?>
-                <p class="nr-editor-login__error"><?php echo esc_html($message); ?><?php if ($error === 'blocked') : ?> <?php echo esc_html__('Administrator can reset the lock in plugin settings.', 'smart-product-reviews'); ?><?php endif; ?></p>
+                <p class="nr-editor-login__error"><?php echo esc_html($message); ?><?php if ($error === 'blocked') : ?> <?php echo esc_html__('Administrator can reset the lock in plugin settings.', 'woocommerce-product-reviews'); ?><?php endif; ?></p>
             <?php endif; ?>
             <form method="post" action="" class="nr-editor-login__form" id="nr-editor-login-form">
                 <?php wp_nonce_field('nr_editor_login', 'nr_editor_nonce'); ?>
                 <input type="hidden" name="nr_editor_login" value="1" />
                 <input type="hidden" name="nr_editor_redirect" value="<?php echo esc_attr($redirect_to); ?>" />
                 <p>
-                    <label for="nr_editor_user"><?php echo esc_html__('Username', 'smart-product-reviews'); ?></label><br>
+                    <label for="nr_editor_user"><?php echo esc_html__('Username', 'woocommerce-product-reviews'); ?></label><br>
                     <input type="text" name="nr_editor_user" id="nr_editor_user" class="nr-editor-login__input" required autocomplete="username" />
                 </p>
                 <p>
-                    <label for="nr_editor_pass"><?php echo esc_html__('Password', 'smart-product-reviews'); ?></label><br>
+                    <label for="nr_editor_pass"><?php echo esc_html__('Password', 'woocommerce-product-reviews'); ?></label><br>
                     <input type="password" name="nr_editor_pass" id="nr_editor_pass" class="nr-editor-login__input" required autocomplete="current-password" />
                 </p>
                 <p>
-                    <label><input type="checkbox" name="nr_editor_remember" value="1" /> <?php echo esc_html__('Remember me', 'smart-product-reviews'); ?></label>
+                    <label><input type="checkbox" name="nr_editor_remember" value="1" /> <?php echo esc_html__('Remember me', 'woocommerce-product-reviews'); ?></label>
                 </p>
-                <p><button type="submit" class="nr-editor-login__submit"><?php echo esc_html__('Log in', 'smart-product-reviews'); ?></button></p>
+                <p><button type="submit" class="nr-editor-login__submit"><?php echo esc_html__('Log in', 'woocommerce-product-reviews'); ?></button></p>
                 <p class="nr-editor-login__message" style="display:none;"></p>
             </form>
             <script>
@@ -330,8 +330,8 @@ class NR_Shortcodes {
         $defaults = [
             'count'        => 5,
             'title'        => $default_orderby === 'popular'
-                ? __('Popular reviews', 'smart-product-reviews')
-                : __('Latest reviews', 'smart-product-reviews'),
+                ? __('Popular reviews', 'woocommerce-product-reviews')
+                : __('Latest reviews', 'woocommerce-product-reviews'),
             'type'         => 'comments',
             'orderby'      => $default_orderby,  // popular|latest|rating
             'order'        => 'DESC',
@@ -347,7 +347,7 @@ class NR_Shortcodes {
         if ($atts['type'] === 'notes') {
             return $this->latest_editor_notes([
                 'count' => $atts['count'],
-                'title' => $atts['title'] ?: __('Editor notes', 'smart-product-reviews'),
+                'title' => $atts['title'] ?: __('Editor notes', 'woocommerce-product-reviews'),
             ]);
         }
 
@@ -458,7 +458,7 @@ class NR_Shortcodes {
     public function latest_editor_notes($atts) {
         $atts = shortcode_atts([
             'count' => 5,
-            'title' => __('Editor notes', 'smart-product-reviews'),
+            'title' => __('Editor notes', 'woocommerce-product-reviews'),
         ], $atts, 'nr_latest_editor_notes');
 
         $products = get_posts([
@@ -489,7 +489,7 @@ class NR_Shortcodes {
             }
             echo '<li class="nr-widget-item">';
             echo ' <a href="' . esc_url($link) . '#nr-editor-note">' . esc_html(wp_trim_words(wp_strip_all_tags($note), 18)) . '</a>';
-            echo ' <span class="nr-meta">' . esc_html($author ?: __('Editor', 'smart-product-reviews')) . ' · ' . esc_html(get_the_title($p->ID)) . '</span>';
+            echo ' <span class="nr-meta">' . esc_html($author ?: __('Editor', 'woocommerce-product-reviews')) . ' · ' . esc_html(get_the_title($p->ID)) . '</span>';
             echo '</li>';
         }
         echo '</ul></div>';

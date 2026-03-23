@@ -1,26 +1,26 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Product Reviews 1.1.0\n"
-"POT-Creation-Date: 2026-03-21 00:00+0000\n"
-"PO-Revision-Date: 2026-03-21 00:00+0000\n"
+"Project-Id-Version: WooCommerce Product Reviews 2.6.0\n"
+"POT-Creation-Date: 2026-03-23 00:00+0000\n"
+"PO-Revision-Date: 2026-03-23 00:00+0000\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Cursor\n"
-"X-Domain: smart-product-reviews\n"
+"X-Generator: Claude\n"
+"X-Domain: woocommerce-product-reviews\n"
 
-msgid "Smart Product Reviews requires WooCommerce to be installed."
-msgstr "Для Smart Product Reviews требуется установленный WooCommerce."
+msgid "WooCommerce Product Reviews requires WooCommerce to be installed."
+msgstr "Для WooCommerce Product Reviews требуется установленный WooCommerce."
 
 msgid "Settings saved."
 msgstr "Настройки сохранены."
 
-msgid "Smart Product Reviews - settings"
-msgstr "Smart Product Reviews - настройки"
+msgid "WooCommerce Product Reviews - settings"
+msgstr "WooCommerce Product Reviews — настройки"
 
-msgid "Login (VK, Yandex, site profile)"
-msgstr "Вход (VK, Yandex, профиль сайта)"
+msgid "Social login (VK, OK, Yandex, Google)"
+msgstr "Соцсети (VK, OK, Яндекс, Google)"
 
 msgid "To enable social login, turn on \"Anyone can register\" in Settings -> General."
 msgstr "Чтобы включить вход через соцсети, активируйте «Любой может зарегистрироваться» в Настройки -> Общие."
@@ -31,14 +31,23 @@ msgstr "Включить вход через VK"
 msgid "VK application ID"
 msgstr "ID приложения VK"
 
+msgid "Odnoklassniki (OK)"
+msgstr "Одноклассники (OK)"
+
+msgid "Enable OK login"
+msgstr "Включить вход через OK"
+
 msgid "Enable Yandex login"
-msgstr "Включить вход через Yandex"
+msgstr "Включить вход через Яндекс"
 
 msgid "Application ID"
 msgstr "ID приложения"
 
 msgid "Application secret"
 msgstr "Секрет приложения"
+
+msgid "Enable Google login"
+msgstr "Включить вход через Google"
 
 msgid "Reviews"
 msgstr "Отзывы"
@@ -51,6 +60,21 @@ msgstr "Смайлы в редакторе"
 
 msgid "Reviews per page"
 msgstr "Отзывов на странице"
+
+msgid "Reply threads"
+msgstr "Ветки ответов"
+
+msgid "Enable one-level reply threads"
+msgstr "Включить ветки ответов (один уровень)"
+
+msgid "Rate limit"
+msgstr "Ограничение частоты"
+
+msgid "reviews per"
+msgstr "отзывов за"
+
+msgid "minutes per IP"
+msgstr "минут на IP"
 
 msgid "Editor note login"
 msgstr "Вход редактора примечаний"
@@ -104,7 +128,7 @@ msgid "Save"
 msgstr "Сохранить"
 
 msgid "Access denied."
-msgstr "Доступ запрещен."
+msgstr "Доступ запрещён."
 
 msgid "Invalid product."
 msgstr "Неверный товар."
@@ -130,8 +154,14 @@ msgstr "Введите имя и email или войдите."
 msgid "Save failed."
 msgstr "Ошибка сохранения."
 
-msgid "Thank you! Your review has been submitted."
-msgstr "Спасибо! Ваш отзыв отправлен."
+msgid "Thank you! Your review has been published."
+msgstr "Спасибо! Ваш отзыв опубликован."
+
+msgid "Thank you! Your review is awaiting moderation."
+msgstr "Спасибо! Ваш отзыв ожидает модерации."
+
+msgid "Too many reviews. Please try again later."
+msgstr "Слишком много отзывов. Попробуйте позже."
 
 msgid "Editor note placeholder (visible on frontend only)."
 msgstr "Заглушка примечания редактора (видно только на сайте)."
@@ -145,6 +175,69 @@ msgstr "Редактировать примечание"
 msgid "Save note"
 msgstr "Сохранить примечание"
 
+msgid "Note:"
+msgstr "Примечание:"
+
+msgid "Rating:"
+msgstr "Оценка:"
+
+msgid "Your review..."
+msgstr "Ваш отзыв..."
+
+msgid "or leave a review as a guest:"
+msgstr "или оставьте отзыв как гость:"
+
+msgid "Name"
+msgstr "Имя"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Submit review"
+msgstr "Отправить отзыв"
+
+msgid "Load more reviews"
+msgstr "Загрузить ещё"
+
+msgid "Reply"
+msgstr "Ответить"
+
+msgid "Logged in as"
+msgstr "Вы вошли как"
+
+msgid "Log out"
+msgstr "Выйти"
+
+msgid "editor"
+msgstr "редактор"
+
+msgid "Saving..."
+msgstr "Сохранение..."
+
+msgid "Saved."
+msgstr "Сохранено."
+
+msgid "Error"
+msgstr "Ошибка"
+
+msgid "Network error"
+msgstr "Ошибка сети"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Your reply..."
+msgstr "Ваш ответ..."
+
+msgid "Reply must be at least 10 characters."
+msgstr "Ответ должен быть не менее 10 символов."
+
+msgid "Loading..."
+msgstr "Загрузка..."
+
+msgid "Login error"
+msgstr "Ошибка входа"
+
 msgid "Logged in as %s."
 msgstr "Вы вошли как %s."
 
@@ -157,9 +250,6 @@ msgstr "Открыть пример товара"
 msgid "Go to site"
 msgstr "На сайт"
 
-msgid "Log out"
-msgstr "Выйти"
-
 msgid "Security check failed. Please try again."
 msgstr "Ошибка проверки безопасности. Попробуйте снова."
 
@@ -168,6 +258,9 @@ msgstr "Введите логин и пароль."
 
 msgid "Invalid login or password. Use the exact WordPress username from user profile."
 msgstr "Неверный логин или пароль. Используйте точный логин из профиля WordPress."
+
+msgid "Invalid login or password."
+msgstr "Неверный логин или пароль."
 
 msgid "This user has no permission to edit editor notes."
 msgstr "У этого пользователя нет прав на редактирование примечаний."
@@ -193,8 +286,53 @@ msgstr "Войти"
 msgid "Popular reviews"
 msgstr "Популярные отзывы"
 
+msgid "Latest reviews"
+msgstr "Последние отзывы"
+
 msgid "Editor notes"
 msgstr "Примечания редактора"
 
-msgid "Latest reviews"
-msgstr "Последние отзывы"
+msgid "Log in via:"
+msgstr "Войти через:"
+
+msgid "Yandex"
+msgstr "Яндекс"
+
+msgid "Registration is disabled."
+msgstr "Регистрация отключена."
+
+msgid "This login provider is not enabled."
+msgstr "Этот способ входа не включён."
+
+msgid "Unknown provider."
+msgstr "Неизвестный провайдер."
+
+msgid "VK not configured."
+msgstr "VK не настроен."
+
+msgid "VK: no access token"
+msgstr "VK: нет токена доступа"
+
+msgid "OK not configured."
+msgstr "OK не настроен."
+
+msgid "OK: no access token"
+msgstr "OK: нет токена доступа"
+
+msgid "OK API error"
+msgstr "Ошибка API OK"
+
+msgid "Yandex not configured."
+msgstr "Яндекс не настроен."
+
+msgid "Yandex: no access token"
+msgstr "Яндекс: нет токена доступа"
+
+msgid "Google not configured."
+msgstr "Google не настроен."
+
+msgid "Google: no access token"
+msgstr "Google: нет токена доступа"
+
+msgid "See GitHub releases for details."
+msgstr "Подробности в релизах на GitHub."

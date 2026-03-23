@@ -45,11 +45,11 @@ class NR_Social {
         $labels = [
             'vk'     => 'VK',
             'ok'     => 'OK',
-            'yandex' => __('Yandex', 'smart-product-reviews'),
+            'yandex' => __('Yandex', 'woocommerce-product-reviews'),
             'google' => 'Google',
         ];
         $html = '<div class="nr-social-login">';
-        $html .= '<span class="nr-connect-label">' . esc_html__('Log in via:', 'smart-product-reviews') . '</span>';
+        $html .= '<span class="nr-connect-label">' . esc_html__('Log in via:', 'woocommerce-product-reviews') . '</span>';
         foreach ($providers as $p) {
             $html .= '<button type="button" class="nr-btn nr-' . esc_attr($p) . '" data-provider="' . esc_attr($p) . '" data-post-id="' . (int) $post_id . '">' . esc_html($labels[$p]) . '</button>';
         }
@@ -61,7 +61,7 @@ class NR_Social {
         check_ajax_referer('nr_social_login', 'nonce');
 
         if (!get_option('users_can_register')) {
-            wp_send_json_error(['message' => __('Registration is disabled.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Registration is disabled.', 'woocommerce-product-reviews')]);
         }
         $provider = isset($_POST['provider']) ? sanitize_text_field($_POST['provider']) : '';
         $post_id  = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
@@ -69,14 +69,14 @@ class NR_Social {
         // Verify provider is enabled in settings
         $enabled = self::get_enabled_providers();
         if (!in_array($provider, $enabled, true)) {
-            wp_send_json_error(['message' => __('This login provider is not enabled.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('This login provider is not enabled.', 'woocommerce-product-reviews')]);
         }
 
         $method = $provider . '_redirect';
         if (method_exists($this, $method)) {
             $this->$method($post_id);
         }
-        wp_send_json_error(['message' => __('Unknown provider.', 'smart-product-reviews')]);
+        wp_send_json_error(['message' => __('Unknown provider.', 'woocommerce-product-reviews')]);
     }
 
     // ── VK (PKCE) ─────────────────────────────────────
@@ -84,7 +84,7 @@ class NR_Social {
     private function vk_redirect($post_id) {
         $app_id = NR_Core::instance()->get_option('vk_app_id');
         if (!$app_id) {
-            wp_send_json_error(['message' => __('VK not configured.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('VK not configured.', 'woocommerce-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=vk');
         $state = wp_create_nonce('nr_vk_' . $post_id);
@@ -122,7 +122,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_vk', __('VK: no access token', 'smart-product-reviews'));
+            return new WP_Error('nr_vk', __('VK: no access token', 'woocommerce-product-reviews'));
         }
         $uid = isset($body['user_id']) ? $body['user_id'] : '';
         $user_res = wp_remote_get('https://id.vk.ru/userinfo?access_token=' . urlencode($body['access_token']));
@@ -142,7 +142,7 @@ class NR_Social {
         $app_id = NR_Core::instance()->get_option('ok_app_id');
         $secret = NR_Core::instance()->get_option('ok_secret');
         if (!$app_id || !$secret) {
-            wp_send_json_error(['message' => __('OK not configured.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('OK not configured.', 'woocommerce-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=ok');
         $state = wp_create_nonce('nr_ok_' . $post_id);
@@ -176,7 +176,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_ok', __('OK: no access token', 'smart-product-reviews'));
+            return new WP_Error('nr_ok', __('OK: no access token', 'woocommerce-product-reviews'));
         }
         $token = $body['access_token'];
 
@@ -201,7 +201,7 @@ class NR_Social {
         if (is_wp_error($user_res)) return $user_res;
         $user = json_decode(wp_remote_retrieve_body($user_res), true);
         if (isset($user['error_code'])) {
-            return new WP_Error('nr_ok', __('OK API error', 'smart-product-reviews'));
+            return new WP_Error('nr_ok', __('OK API error', 'woocommerce-product-reviews'));
         }
         $uid   = isset($user['uid']) ? $user['uid'] : '';
         $email = isset($user['email']) ? $user['email'] : ($uid ? $uid . '@ok.ru' : '');
@@ -217,7 +217,7 @@ class NR_Social {
         $id = NR_Core::instance()->get_option('yandex_id');
         $secret = NR_Core::instance()->get_option('yandex_secret');
         if (!$id || !$secret) {
-            wp_send_json_error(['message' => __('Yandex not configured.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Yandex not configured.', 'woocommerce-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=yandex');
         $state = wp_create_nonce('nr_ya_' . $post_id);
@@ -247,7 +247,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_ya', __('Yandex: no access token', 'smart-product-reviews'));
+            return new WP_Error('nr_ya', __('Yandex: no access token', 'woocommerce-product-reviews'));
         }
         $user_res = wp_remote_get('https://login.yandex.ru/info?format=json', [
             'headers' => ['Authorization' => 'OAuth ' . $body['access_token']],
@@ -266,7 +266,7 @@ class NR_Social {
         $id = NR_Core::instance()->get_option('google_id');
         $secret = NR_Core::instance()->get_option('google_secret');
         if (!$id || !$secret) {
-            wp_send_json_error(['message' => __('Google not configured.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Google not configured.', 'woocommerce-product-reviews')]);
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=google');
         $state = wp_create_nonce('nr_gg_' . $post_id);
@@ -299,7 +299,7 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_gg', __('Google: no access token', 'smart-product-reviews'));
+            return new WP_Error('nr_gg', __('Google: no access token', 'woocommerce-product-reviews'));
         }
         $user_res = wp_remote_get('https://www.googleapis.com/oauth2/v2/userinfo', [
             'headers' => ['Authorization' => 'Bearer ' . $body['access_token']],
@@ -378,14 +378,16 @@ class NR_Social {
                 'fields'     => 'ID',
             ]);
             if (!empty($existing)) {
-                return (int) $existing[0];
+                $user_id = (int) $existing[0];
+                wp_update_user(['ID' => $user_id, 'display_name' => $name]);
+                return $user_id;
             }
         }
 
         // Fallback to email
         $user_id = email_exists($email);
         if ($user_id) {
-            // Store provider UID for future lookups
+            wp_update_user(['ID' => $user_id, 'display_name' => $name]);
             if ($provider_uid) {
                 update_user_meta($user_id, 'nr_social_uid_' . $provider, $provider_uid);
             }

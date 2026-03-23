@@ -60,17 +60,17 @@ class NR_Comments {
         $user = wp_get_current_user();
         $can = NR_Core::can_manage_editor_notes($user);
         if (!$can) {
-            wp_send_json_error(['message' => __('Access denied.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Access denied.', 'woocommerce-product-reviews')]);
         }
         $post_id = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
         $content = isset($_POST['content']) ? wp_kses_post(wp_unslash($_POST['content'])) : '';
         if (!$post_id || get_post_type($post_id) !== 'product') {
-            wp_send_json_error(['message' => __('Invalid product.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
         }
         $user = wp_get_current_user();
         update_post_meta($post_id, '_nr_editor_note', $content);
         update_post_meta($post_id, '_nr_editor_note_author', $user->display_name);
-        wp_send_json_success(['message' => __('Editor note saved.', 'smart-product-reviews')]);
+        wp_send_json_success(['message' => __('Editor note saved.', 'woocommerce-product-reviews')]);
     }
 
     /**
@@ -205,7 +205,7 @@ class NR_Comments {
     public function replace_reviews_tab($tabs) {
         unset($tabs['reviews']);
         $tabs['nr_reviews'] = [
-            'title'    => __('Reviews', 'smart-product-reviews'),
+            'title'    => __('Reviews', 'woocommerce-product-reviews'),
             'priority' => 30,
             'callback' => function () {
                 $file = NR_PATH . 'templates/comments.php';
@@ -238,9 +238,9 @@ class NR_Comments {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('nr_editor_status'),
             'i18n'     => [
-                'logged_as' => __('Logged in as', 'smart-product-reviews'),
-                'logout'    => __('Log out', 'smart-product-reviews'),
-                'editor'    => __('editor', 'smart-product-reviews'),
+                'logged_as' => __('Logged in as', 'woocommerce-product-reviews'),
+                'logout'    => __('Log out', 'woocommerce-product-reviews'),
+                'editor'    => __('editor', 'woocommerce-product-reviews'),
             ],
         ]);
     }
@@ -262,18 +262,18 @@ class NR_Comments {
             'editor_note_nonce' => wp_create_nonce('nr_save_editor_note'),
             'thread_depth'      => (int) NR_Core::instance()->get_option('thread_depth', 1),
             'i18n'              => [
-                'saving'         => __('Saving...', 'smart-product-reviews'),
-                'save_note'      => __('Save note', 'smart-product-reviews'),
-                'saved'          => __('Saved.', 'smart-product-reviews'),
-                'error'          => __('Error', 'smart-product-reviews'),
-                'network_error'  => __('Network error', 'smart-product-reviews'),
-                'reply'          => __('Reply', 'smart-product-reviews'),
-                'cancel'         => __('Cancel', 'smart-product-reviews'),
-                'reply_placeholder' => __('Your reply...', 'smart-product-reviews'),
-                'reply_min_length'  => __('Reply must be at least 10 characters.', 'smart-product-reviews'),
-                'loading'        => __('Loading...', 'smart-product-reviews'),
-                'load_more'      => __('Load more reviews', 'smart-product-reviews'),
-                'login_error'    => __('Login error', 'smart-product-reviews'),
+                'saving'         => __('Saving...', 'woocommerce-product-reviews'),
+                'save_note'      => __('Save note', 'woocommerce-product-reviews'),
+                'saved'          => __('Saved.', 'woocommerce-product-reviews'),
+                'error'          => __('Error', 'woocommerce-product-reviews'),
+                'network_error'  => __('Network error', 'woocommerce-product-reviews'),
+                'reply'          => __('Reply', 'woocommerce-product-reviews'),
+                'cancel'         => __('Cancel', 'woocommerce-product-reviews'),
+                'reply_placeholder' => __('Your reply...', 'woocommerce-product-reviews'),
+                'reply_min_length'  => __('Reply must be at least 10 characters.', 'woocommerce-product-reviews'),
+                'loading'        => __('Loading...', 'woocommerce-product-reviews'),
+                'load_more'      => __('Load more reviews', 'woocommerce-product-reviews'),
+                'login_error'    => __('Login error', 'woocommerce-product-reviews'),
             ],
         ]);
     }
@@ -298,8 +298,8 @@ class NR_Comments {
         if (!is_singular('product')) {
             return $defaults;
         }
-        $defaults['title_reply'] = __('Leave a review', 'smart-product-reviews');
-        $defaults['label_submit'] = __('Submit', 'smart-product-reviews');
+        $defaults['title_reply'] = __('Leave a review', 'woocommerce-product-reviews');
+        $defaults['label_submit'] = __('Submit', 'woocommerce-product-reviews');
         return $defaults;
     }
 
@@ -313,7 +313,7 @@ class NR_Comments {
         $transient_key = 'nr_rl_' . md5( $ip );
         $count = (int) get_transient( $transient_key );
         if ( $count >= $rl_max ) {
-            wp_send_json_error(['message' => __('Too many reviews. Please try again later.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Too many reviews. Please try again later.', 'woocommerce-product-reviews')]);
         }
 
         $post_id       = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
@@ -322,10 +322,10 @@ class NR_Comments {
         $comment_parent = isset($_POST['comment_parent']) ? (int) $_POST['comment_parent'] : 0;
 
         if (!$post_id || get_post_type($post_id) !== 'product') {
-            wp_send_json_error(['message' => __('Invalid product.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
         }
         if (strlen($content) < 10) {
-            wp_send_json_error(['message' => __('Review text must be at least 10 characters.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Review text must be at least 10 characters.', 'woocommerce-product-reviews')]);
         }
 
         $user = wp_get_current_user();
@@ -333,7 +333,7 @@ class NR_Comments {
         $email = $user->ID ? $user->user_email : (isset($_POST['email']) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '');
 
         if (!$user->ID && (!$author || !$email)) {
-            wp_send_json_error(['message' => __('Enter name and email or log in.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Enter name and email or log in.', 'woocommerce-product-reviews')]);
         }
 
         // Validate parent: only allow 1 level of replies
@@ -361,7 +361,7 @@ class NR_Comments {
             wp_send_json_error(['message' => $comment_id->get_error_message()]);
         }
         if ( ! $comment_id ) {
-            wp_send_json_error(['message' => __('Save failed.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Save failed.', 'woocommerce-product-reviews')]);
         }
 
         if ($rating >= 1 && $rating <= 5) {
@@ -375,8 +375,8 @@ class NR_Comments {
 
         $comment = get_comment( $comment_id );
         $status_msg = ( $comment && (int) $comment->comment_approved === 1 )
-            ? __('Thank you! Your review has been published.', 'smart-product-reviews')
-            : __('Thank you! Your review is awaiting moderation.', 'smart-product-reviews');
+            ? __('Thank you! Your review has been published.', 'woocommerce-product-reviews')
+            : __('Thank you! Your review is awaiting moderation.', 'woocommerce-product-reviews');
 
         wp_send_json_success([
             'message'    => $status_msg,
@@ -393,7 +393,7 @@ class NR_Comments {
         $post_id = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
         $page    = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         if (!$post_id || get_post_type($post_id) !== 'product') {
-            wp_send_json_error(['message' => __('Invalid product.', 'smart-product-reviews')]);
+            wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
         }
         $tree = self::get_comments_tree($post_id, $page);
         $html = '';
@@ -480,7 +480,7 @@ class NR_Comments {
             </div>
             <div class="nr-comment-content"><?php echo wpautop(esc_html($comment->comment_content)); ?></div>
             <?php if ($thread_depth && (int) $comment->comment_parent === 0) : ?>
-                <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'smart-product-reviews'); ?></button>
+                <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'woocommerce-product-reviews'); ?></button>
             <?php endif; ?>
             <?php if (!empty($comment->children)) : ?>
                 <div class="nr-replies">

@@ -1,26 +1,26 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Product Reviews 1.1.0\n"
-"POT-Creation-Date: 2026-03-21 00:00+0000\n"
-"PO-Revision-Date: 2026-03-21 00:00+0000\n"
+"Project-Id-Version: WooCommerce Product Reviews 2.6.0\n"
+"POT-Creation-Date: 2026-03-23 00:00+0000\n"
+"PO-Revision-Date: 2026-03-23 00:00+0000\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Cursor\n"
-"X-Domain: smart-product-reviews\n"
+"X-Generator: Claude\n"
+"X-Domain: woocommerce-product-reviews\n"
 
-msgid "Smart Product Reviews requires WooCommerce to be installed."
-msgstr "Smart Product Reviews requires WooCommerce to be installed."
+msgid "WooCommerce Product Reviews requires WooCommerce to be installed."
+msgstr "WooCommerce Product Reviews requires WooCommerce to be installed."
 
 msgid "Settings saved."
 msgstr "Settings saved."
 
-msgid "Smart Product Reviews - settings"
-msgstr "Smart Product Reviews - settings"
+msgid "WooCommerce Product Reviews - settings"
+msgstr "WooCommerce Product Reviews - settings"
 
-msgid "Login (VK, Yandex, site profile)"
-msgstr "Login (VK, Yandex, site profile)"
+msgid "Social login (VK, OK, Yandex, Google)"
+msgstr "Social login (VK, OK, Yandex, Google)"
 
 msgid "To enable social login, turn on \"Anyone can register\" in Settings -> General."
 msgstr "To enable social login, turn on \"Anyone can register\" in Settings -> General."
@@ -31,6 +31,12 @@ msgstr "Enable VK login"
 msgid "VK application ID"
 msgstr "VK application ID"
 
+msgid "Odnoklassniki (OK)"
+msgstr "Odnoklassniki (OK)"
+
+msgid "Enable OK login"
+msgstr "Enable OK login"
+
 msgid "Enable Yandex login"
 msgstr "Enable Yandex login"
 
@@ -39,6 +45,9 @@ msgstr "Application ID"
 
 msgid "Application secret"
 msgstr "Application secret"
+
+msgid "Enable Google login"
+msgstr "Enable Google login"
 
 msgid "Reviews"
 msgstr "Reviews"
@@ -51,6 +60,21 @@ msgstr "Smilies in editor"
 
 msgid "Reviews per page"
 msgstr "Reviews per page"
+
+msgid "Reply threads"
+msgstr "Reply threads"
+
+msgid "Enable one-level reply threads"
+msgstr "Enable one-level reply threads"
+
+msgid "Rate limit"
+msgstr "Rate limit"
+
+msgid "reviews per"
+msgstr "reviews per"
+
+msgid "minutes per IP"
+msgstr "minutes per IP"
 
 msgid "Editor note login"
 msgstr "Editor note login"
@@ -130,8 +154,14 @@ msgstr "Enter name and email or log in."
 msgid "Save failed."
 msgstr "Save failed."
 
-msgid "Thank you! Your review has been submitted."
-msgstr "Thank you! Your review has been submitted."
+msgid "Thank you! Your review has been published."
+msgstr "Thank you! Your review has been published."
+
+msgid "Thank you! Your review is awaiting moderation."
+msgstr "Thank you! Your review is awaiting moderation."
+
+msgid "Too many reviews. Please try again later."
+msgstr "Too many reviews. Please try again later."
 
 msgid "Editor note placeholder (visible on frontend only)."
 msgstr "Editor note placeholder (visible on frontend only)."
@@ -145,6 +175,69 @@ msgstr "Edit note"
 msgid "Save note"
 msgstr "Save note"
 
+msgid "Note:"
+msgstr "Note:"
+
+msgid "Rating:"
+msgstr "Rating:"
+
+msgid "Your review..."
+msgstr "Your review..."
+
+msgid "or leave a review as a guest:"
+msgstr "or leave a review as a guest:"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Submit review"
+msgstr "Submit review"
+
+msgid "Load more reviews"
+msgstr "Load more reviews"
+
+msgid "Reply"
+msgstr "Reply"
+
+msgid "Logged in as"
+msgstr "Logged in as"
+
+msgid "Log out"
+msgstr "Log out"
+
+msgid "editor"
+msgstr "editor"
+
+msgid "Saving..."
+msgstr "Saving..."
+
+msgid "Saved."
+msgstr "Saved."
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Network error"
+msgstr "Network error"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Your reply..."
+msgstr "Your reply..."
+
+msgid "Reply must be at least 10 characters."
+msgstr "Reply must be at least 10 characters."
+
+msgid "Loading..."
+msgstr "Loading..."
+
+msgid "Login error"
+msgstr "Login error"
+
 msgid "Logged in as %s."
 msgstr "Logged in as %s."
 
@@ -157,9 +250,6 @@ msgstr "Open sample product"
 msgid "Go to site"
 msgstr "Go to site"
 
-msgid "Log out"
-msgstr "Log out"
-
 msgid "Security check failed. Please try again."
 msgstr "Security check failed. Please try again."
 
@@ -168,6 +258,9 @@ msgstr "Enter login and password."
 
 msgid "Invalid login or password. Use the exact WordPress username from user profile."
 msgstr "Invalid login or password. Use the exact WordPress username from user profile."
+
+msgid "Invalid login or password."
+msgstr "Invalid login or password."
 
 msgid "This user has no permission to edit editor notes."
 msgstr "This user has no permission to edit editor notes."
@@ -193,8 +286,53 @@ msgstr "Log in"
 msgid "Popular reviews"
 msgstr "Popular reviews"
 
+msgid "Latest reviews"
+msgstr "Latest reviews"
+
 msgid "Editor notes"
 msgstr "Editor notes"
 
-msgid "Latest reviews"
-msgstr "Latest reviews"
+msgid "Log in via:"
+msgstr "Log in via:"
+
+msgid "Yandex"
+msgstr "Yandex"
+
+msgid "Registration is disabled."
+msgstr "Registration is disabled."
+
+msgid "This login provider is not enabled."
+msgstr "This login provider is not enabled."
+
+msgid "Unknown provider."
+msgstr "Unknown provider."
+
+msgid "VK not configured."
+msgstr "VK not configured."
+
+msgid "VK: no access token"
+msgstr "VK: no access token"
+
+msgid "OK not configured."
+msgstr "OK not configured."
+
+msgid "OK: no access token"
+msgstr "OK: no access token"
+
+msgid "OK API error"
+msgstr "OK API error"
+
+msgid "Yandex not configured."
+msgstr "Yandex not configured."
+
+msgid "Yandex: no access token"
+msgstr "Yandex: no access token"
+
+msgid "Google not configured."
+msgstr "Google not configured."
+
+msgid "Google: no access token"
+msgstr "Google: no access token"
+
+msgid "See GitHub releases for details."
+msgstr "See GitHub releases for details."

@@ -82,7 +82,7 @@ class NR_GitHub_Updater {
             'download_link' => $remote['zipball_url'],
             'sections'      => [
                 'description' => $plugin_data['Description'],
-                'changelog'   => $remote['body'] ?: __('See GitHub releases for details.', 'smart-product-reviews'),
+                'changelog'   => $remote['body'] ?: __('See GitHub releases for details.', 'woocommerce-product-reviews'),
             ],
             'requires'      => $plugin_data['RequiresWP'] ?? '5.0',
             'requires_php'  => $plugin_data['RequiresPHP'] ?? '7.2',

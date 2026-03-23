@@ -19,7 +19,7 @@ if (!is_string($editor_note_author)) {
 }
 
 if (nr_is_editor_context()) {
-    echo '<div id="nr-editor-note" class="nr-editor-note"><p class="nr-editor-placeholder">' . esc_html__('Editor note placeholder (visible on frontend only).', 'smart-product-reviews') . '</p></div>';
+    echo '<div id="nr-editor-note" class="nr-editor-note"><p class="nr-editor-placeholder">' . esc_html__('Editor note placeholder (visible on frontend only).', 'woocommerce-product-reviews') . '</p></div>';
     return;
 }
 
@@ -30,15 +30,15 @@ if ($can_edit) {
 }
 ?>
 <div id="nr-editor-note" class="nr-editor-note">
-    <h3 class="nr-title"><?php echo esc_html__('Editor note', 'smart-product-reviews'); ?></h3>
+    <h3 class="nr-title"><?php echo esc_html__('Editor note', 'woocommerce-product-reviews'); ?></h3>
 
     <div class="nr-editor-note-content">
-        <?php if ($editor_note_author) : ?><p class="nr-editor-note-by"><?php echo esc_html__('Note:', 'smart-product-reviews'); ?> <strong><?php echo esc_html($editor_note_author); ?></strong></p><?php endif; ?>
-        <?php echo $editor_note ? wp_kses_post($editor_note) : '<p class="nr-no-note">' . esc_html__('No editor note yet.', 'smart-product-reviews') . '</p>'; ?>
+        <?php if ($editor_note_author) : ?><p class="nr-editor-note-by"><?php echo esc_html__('Note:', 'woocommerce-product-reviews'); ?> <strong><?php echo esc_html($editor_note_author); ?></strong></p><?php endif; ?>
+        <?php echo $editor_note ? wp_kses_post($editor_note) : '<p class="nr-no-note">' . esc_html__('No editor note yet.', 'woocommerce-product-reviews') . '</p>'; ?>
     </div>
     <?php if ($can_edit) : ?>
         <p class="nr-editor-note-actions">
-            <button type="button" class="nr-edit-note nr-submit"><?php echo esc_html__('Edit note', 'smart-product-reviews'); ?></button>
+            <button type="button" class="nr-edit-note nr-submit"><?php echo esc_html__('Edit note', 'woocommerce-product-reviews'); ?></button>
         </p>
         <form id="nr-editor-note-form" class="nr-editor-note-form" method="post" action="" data-post-id="<?php echo (int) $post_id; ?>" style="display:none;">
             <?php wp_nonce_field('nr_save_editor_note', 'nr_editor_nonce'); ?>
@@ -60,7 +60,7 @@ if ($can_edit) {
                 'wpautop'      => true,
             ]);
             ?>
-            <p><button type="submit" class="nr-submit nr-save-note"><?php echo esc_html__('Save note', 'smart-product-reviews'); ?></button></p>
+            <p><button type="submit" class="nr-submit nr-save-note"><?php echo esc_html__('Save note', 'woocommerce-product-reviews'); ?></button></p>
             <p class="nr-form-message" style="display:none;"></p>
         </form>
     <?php endif; ?>

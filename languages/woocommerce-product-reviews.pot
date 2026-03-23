@@ -1,0 +1,452 @@
+# Copyright (C) 2026 Alexander Nemirov
+# This file is distributed under the same license as the WooCommerce Product Reviews plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Product Reviews 2.6.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-23 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Claude\n"
+"X-Domain: woocommerce-product-reviews\n"
+
+#: woocommerce-product-reviews.php
+msgid "WooCommerce Product Reviews requires WooCommerce to be installed."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Settings saved."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "WooCommerce Product Reviews - settings"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Social login (VK, OK, Yandex, Google)"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "To enable social login, turn on \"Anyone can register\" in Settings -> General."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Enable VK login"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "VK application ID"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Odnoklassniki (OK)"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Enable OK login"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Enable Yandex login"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Application ID"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Application secret"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Enable Google login"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Reviews"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Editor"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Smilies in editor"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Reviews per page"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Reply threads"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Enable one-level reply threads"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Rate limit"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "reviews per"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "minutes per IP"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Editor note login"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Create a separate WordPress user for editor notes and provide username/password to the editor."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Login page"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Create a page with shortcode [nr_editor_login] and send this URL to editors."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Redirect after login"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Leave empty to redirect to homepage."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Important:"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "If page cache is enabled, disable cache for logged-in users or exclude product pages."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Login lock"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "After 3 failed attempts the IP is blocked for 1 hour."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Reset editor login lock"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Lock reset successfully."
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Shortcodes"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Insert into content or widget:"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Editor login page:"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Product page block:"
+msgstr ""
+
+#: admin/class-nr-admin.php
+msgid "Save"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Access denied."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Invalid product."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Editor note saved."
+msgstr ""
+
+#: templates/comments.php templates/editor-note.php
+msgid "Editor note"
+msgstr ""
+
+#: templates/comments.php
+msgid "Leave a review"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Submit"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Review text must be at least 10 characters."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Enter name and email or log in."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Save failed."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Thank you! Your review has been published."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Thank you! Your review is awaiting moderation."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Too many reviews. Please try again later."
+msgstr ""
+
+#: templates/comments.php templates/editor-note.php
+msgid "Editor note placeholder (visible on frontend only)."
+msgstr ""
+
+#: templates/comments.php templates/editor-note.php
+msgid "No editor note yet."
+msgstr ""
+
+#: templates/comments.php templates/editor-note.php
+msgid "Edit note"
+msgstr ""
+
+#: templates/comments.php templates/editor-note.php
+msgid "Save note"
+msgstr ""
+
+#: templates/comments.php templates/editor-note.php
+msgid "Note:"
+msgstr ""
+
+#: templates/comments.php
+msgid "Rating:"
+msgstr ""
+
+#: templates/comments.php
+msgid "Your review..."
+msgstr ""
+
+#: templates/comments.php
+msgid "or leave a review as a guest:"
+msgstr ""
+
+#: templates/comments.php
+msgid "Name"
+msgstr ""
+
+#: templates/comments.php
+msgid "Email"
+msgstr ""
+
+#: templates/comments.php
+msgid "Submit review"
+msgstr ""
+
+#: templates/comments.php
+msgid "Load more reviews"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Reply"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Logged in as"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Log out"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "editor"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Saving..."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Saved."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Error"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Network error"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Cancel"
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Your reply..."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Reply must be at least 10 characters."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Loading..."
+msgstr ""
+
+#: includes/class-nr-comments.php
+msgid "Login error"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Logged in as %s."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Open any product page: at the bottom you will see the editor note block and the edit button."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Open sample product"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Go to site"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Security check failed. Please try again."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Enter login and password."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Invalid login or password. Use the exact WordPress username from user profile."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Invalid login or password."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "This user has no permission to edit editor notes."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Too many failed attempts. Try again in one hour."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Administrator can reset the lock in plugin settings."
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Username"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Password"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Remember me"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Log in"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Popular reviews"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Latest reviews"
+msgstr ""
+
+#: includes/class-nr-shortcodes.php
+msgid "Editor notes"
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Log in via:"
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Yandex"
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Registration is disabled."
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "This login provider is not enabled."
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Unknown provider."
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "VK not configured."
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "VK: no access token"
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "OK not configured."
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "OK: no access token"
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "OK API error"
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Yandex not configured."
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Yandex: no access token"
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Google not configured."
+msgstr ""
+
+#: includes/class-nr-social.php
+msgid "Google: no access token"
+msgstr ""
+
+#: includes/class-nr-github-updater.php
+msgid "See GitHub releases for details."
+msgstr ""

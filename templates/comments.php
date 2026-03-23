@@ -19,7 +19,7 @@ if (!is_string($editor_note_author)) {
 }
 
 if (nr_is_editor_context()) {
-    echo '<div id="nr-editor-note" class="nr-editor-note"><p class="nr-editor-placeholder">' . esc_html__('Editor note placeholder (visible on frontend only).', 'smart-product-reviews') . '</p></div>';
+    echo '<div id="nr-editor-note" class="nr-editor-note"><p class="nr-editor-placeholder">' . esc_html__('Editor note placeholder (visible on frontend only).', 'woocommerce-product-reviews') . '</p></div>';
     return;
 }
 
@@ -49,15 +49,15 @@ $total_pages = max(1, (int) ceil($total_parents / $per_page));
 
 <!-- ═══ Editor note ═══ -->
 <div id="nr-editor-note" class="nr-editor-note">
-    <h3 class="nr-title"><?php echo esc_html__('Editor note', 'smart-product-reviews'); ?></h3>
+    <h3 class="nr-title"><?php echo esc_html__('Editor note', 'woocommerce-product-reviews'); ?></h3>
 
     <div class="nr-editor-note-content">
-        <?php if ($editor_note_author) : ?><p class="nr-editor-note-by"><?php echo esc_html__('Note:', 'smart-product-reviews'); ?> <strong><?php echo esc_html($editor_note_author); ?></strong></p><?php endif; ?>
-        <?php echo $editor_note ? wp_kses_post($editor_note) : '<p class="nr-no-note">' . esc_html__('No editor note yet.', 'smart-product-reviews') . '</p>'; ?>
+        <?php if ($editor_note_author) : ?><p class="nr-editor-note-by"><?php echo esc_html__('Note:', 'woocommerce-product-reviews'); ?> <strong><?php echo esc_html($editor_note_author); ?></strong></p><?php endif; ?>
+        <?php echo $editor_note ? wp_kses_post($editor_note) : '<p class="nr-no-note">' . esc_html__('No editor note yet.', 'woocommerce-product-reviews') . '</p>'; ?>
     </div>
     <?php if ($can_edit) : ?>
         <p class="nr-editor-note-actions">
-            <button type="button" class="nr-edit-note nr-submit"><?php echo esc_html__('Edit note', 'smart-product-reviews'); ?></button>
+            <button type="button" class="nr-edit-note nr-submit"><?php echo esc_html__('Edit note', 'woocommerce-product-reviews'); ?></button>
         </p>
         <form id="nr-editor-note-form" class="nr-editor-note-form" method="post" action="" data-post-id="<?php echo (int) $post_id; ?>" style="display:none;">
             <?php wp_nonce_field('nr_save_editor_note', 'nr_editor_nonce'); ?>
@@ -79,7 +79,7 @@ $total_pages = max(1, (int) ceil($total_parents / $per_page));
                 'wpautop'      => true,
             ]);
             ?>
-            <p><button type="submit" class="nr-submit nr-save-note"><?php echo esc_html__('Save note', 'smart-product-reviews'); ?></button></p>
+            <p><button type="submit" class="nr-submit nr-save-note"><?php echo esc_html__('Save note', 'woocommerce-product-reviews'); ?></button></p>
             <p class="nr-form-message" style="display:none;"></p>
         </form>
     <?php endif; ?>
@@ -88,23 +88,15 @@ $total_pages = max(1, (int) ceil($total_parents / $per_page));
 <!-- ═══ Reviews section ═══ -->
 <div id="nr-reviews" class="nr-reviews" data-post-id="<?php echo (int) $post_id; ?>" data-page="1" data-total-pages="<?php echo (int) $total_pages; ?>">
 
-    <!-- Rating summary -->
-    <?php if ($rating_count > 0) : ?>
-    <div class="nr-product-rating">
-        <?php echo NR_Rating::get_rating_html($avg_rating); ?>
-        <span class="nr-rating-count"><?php echo esc_html(sprintf(__('%s reviews', 'smart-product-reviews'), $rating_count)); ?></span>
-    </div>
-    <?php endif; ?>
-
     <!-- Review form -->
-    <h3 class="nr-title"><?php echo esc_html__('Leave a review', 'smart-product-reviews'); ?></h3>
+    <h3 class="nr-title"><?php echo esc_html__('Leave a review', 'woocommerce-product-reviews'); ?></h3>
 
     <div class="nr-form-wrap">
         <form id="nr-comment-form" class="nr-form" data-post-id="<?php echo (int) $post_id; ?>">
             <input type="hidden" name="comment_parent" value="0" />
 
             <div class="nr-rating-input">
-                <label><?php echo esc_html__('Rating:', 'smart-product-reviews'); ?></label>
+                <label><?php echo esc_html__('Rating:', 'woocommerce-product-reviews'); ?></label>
                 <span class="nr-stars-edit" data-rating="0">
                     <span class="nr-star" data-v="1">&#9733;</span>
                     <span class="nr-star" data-v="2">&#9733;</span>
@@ -116,22 +108,22 @@ $total_pages = max(1, (int) ceil($total_parents / $per_page));
             </div>
 
             <p>
-                <textarea name="content" rows="4" placeholder="<?php echo esc_attr__('Your review...', 'smart-product-reviews'); ?>" required></textarea>
+                <textarea name="content" rows="4" placeholder="<?php echo esc_attr__('Your review...', 'woocommerce-product-reviews'); ?>" required></textarea>
             </p>
 
             <?php if (!$is_logged_in) : ?>
                 <!-- Social login buttons -->
                 <?php echo NR_Social::render_buttons($post_id); ?>
 
-                <p class="nr-or"><?php echo esc_html__('or leave a review as a guest:', 'smart-product-reviews'); ?></p>
+                <p class="nr-or"><?php echo esc_html__('or leave a review as a guest:', 'woocommerce-product-reviews'); ?></p>
                 <p>
-                    <input type="text" name="author" placeholder="<?php echo esc_attr__('Name', 'smart-product-reviews'); ?>" required />
-                    <input type="email" name="email" placeholder="<?php echo esc_attr__('Email', 'smart-product-reviews'); ?>" required />
+                    <input type="text" name="author" placeholder="<?php echo esc_attr__('Name', 'woocommerce-product-reviews'); ?>" required />
+                    <input type="email" name="email" placeholder="<?php echo esc_attr__('Email', 'woocommerce-product-reviews'); ?>" required />
                 </p>
             <?php endif; ?>
 
             <p>
-                <button type="submit" class="nr-submit"><?php echo esc_html__('Submit review', 'smart-product-reviews'); ?></button>
+                <button type="submit" class="nr-submit"><?php echo esc_html__('Submit review', 'woocommerce-product-reviews'); ?></button>
             </p>
             <p class="nr-form-message" style="display:none;"></p>
         </form>
@@ -147,7 +139,7 @@ $total_pages = max(1, (int) ceil($total_parents / $per_page));
     <!-- Pagination -->
     <?php if ($total_pages > 1) : ?>
     <div class="nr-pagination" data-post-id="<?php echo (int) $post_id; ?>">
-        <button type="button" class="nr-load-more nr-submit"><?php echo esc_html__('Load more reviews', 'smart-product-reviews'); ?></button>
+        <button type="button" class="nr-load-more nr-submit"><?php echo esc_html__('Load more reviews', 'woocommerce-product-reviews'); ?></button>
     </div>
     <?php endif; ?>
 

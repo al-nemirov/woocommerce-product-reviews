@@ -1,4 +1,4 @@
-# Smart Product Reviews
+# WooCommerce Product Reviews
 
 WooCommerce review engine with social login, threaded replies, star ratings, editor notes, and flexible shortcodes.
 
@@ -12,7 +12,7 @@ WooCommerce review engine with social login, threaded replies, star ratings, edi
 - **Shortcodes** with extended attributes: `orderby`, `template`, `show_rating`, `cache_ttl`, etc.
 - **Configurable rate limiting** in admin (N reviews per M minutes per IP)
 - **Transient caching** for widget shortcodes with versioned invalidation
-- **Full i18n** — all strings localizable via `smart-product-reviews` text domain
+- **Full i18n** — all strings localizable via `woocommerce-product-reviews` text domain
 
 ## Shortcodes
 
@@ -35,9 +35,9 @@ WooCommerce review engine with social login, threaded replies, star ratings, edi
 
 ## Installation
 
-1. Upload to `wp-content/plugins/smart-product-reviews/`
+1. Upload to `wp-content/plugins/woocommerce-product-reviews/`
 2. Activate in Plugins menu
-3. Configure: **Smart Product Reviews** in admin sidebar
+3. Configure: **WooCommerce Product Reviews** in admin sidebar
 
 ## Author
 
@@ -45,7 +45,7 @@ Alexander Nemirov
 
 ---
 
-# Smart Product Reviews (RU)
+# WooCommerce Product Reviews (RU)
 
 Система отзывов и рейтингов для WooCommerce с соцсетями, ветками ответов, редакторскими примечаниями и гибкими шорткодами.
 
@@ -59,13 +59,13 @@ Alexander Nemirov
 - **Шорткоды** с расширенными атрибутами: `orderby`, `template`, `show_rating`, `cache_ttl` и др.
 - **Настраиваемый rate-limit** в админке (N отзывов за M минут на IP)
 - **Transient-кэш** виджетных шорткодов с версионной инвалидацией
-- **Полная локализация** — все строки через text domain `smart-product-reviews`
+- **Полная локализация** — все строки через text domain `woocommerce-product-reviews`
 
 ## Установка
 
-1. Скопируйте в `wp-content/plugins/smart-product-reviews/`
+1. Скопируйте в `wp-content/plugins/woocommerce-product-reviews/`
 2. Активируйте в меню «Плагины»
-3. Настройки: **Smart Product Reviews** в боковом меню
+3. Настройки: **WooCommerce Product Reviews** в боковом меню
 
 ## Автор
 

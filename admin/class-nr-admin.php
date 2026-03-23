@@ -31,16 +31,16 @@ class NR_Admin {
             return;
         }
         NR_Shortcodes::clear_login_blocks();
-        wp_safe_redirect(add_query_arg(['nr_blocks_cleared' => '1'], remove_query_arg(['nr_clear_login_blocks', '_wpnonce'], wp_get_referer() ?: admin_url('admin.php?page=smart-product-reviews'))));
+        wp_safe_redirect(add_query_arg(['nr_blocks_cleared' => '1'], remove_query_arg(['nr_clear_login_blocks', '_wpnonce'], wp_get_referer() ?: admin_url('admin.php?page=woocommerce-product-reviews'))));
         exit;
     }
 
     public function menu() {
         add_menu_page(
-            'Smart Product Reviews',
-            'Smart Product Reviews',
+            'WooCommerce Product Reviews',
+            'WooCommerce Product Reviews',
             'manage_options',
-            'smart-product-reviews',
+            'woocommerce-product-reviews',
             [$this, 'page'],
             'dashicons-star-filled',
             26
@@ -73,7 +73,7 @@ class NR_Admin {
             'editor_login_page_id' => (int) NR_Core::instance()->get_option('editor_login_page_id', 0),
         ];
         update_option('nr_options', $opts);
-        echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'smart-product-reviews') . '</p></div>';
+        echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'woocommerce-product-reviews') . '</p></div>';
     }
 
     public function page() {
@@ -81,27 +81,27 @@ class NR_Admin {
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=');
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html__('Smart Product Reviews - settings', 'smart-product-reviews'); ?></h1>
+            <h1><?php echo esc_html__('WooCommerce Product Reviews - settings', 'woocommerce-product-reviews'); ?></h1>
 
             <form method="post">
                 <?php wp_nonce_field('nr_options', '_wpnonce'); ?>
 
-                <h2><?php echo esc_html__('Social login (VK, OK, Yandex, Google)', 'smart-product-reviews'); ?></h2>
-                <p class="description"><?php echo esc_html__('To enable social login, turn on "Anyone can register" in Settings -> General.', 'smart-product-reviews'); ?></p>
+                <h2><?php echo esc_html__('Social login (VK, OK, Yandex, Google)', 'woocommerce-product-reviews'); ?></h2>
+                <p class="description"><?php echo esc_html__('To enable social login, turn on "Anyone can register" in Settings -> General.', 'woocommerce-product-reviews'); ?></p>
 
                 <table class="form-table">
                     <tr>
                         <th>VK</th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_vk" value="1" <?php checked(!empty($o['enable_vk'])); ?> /> <?php echo esc_html__('Enable VK login', 'smart-product-reviews'); ?></label><br>
-                            <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('VK application ID', 'smart-product-reviews'); ?>" />
+                            <label><input type="checkbox" name="nr_enable_vk" value="1" <?php checked(!empty($o['enable_vk'])); ?> /> <?php echo esc_html__('Enable VK login', 'woocommerce-product-reviews'); ?></label><br>
+                            <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('VK application ID', 'woocommerce-product-reviews'); ?>" />
                             <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>vk</code></p>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Odnoklassniki (OK)', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Odnoklassniki (OK)', 'woocommerce-product-reviews'); ?></th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_ok" value="1" <?php checked(!empty($o['enable_ok'])); ?> /> <?php echo esc_html__('Enable OK login', 'smart-product-reviews'); ?></label><br>
+                            <label><input type="checkbox" name="nr_enable_ok" value="1" <?php checked(!empty($o['enable_ok'])); ?> /> <?php echo esc_html__('Enable OK login', 'woocommerce-product-reviews'); ?></label><br>
                             <input type="text" name="nr_ok_app_id" value="<?php echo esc_attr($o['ok_app_id'] ?? ''); ?>" class="regular-text" placeholder="Application ID" /><br>
                             <input type="text" name="nr_ok_app_key" value="<?php echo esc_attr($o['ok_app_key'] ?? ''); ?>" class="regular-text" placeholder="Application Key" /><br>
                             <input type="text" name="nr_ok_secret" value="<?php echo esc_attr($o['ok_secret'] ?? ''); ?>" class="regular-text" placeholder="Application Secret" />
@@ -111,16 +111,16 @@ class NR_Admin {
                     <tr>
                         <th>Yandex</th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_yandex" value="1" <?php checked(!empty($o['enable_yandex'])); ?> /> <?php echo esc_html__('Enable Yandex login', 'smart-product-reviews'); ?></label><br>
-                            <input type="text" name="nr_yandex_id" value="<?php echo esc_attr($o['yandex_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application ID', 'smart-product-reviews'); ?>" /><br>
-                            <input type="text" name="nr_yandex_secret" value="<?php echo esc_attr($o['yandex_secret'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application secret', 'smart-product-reviews'); ?>" />
+                            <label><input type="checkbox" name="nr_enable_yandex" value="1" <?php checked(!empty($o['enable_yandex'])); ?> /> <?php echo esc_html__('Enable Yandex login', 'woocommerce-product-reviews'); ?></label><br>
+                            <input type="text" name="nr_yandex_id" value="<?php echo esc_attr($o['yandex_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application ID', 'woocommerce-product-reviews'); ?>" /><br>
+                            <input type="text" name="nr_yandex_secret" value="<?php echo esc_attr($o['yandex_secret'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application secret', 'woocommerce-product-reviews'); ?>" />
                             <p class="description">Callback: <code><?php echo esc_html($callback); ?>yandex</code></p>
                         </td>
                     </tr>
                     <tr>
                         <th>Google</th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_google" value="1" <?php checked(!empty($o['enable_google'])); ?> /> <?php echo esc_html__('Enable Google login', 'smart-product-reviews'); ?></label><br>
+                            <label><input type="checkbox" name="nr_enable_google" value="1" <?php checked(!empty($o['enable_google'])); ?> /> <?php echo esc_html__('Enable Google login', 'woocommerce-product-reviews'); ?></label><br>
                             <input type="text" name="nr_google_id" value="<?php echo esc_attr($o['google_id'] ?? ''); ?>" class="regular-text" placeholder="Client ID" /><br>
                             <input type="text" name="nr_google_secret" value="<?php echo esc_attr($o['google_secret'] ?? ''); ?>" class="regular-text" placeholder="Client Secret" />
                             <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>google</code></p>
@@ -128,78 +128,78 @@ class NR_Admin {
                     </tr>
                 </table>
 
-                <h2><?php echo esc_html__('Reviews', 'smart-product-reviews'); ?></h2>
+                <h2><?php echo esc_html__('Reviews', 'woocommerce-product-reviews'); ?></h2>
                 <table class="form-table">
                     <tr>
-                        <th><?php echo esc_html__('Editor', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Editor', 'woocommerce-product-reviews'); ?></th>
                         <td>
-                            <label><input type="checkbox" name="nr_editor_smilies" value="1" <?php checked(!empty($o['editor_smilies'])); ?> /> <?php echo esc_html__('Smilies in editor', 'smart-product-reviews'); ?></label>
+                            <label><input type="checkbox" name="nr_editor_smilies" value="1" <?php checked(!empty($o['editor_smilies'])); ?> /> <?php echo esc_html__('Smilies in editor', 'woocommerce-product-reviews'); ?></label>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Reviews per page', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Reviews per page', 'woocommerce-product-reviews'); ?></th>
                         <td>
                             <input type="number" name="nr_comments_per_page" value="<?php echo esc_attr($o['comments_per_page'] ?? 10); ?>" min="5" max="50" />
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Reply threads', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Reply threads', 'woocommerce-product-reviews'); ?></th>
                         <td>
-                            <label><input type="checkbox" name="nr_thread_depth" value="1" <?php checked(!empty($o['thread_depth'])); ?> /> <?php echo esc_html__('Enable one-level reply threads', 'smart-product-reviews'); ?></label>
+                            <label><input type="checkbox" name="nr_thread_depth" value="1" <?php checked(!empty($o['thread_depth'])); ?> /> <?php echo esc_html__('Enable one-level reply threads', 'woocommerce-product-reviews'); ?></label>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Rate limit', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Rate limit', 'woocommerce-product-reviews'); ?></th>
                         <td>
                             <input type="number" name="nr_rate_limit_count" value="<?php echo esc_attr($o['rate_limit_count'] ?? 5); ?>" min="1" max="100" style="width:60px" />
-                            <?php echo esc_html__('reviews per', 'smart-product-reviews'); ?>
+                            <?php echo esc_html__('reviews per', 'woocommerce-product-reviews'); ?>
                             <input type="number" name="nr_rate_limit_period" value="<?php echo esc_attr(($o['rate_limit_period'] ?? 3600) / 60); ?>" min="1" max="1440" style="width:60px" />
-                            <?php echo esc_html__('minutes per IP', 'smart-product-reviews'); ?>
+                            <?php echo esc_html__('minutes per IP', 'woocommerce-product-reviews'); ?>
                         </td>
                     </tr>
                 </table>
 
-                <h2><?php echo esc_html__('Editor note login', 'smart-product-reviews'); ?></h2>
-                <p class="description"><?php echo esc_html__('Create a separate WordPress user for editor notes and provide username/password to the editor.', 'smart-product-reviews'); ?></p>
+                <h2><?php echo esc_html__('Editor note login', 'woocommerce-product-reviews'); ?></h2>
+                <p class="description"><?php echo esc_html__('Create a separate WordPress user for editor notes and provide username/password to the editor.', 'woocommerce-product-reviews'); ?></p>
                 <table class="form-table">
                     <tr>
-                        <th><?php echo esc_html__('Login page', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Login page', 'woocommerce-product-reviews'); ?></th>
                         <td>
-                            <p><?php echo esc_html__('Create a page with shortcode [nr_editor_login] and send this URL to editors.', 'smart-product-reviews'); ?></p>
+                            <p><?php echo esc_html__('Create a page with shortcode [nr_editor_login] and send this URL to editors.', 'woocommerce-product-reviews'); ?></p>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Redirect after login', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Redirect after login', 'woocommerce-product-reviews'); ?></th>
                         <td>
                             <input type="url" name="nr_editor_login_redirect" value="<?php echo esc_attr($o['editor_login_redirect'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(home_url('/')); ?>" />
-                            <p class="description"><?php echo esc_html__('Leave empty to redirect to homepage.', 'smart-product-reviews'); ?></p>
-                            <p class="description" style="margin-top:10px;"><strong><?php echo esc_html__('Important:', 'smart-product-reviews'); ?></strong> <?php echo esc_html__('If page cache is enabled, disable cache for logged-in users or exclude product pages.', 'smart-product-reviews'); ?></p>
+                            <p class="description"><?php echo esc_html__('Leave empty to redirect to homepage.', 'woocommerce-product-reviews'); ?></p>
+                            <p class="description" style="margin-top:10px;"><strong><?php echo esc_html__('Important:', 'woocommerce-product-reviews'); ?></strong> <?php echo esc_html__('If page cache is enabled, disable cache for logged-in users or exclude product pages.', 'woocommerce-product-reviews'); ?></p>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Login lock', 'smart-product-reviews'); ?></th>
+                        <th><?php echo esc_html__('Login lock', 'woocommerce-product-reviews'); ?></th>
                         <td>
-                            <p class="description"><?php echo esc_html__('After 3 failed attempts the IP is blocked for 1 hour.', 'smart-product-reviews'); ?></p>
-                            <p><a href="<?php echo esc_url(wp_nonce_url(add_query_arg('nr_clear_login_blocks', '1', admin_url('admin.php?page=smart-product-reviews')), 'nr_clear_login_blocks')); ?>" class="button"><?php echo esc_html__('Reset editor login lock', 'smart-product-reviews'); ?></a></p>
+                            <p class="description"><?php echo esc_html__('After 3 failed attempts the IP is blocked for 1 hour.', 'woocommerce-product-reviews'); ?></p>
+                            <p><a href="<?php echo esc_url(wp_nonce_url(add_query_arg('nr_clear_login_blocks', '1', admin_url('admin.php?page=woocommerce-product-reviews')), 'nr_clear_login_blocks')); ?>" class="button"><?php echo esc_html__('Reset editor login lock', 'woocommerce-product-reviews'); ?></a></p>
                             <?php if (!empty($_GET['nr_blocks_cleared'])) : ?>
-                                <p class="description" style="color:green;"><?php echo esc_html__('Lock reset successfully.', 'smart-product-reviews'); ?></p>
+                                <p class="description" style="color:green;"><?php echo esc_html__('Lock reset successfully.', 'woocommerce-product-reviews'); ?></p>
                             <?php endif; ?>
                         </td>
                     </tr>
                 </table>
 
-                <h2><?php echo esc_html__('Shortcodes', 'smart-product-reviews'); ?></h2>
-                <p><?php echo esc_html__('Insert into content or widget:', 'smart-product-reviews'); ?></p>
+                <h2><?php echo esc_html__('Shortcodes', 'woocommerce-product-reviews'); ?></h2>
+                <p><?php echo esc_html__('Insert into content or widget:', 'woocommerce-product-reviews'); ?></p>
                 <ul style="list-style:disc; margin-left:20px;">
-                    <li><strong><?php echo esc_html__('Editor login page:', 'smart-product-reviews'); ?></strong> <code>[nr_editor_login]</code></li>
-                    <li><strong><?php echo esc_html__('Product page block:', 'smart-product-reviews'); ?></strong> <code>[nr_product_reviews]</code> / <code>[nr_editor_note]</code></li>
+                    <li><strong><?php echo esc_html__('Editor login page:', 'woocommerce-product-reviews'); ?></strong> <code>[nr_editor_login]</code></li>
+                    <li><strong><?php echo esc_html__('Product page block:', 'woocommerce-product-reviews'); ?></strong> <code>[nr_product_reviews]</code> / <code>[nr_editor_note]</code></li>
                     <li><code>[nr_latest_comments count="5" title="Latest reviews"]</code></li>
                     <li><code>[nr_popular_comments count="5" title="Popular reviews"]</code></li>
                     <li><code>[nr_latest_editor_notes count="5" title="Editor notes"]</code></li>
                 </ul>
 
                 <p class="submit">
-                    <input type="submit" name="nr_save" class="button button-primary" value="<?php echo esc_attr__('Save', 'smart-product-reviews'); ?>" />
+                    <input type="submit" name="nr_save" class="button button-primary" value="<?php echo esc_attr__('Save', 'woocommerce-product-reviews'); ?>" />
                 </p>
             </form>
         </div>

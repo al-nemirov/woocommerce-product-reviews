@@ -1,8 +1,8 @@
 <?php
 /**
- * Smart Product Reviews: принудительное включение отзывов на странице товара
+ * WooCommerce Product Reviews: принудительное включение отзывов на странице товара
  * Подключите в functions.php темы одной строкой:
- * require_once get_stylesheet_directory() . '/path-to/smart-product-reviews/fix-comments-display.php';
+ * require_once get_stylesheet_directory() . '/path-to/woocommerce-product-reviews/fix-comments-display.php';
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
