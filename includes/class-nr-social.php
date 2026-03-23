@@ -124,12 +124,13 @@ class NR_Social {
         wp_send_json_error(['message' => __('Unknown provider.', 'woocommerce-product-reviews')]);
     }
 
-    // ── VK (PKCE) ─────────────────────────────────────
+    // ── VK ID (confidential client + PKCE) ──────────────
 
     private function vk_redirect($post_id) {
         $app_id = NR_Core::instance()->get_option('vk_app_id');
-        if (!$app_id) {
-            wp_send_json_error(['message' => __('VK not configured.', 'woocommerce-product-reviews')]);
+        $secret = NR_Core::instance()->get_option('vk_secret');
+        if (!$app_id || !$secret) {
+            wp_send_json_error(['message' => __('VK not configured. Set App ID and Protected Key.', 'woocommerce-product-reviews')]);
         }
         $callback = self::get_callback_url('vk');
         $state = wp_create_nonce('nr_vk_' . $post_id);
@@ -152,11 +153,14 @@ class NR_Social {
     }
 
     private function vk_get_user($code, $data) {
-        $app_id = NR_Core::instance()->get_option('vk_app_id');
+        $core = NR_Core::instance();
+        $app_id = $core->get_option('vk_app_id');
+        $secret = $core->get_option('vk_secret');
         $callback = self::get_callback_url('vk');
         $body = [
             'grant_type'    => 'authorization_code',
             'client_id'     => $app_id,
+            'client_secret' => $secret,
             'code'          => $code,
             'redirect_uri'  => $callback,
         ];
@@ -167,7 +171,8 @@ class NR_Social {
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
-            return new WP_Error('nr_vk', __('VK: no access token', 'woocommerce-product-reviews'));
+            $err = isset($body['error_description']) ? $body['error_description'] : (isset($body['error']) ? $body['error'] : 'no access token');
+            return new WP_Error('nr_vk', 'VK: ' . $err);
         }
         $uid = isset($body['user_id']) ? $body['user_id'] : '';
         $user_res = wp_remote_post('https://id.vk.com/oauth2/user_info', [

@@ -132,6 +132,7 @@ final class NR_Core {
     private function default_options() {
         return [
             'vk_app_id'     => '',
+            'vk_secret'     => '',
             'yandex_id'     => '',
             'yandex_secret' => '',
             'enable_vk'     => 0,

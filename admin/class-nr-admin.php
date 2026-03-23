@@ -53,6 +53,7 @@ class NR_Admin {
         }
         $opts = [
             'vk_app_id'      => sanitize_text_field($_POST['nr_vk_app_id'] ?? ''),
+            'vk_secret'      => sanitize_text_field($_POST['nr_vk_secret'] ?? ''),
             'yandex_id'      => sanitize_text_field($_POST['nr_yandex_id'] ?? ''),
             'yandex_secret'  => sanitize_text_field($_POST['nr_yandex_secret'] ?? ''),
             'enable_vk'      => !empty($_POST['nr_enable_vk']) ? 1 : 0,
@@ -100,15 +101,17 @@ class NR_Admin {
 
                 <table class="form-table">
                     <tr>
-                        <th>VK</th>
+                        <th>VK ID</th>
                         <td>
                             <label><input type="checkbox" name="nr_enable_vk" value="1" <?php checked(!empty($o['enable_vk'])); ?> /> <?php echo esc_html__('Enable VK login', 'woocommerce-product-reviews'); ?></label><br>
-                            <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('VK application ID', 'woocommerce-product-reviews'); ?>" />
+                            <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="App ID" /><br>
+                            <input type="text" name="nr_vk_secret" value="<?php echo esc_attr($o['vk_secret'] ?? ''); ?>" class="regular-text" placeholder="Protected Key (Защищённый ключ)" />
                             <p class="description">
                                 <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://id.vk.com/about/business/go" target="_blank">VK ID &rarr; <?php echo esc_html__('Create app', 'woocommerce-product-reviews'); ?></a><br>
                                 <?php echo esc_html__('2. App type: Web. Platform: Web.', 'woocommerce-product-reviews'); ?><br>
-                                <?php echo esc_html__('3. In "Redirect URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>vk</code><br>
-                                <?php echo esc_html__('4. Copy "App ID" and paste above.', 'woocommerce-product-reviews'); ?>
+                                <?php echo esc_html__('3. In "Redirect URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>vk/</code><br>
+                                <?php echo esc_html__('4. Copy "App ID" — first field above.', 'woocommerce-product-reviews'); ?><br>
+                                5. <?php echo esc_html__('Go to "Ключи доступа" → copy "Защищённый ключ" (Protected Key) — second field.', 'woocommerce-product-reviews'); ?>
                             </p>
                         </td>
                     </tr>
