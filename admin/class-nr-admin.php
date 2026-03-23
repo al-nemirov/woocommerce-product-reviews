@@ -38,7 +38,7 @@ class NR_Admin {
     public function menu() {
         add_menu_page(
             'WooCommerce Product Reviews',
-            'WooCommerce Product Reviews',
+            'WC Отзывы',
             'manage_options',
             'woocommerce-product-reviews',
             [$this, 'page'],
