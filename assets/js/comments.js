@@ -83,6 +83,21 @@
         var $ratingInput = $form.length ? $form.find('input[name="rating"]') : $();
         var $parentInput = $form.length ? $form.find('input[name="comment_parent"]') : $();
 
+        // Emoji picker
+        $(document).off('click.nr-emoji-toggle', '.nr-emoji-toggle').on('click.nr-emoji-toggle', '.nr-emoji-toggle', function(e) {
+            e.preventDefault();
+            $(this).siblings('.nr-emoji-picker').toggle();
+        });
+        $(document).off('click.nr-emoji', '.nr-emoji').on('click.nr-emoji', '.nr-emoji', function() {
+            var emoji = $(this).data('emoji');
+            var $ta = $(this).closest('.nr-textarea-wrap').find('textarea');
+            var pos = $ta[0].selectionStart || $ta.val().length;
+            var val = $ta.val();
+            $ta.val(val.slice(0, pos) + emoji + val.slice(pos));
+            $ta.focus();
+            $ta[0].selectionStart = $ta[0].selectionEnd = pos + emoji.length;
+        });
+
         // Star rating click & form submit — only if logged in (form exists)
         if ($form.length) {
             $rating.off('click.nr').on('click.nr', '.nr-star', function() {

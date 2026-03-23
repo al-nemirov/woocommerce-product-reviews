@@ -133,9 +133,18 @@ $has_note = !empty(trim($editor_note));
                     <input type="hidden" name="rating" value="0" />
                 </div>
 
-                <p>
+                <div class="nr-textarea-wrap">
                     <textarea name="content" rows="4" placeholder="<?php echo esc_attr__('Ваш отзыв...', 'woocommerce-product-reviews'); ?>" required></textarea>
-                </p>
+                    <button type="button" class="nr-emoji-toggle" title="Emoji">😊</button>
+                    <div class="nr-emoji-picker" style="display:none;">
+                        <?php
+                        $emojis = ['😊','😍','👍','❤️','🔥','😂','🤔','👏','💯','⭐','📚','📖','✨','🎉','😎','🥰','😢','😠','👎','💔'];
+                        foreach ($emojis as $e) {
+                            echo '<span class="nr-emoji" data-emoji="' . $e . '">' . $e . '</span>';
+                        }
+                        ?>
+                    </div>
+                </div>
 
                 <p>
                     <button type="submit" class="nr-submit"><?php echo esc_html__('Отправить', 'woocommerce-product-reviews'); ?></button>
