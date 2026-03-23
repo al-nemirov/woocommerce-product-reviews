@@ -14,7 +14,7 @@ class NR_GitHub_Updater {
     private $github_repo;
     private $github_url;
     private $cache_key;
-    private $cache_ttl = 43200; // 12 hours
+    private $cache_ttl = 21600; // 6 hours
 
     public function __construct($plugin_file, $github_repo) {
         $this->plugin_file = $plugin_file;
@@ -26,6 +26,11 @@ class NR_GitHub_Updater {
         add_filter('pre_set_site_transient_update_plugins', [$this, 'check_update']);
         add_filter('plugins_api', [$this, 'plugin_info'], 10, 3);
         add_filter('upgrader_post_install', [$this, 'post_install'], 10, 3);
+
+        // Clear cache when WP force-checks ("Check again" button on Updates page)
+        if (is_admin() && isset($_GET['force-check'])) {
+            delete_transient($this->cache_key);
+        }
     }
 
     /**
