@@ -18,11 +18,41 @@ class NR_Admin {
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_init', [$this, 'save']);
         add_action('admin_init', [$this, 'maybe_clear_login_blocks']);
+        add_action('admin_bar_menu', [$this, 'admin_bar'], 80);
     }
 
     /**
-     * Обработка нажатия «Сбросить блокировку входа редактора».
+     * Admin bar: quick link to reviews settings + pending comments.
      */
+    public function admin_bar($wp_admin_bar) {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        $pending = wp_count_comments();
+        $count = $pending->moderated ?? 0;
+        $title = 'Отзывы';
+        if ($count > 0) {
+            $title .= ' <span class="ab-label" style="background:#d63638;color:#fff;border-radius:10px;padding:0 6px;font-size:11px;margin-left:4px;">' . $count . '</span>';
+        }
+        $wp_admin_bar->add_node([
+            'id'    => 'nr-reviews',
+            'title' => $title,
+            'href'  => admin_url('admin.php?page=woocommerce-product-reviews'),
+        ]);
+        $wp_admin_bar->add_node([
+            'parent' => 'nr-reviews',
+            'id'     => 'nr-reviews-settings',
+            'title'  => 'Настройки',
+            'href'   => admin_url('admin.php?page=woocommerce-product-reviews'),
+        ]);
+        $wp_admin_bar->add_node([
+            'parent' => 'nr-reviews',
+            'id'     => 'nr-reviews-comments',
+            'title'  => 'Все комментарии',
+            'href'   => admin_url('edit-comments.php'),
+        ]);
+    }
+
     public function maybe_clear_login_blocks() {
         if (empty($_GET['nr_clear_login_blocks']) || !current_user_can('manage_options')) {
             return;
@@ -75,7 +105,7 @@ class NR_Admin {
             'editor_note_title' => sanitize_text_field($_POST['nr_editor_note_title'] ?? ''),
         ];
         update_option('nr_options', $opts);
-        echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'woocommerce-product-reviews') . '</p></div>';
+        echo '<div class="notice notice-success"><p>Настройки сохранены.</p></div>';
     }
 
     public function page() {
@@ -83,161 +113,171 @@ class NR_Admin {
         $callback = home_url('/nr-auth/');
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html__('WooCommerce Product Reviews - settings', 'woocommerce-product-reviews'); ?></h1>
+            <h1>WC Отзывы — Настройки</h1>
 
             <form method="post">
                 <?php wp_nonce_field('nr_options', '_wpnonce'); ?>
 
-                <h2><?php echo esc_html__('Social login (VK, OK, Yandex, Google)', 'woocommerce-product-reviews'); ?></h2>
+                <!-- ═══ Social login ═══ -->
+                <h2>Вход через соцсети</h2>
                 <div class="notice notice-info inline" style="margin:10px 0 16px;padding:10px 14px;">
-                    <p><strong><?php echo esc_html__('Before you start:', 'woocommerce-product-reviews'); ?></strong></p>
+                    <p><strong>Перед настройкой:</strong></p>
                     <ol style="margin:4px 0 0 18px;">
-                        <li><?php echo esc_html__('Go to Settings -> General -> check "Anyone can register".', 'woocommerce-product-reviews'); ?></li>
-                        <li><?php echo esc_html__('Create an app on the provider site (links below).', 'woocommerce-product-reviews'); ?></li>
-                        <li><?php echo esc_html__('Copy the Redirect URI shown below and paste it into the app settings.', 'woocommerce-product-reviews'); ?></li>
-                        <li><?php echo esc_html__('Copy the app ID/secret from the provider and paste them here.', 'woocommerce-product-reviews'); ?></li>
+                        <li>Настройки &rarr; Общие &rarr; поставьте галочку «Любой может зарегистрироваться».</li>
+                        <li>Создайте приложение на сайте провайдера (ссылки ниже).</li>
+                        <li>Скопируйте Redirect URI из инструкции ниже и вставьте в настройки приложения.</li>
+                        <li>Скопируйте ключи из приложения и вставьте в поля ниже.</li>
                     </ol>
                 </div>
 
                 <table class="form-table">
+                    <!-- VK ID -->
                     <tr>
                         <th>VK ID</th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_vk" value="1" <?php checked(!empty($o['enable_vk'])); ?> /> <?php echo esc_html__('Enable VK login', 'woocommerce-product-reviews'); ?></label><br>
-                            <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="App ID" /><br>
+                            <label><input type="checkbox" name="nr_enable_vk" value="1" <?php checked(!empty($o['enable_vk'])); ?> /> Включить вход через VK</label><br>
+                            <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="App ID (ID приложения)" /><br>
                             <input type="text" name="nr_vk_secret" value="<?php echo esc_attr($o['vk_secret'] ?? ''); ?>" class="regular-text" placeholder="Protected Key (Защищённый ключ)" />
                             <p class="description">
-                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://id.vk.com/about/business/go" target="_blank">VK ID &rarr; <?php echo esc_html__('Create app', 'woocommerce-product-reviews'); ?></a><br>
-                                <?php echo esc_html__('2. App type: Web. Platform: Web.', 'woocommerce-product-reviews'); ?><br>
-                                <?php echo esc_html__('3. In "Redirect URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>vk/</code><br>
-                                <?php echo esc_html__('4. Copy "App ID" — first field above.', 'woocommerce-product-reviews'); ?><br>
-                                5. <?php echo esc_html__('Go to "Ключи доступа" → copy "Защищённый ключ" (Protected Key) — second field.', 'woocommerce-product-reviews'); ?>
+                                1. Откройте <a href="https://id.vk.com/about/business/go" target="_blank">VK ID для бизнеса</a> &rarr; создайте приложение (тип: Веб-сайт).<br>
+                                2. Платформа: Веб. Укажите домен: <code><?php echo esc_html(parse_url(home_url(), PHP_URL_HOST)); ?></code><br>
+                                3. В «Redirect URI» вставьте: <code><?php echo esc_html($callback); ?>vk/</code><br>
+                                4. Скопируйте «App ID» &rarr; первое поле выше.<br>
+                                5. Ключи доступа &rarr; «Защищённый ключ» &rarr; второе поле выше.<br>
+                                6. Авторизация &rarr; Данные для регистрации &rarr; <strong>включите «Почта»</strong>.
                             </p>
                         </td>
                     </tr>
+
+                    <!-- Одноклассники -->
                     <tr>
-                        <th><?php echo esc_html__('Odnoklassniki (OK)', 'woocommerce-product-reviews'); ?></th>
+                        <th>Одноклассники (OK)</th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_ok" value="1" <?php checked(!empty($o['enable_ok'])); ?> /> <?php echo esc_html__('Enable OK login', 'woocommerce-product-reviews'); ?></label><br>
+                            <label><input type="checkbox" name="nr_enable_ok" value="1" <?php checked(!empty($o['enable_ok'])); ?> /> Включить вход через OK</label><br>
                             <input type="text" name="nr_ok_app_id" value="<?php echo esc_attr($o['ok_app_id'] ?? ''); ?>" class="regular-text" placeholder="Application ID" /><br>
-                            <input type="text" name="nr_ok_app_key" value="<?php echo esc_attr($o['ok_app_key'] ?? ''); ?>" class="regular-text" placeholder="Application Key" /><br>
-                            <input type="text" name="nr_ok_secret" value="<?php echo esc_attr($o['ok_secret'] ?? ''); ?>" class="regular-text" placeholder="Application Secret" />
+                            <input type="text" name="nr_ok_app_key" value="<?php echo esc_attr($o['ok_app_key'] ?? ''); ?>" class="regular-text" placeholder="Application Key (Публичный ключ)" /><br>
+                            <input type="text" name="nr_ok_secret" value="<?php echo esc_attr($o['ok_secret'] ?? ''); ?>" class="regular-text" placeholder="Application Secret (Секретный ключ)" />
                             <p class="description">
-                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://ok.ru/vitrine/myuploaded" target="_blank">OK <?php echo esc_html__('developer portal', 'woocommerce-product-reviews'); ?></a> &rarr; <?php echo esc_html__('add app (type: External).', 'woocommerce-product-reviews'); ?><br>
-                                <?php echo esc_html__('2. In "Redirect URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>ok</code><br>
-                                <?php echo esc_html__('3. You will get 3 keys: Application ID, Application Key, Application Secret — paste all three above.', 'woocommerce-product-reviews'); ?>
+                                1. Откройте <a href="https://ok.ru/vitrine/myuploaded" target="_blank">OK &rarr; портал разработчика</a> &rarr; добавьте приложение (тип: Внешнее).<br>
+                                2. В «Redirect URI» вставьте: <code><?php echo esc_html($callback); ?>ok/</code><br>
+                                3. Скопируйте 3 ключа: Application ID, Application Key, Application Secret &rarr; поля выше.
                             </p>
                         </td>
                     </tr>
+
+                    <!-- Яндекс -->
                     <tr>
-                        <th>Yandex</th>
+                        <th>Яндекс</th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_yandex" value="1" <?php checked(!empty($o['enable_yandex'])); ?> /> <?php echo esc_html__('Enable Yandex login', 'woocommerce-product-reviews'); ?></label><br>
-                            <input type="text" name="nr_yandex_id" value="<?php echo esc_attr($o['yandex_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application ID', 'woocommerce-product-reviews'); ?>" /><br>
-                            <input type="text" name="nr_yandex_secret" value="<?php echo esc_attr($o['yandex_secret'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application secret', 'woocommerce-product-reviews'); ?>" />
+                            <label><input type="checkbox" name="nr_enable_yandex" value="1" <?php checked(!empty($o['enable_yandex'])); ?> /> Включить вход через Яндекс</label><br>
+                            <input type="text" name="nr_yandex_id" value="<?php echo esc_attr($o['yandex_id'] ?? ''); ?>" class="regular-text" placeholder="ClientID (ID приложения)" /><br>
+                            <input type="text" name="nr_yandex_secret" value="<?php echo esc_attr($o['yandex_secret'] ?? ''); ?>" class="regular-text" placeholder="Client secret (Пароль приложения)" />
                             <p class="description">
-                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://oauth.yandex.ru/client/new" target="_blank">Yandex OAuth &rarr; <?php echo esc_html__('Create app', 'woocommerce-product-reviews'); ?></a><br>
-                                <?php echo esc_html__('2. Platform: Web services. In "Callback URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>yandex</code><br>
-                                <?php echo esc_html__('3. Access: check "Login: email address" and "Login: user info".', 'woocommerce-product-reviews'); ?><br>
-                                <?php echo esc_html__('4. Copy "ClientID" and "Client secret" — paste above.', 'woocommerce-product-reviews'); ?>
+                                1. Откройте <a href="https://oauth.yandex.ru/client/new" target="_blank">Яндекс OAuth &rarr; Создать приложение</a>.<br>
+                                2. Платформа: Веб-сервисы. В «Callback URI» вставьте: <code><?php echo esc_html($callback); ?>yandex/</code><br>
+                                3. Доступ: «Логин: адрес электронной почты» и «Логин: информация о пользователе».<br>
+                                4. Скопируйте «ClientID» и «Client secret» &rarr; поля выше.
                             </p>
                         </td>
                     </tr>
+
+                    <!-- Google -->
                     <tr>
                         <th>Google</th>
                         <td>
-                            <label><input type="checkbox" name="nr_enable_google" value="1" <?php checked(!empty($o['enable_google'])); ?> /> <?php echo esc_html__('Enable Google login', 'woocommerce-product-reviews'); ?></label><br>
+                            <label><input type="checkbox" name="nr_enable_google" value="1" <?php checked(!empty($o['enable_google'])); ?> /> Включить вход через Google</label><br>
                             <input type="text" name="nr_google_id" value="<?php echo esc_attr($o['google_id'] ?? ''); ?>" class="regular-text" placeholder="Client ID" /><br>
                             <input type="text" name="nr_google_secret" value="<?php echo esc_attr($o['google_secret'] ?? ''); ?>" class="regular-text" placeholder="Client Secret" />
                             <p class="description">
-                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console &rarr; Credentials</a><br>
-                                <?php echo esc_html__('2. Create OAuth 2.0 Client ID (type: Web application).', 'woocommerce-product-reviews'); ?><br>
-                                <?php echo esc_html__('3. In "Authorized redirect URIs" add:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>google</code><br>
-                                <?php echo esc_html__('4. Copy "Client ID" and "Client secret" — paste above.', 'woocommerce-product-reviews'); ?>
+                                1. Откройте <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console &rarr; Credentials</a>.<br>
+                                2. Создайте OAuth 2.0 Client ID (тип: Web application).<br>
+                                3. В «Authorized redirect URIs» добавьте: <code><?php echo esc_html($callback); ?>google/</code><br>
+                                4. Скопируйте «Client ID» и «Client secret» &rarr; поля выше.
                             </p>
                         </td>
                     </tr>
                 </table>
 
-                <h2><?php echo esc_html__('Reviews', 'woocommerce-product-reviews'); ?></h2>
+                <!-- ═══ Reviews ═══ -->
+                <h2>Отзывы</h2>
                 <table class="form-table">
                     <tr>
-                        <th><?php echo esc_html__('Editor note title', 'woocommerce-product-reviews'); ?></th>
+                        <th>Заголовок примечания</th>
                         <td>
-                            <input type="text" name="nr_editor_note_title" value="<?php echo esc_attr($o['editor_note_title'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Примечание редактора', 'woocommerce-product-reviews'); ?>" />
-                            <p class="description"><?php echo esc_html__('Можно изменить на «Рецензия», «О книге» и т.д. По умолчанию: Примечание редактора', 'woocommerce-product-reviews'); ?></p>
+                            <input type="text" name="nr_editor_note_title" value="<?php echo esc_attr($o['editor_note_title'] ?? ''); ?>" class="regular-text" placeholder="Примечание редактора" />
+                            <p class="description">Можно изменить на «Рецензия», «О книге» и т.д.</p>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Editor', 'woocommerce-product-reviews'); ?></th>
+                        <th>Редактор</th>
                         <td>
-                            <label><input type="checkbox" name="nr_editor_smilies" value="1" <?php checked(!empty($o['editor_smilies'])); ?> /> <?php echo esc_html__('Smilies in editor', 'woocommerce-product-reviews'); ?></label>
+                            <label><input type="checkbox" name="nr_editor_smilies" value="1" <?php checked(!empty($o['editor_smilies'])); ?> /> Смайлики в редакторе примечаний</label>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Reviews per page', 'woocommerce-product-reviews'); ?></th>
+                        <th>Отзывов на страницу</th>
                         <td>
                             <input type="number" name="nr_comments_per_page" value="<?php echo esc_attr($o['comments_per_page'] ?? 10); ?>" min="5" max="50" />
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Reply threads', 'woocommerce-product-reviews'); ?></th>
+                        <th>Ответы</th>
                         <td>
-                            <label><input type="checkbox" name="nr_thread_depth" value="1" <?php checked(!empty($o['thread_depth'])); ?> /> <?php echo esc_html__('Enable one-level reply threads', 'woocommerce-product-reviews'); ?></label>
+                            <label><input type="checkbox" name="nr_thread_depth" value="1" <?php checked(!empty($o['thread_depth'])); ?> /> Разрешить один уровень ответов</label>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Rate limit', 'woocommerce-product-reviews'); ?></th>
+                        <th>Лимит</th>
                         <td>
                             <input type="number" name="nr_rate_limit_count" value="<?php echo esc_attr($o['rate_limit_count'] ?? 5); ?>" min="1" max="100" style="width:60px" />
-                            <?php echo esc_html__('reviews per', 'woocommerce-product-reviews'); ?>
+                            отзывов за
                             <input type="number" name="nr_rate_limit_period" value="<?php echo esc_attr(($o['rate_limit_period'] ?? 3600) / 60); ?>" min="1" max="1440" style="width:60px" />
-                            <?php echo esc_html__('minutes per IP', 'woocommerce-product-reviews'); ?>
+                            минут на IP
                         </td>
                     </tr>
                 </table>
 
-                <h2><?php echo esc_html__('Editor note login', 'woocommerce-product-reviews'); ?></h2>
-                <p class="description"><?php echo esc_html__('Create a separate WordPress user for editor notes and provide username/password to the editor.', 'woocommerce-product-reviews'); ?></p>
+                <!-- ═══ Editor login ═══ -->
+                <h2>Вход редактора</h2>
+                <p class="description">Создайте отдельного WP-пользователя с ролью «Редактор» и передайте логин/пароль редактору.</p>
                 <table class="form-table">
                     <tr>
-                        <th><?php echo esc_html__('Login page', 'woocommerce-product-reviews'); ?></th>
+                        <th>Страница входа</th>
                         <td>
-                            <p><?php echo esc_html__('Create a page with shortcode [nr_editor_login] and send this URL to editors.', 'woocommerce-product-reviews'); ?></p>
+                            <p>Создайте страницу с шорткодом <code>[nr_editor_login]</code> и отправьте URL редактору.</p>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Redirect after login', 'woocommerce-product-reviews'); ?></th>
+                        <th>Редирект после входа</th>
                         <td>
                             <input type="url" name="nr_editor_login_redirect" value="<?php echo esc_attr($o['editor_login_redirect'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(home_url('/')); ?>" />
-                            <p class="description"><?php echo esc_html__('Leave empty to redirect to homepage.', 'woocommerce-product-reviews'); ?></p>
-                            <p class="description" style="margin-top:10px;"><strong><?php echo esc_html__('Important:', 'woocommerce-product-reviews'); ?></strong> <?php echo esc_html__('If page cache is enabled, disable cache for logged-in users or exclude product pages.', 'woocommerce-product-reviews'); ?></p>
+                            <p class="description">Оставьте пустым для перехода на главную.</p>
                         </td>
                     </tr>
                     <tr>
-                        <th><?php echo esc_html__('Login lock', 'woocommerce-product-reviews'); ?></th>
+                        <th>Блокировка</th>
                         <td>
-                            <p class="description"><?php echo esc_html__('After 3 failed attempts the IP is blocked for 1 hour.', 'woocommerce-product-reviews'); ?></p>
-                            <p><a href="<?php echo esc_url(wp_nonce_url(add_query_arg('nr_clear_login_blocks', '1', admin_url('admin.php?page=woocommerce-product-reviews')), 'nr_clear_login_blocks')); ?>" class="button"><?php echo esc_html__('Reset editor login lock', 'woocommerce-product-reviews'); ?></a></p>
+                            <p class="description">После 3 неудачных попыток IP блокируется на 1 час.</p>
+                            <p><a href="<?php echo esc_url(wp_nonce_url(add_query_arg('nr_clear_login_blocks', '1', admin_url('admin.php?page=woocommerce-product-reviews')), 'nr_clear_login_blocks')); ?>" class="button">Сбросить блокировку</a></p>
                             <?php if (!empty($_GET['nr_blocks_cleared'])) : ?>
-                                <p class="description" style="color:green;"><?php echo esc_html__('Lock reset successfully.', 'woocommerce-product-reviews'); ?></p>
+                                <p class="description" style="color:green;">Блокировка сброшена.</p>
                             <?php endif; ?>
                         </td>
                     </tr>
                 </table>
 
-                <h2><?php echo esc_html__('Shortcodes', 'woocommerce-product-reviews'); ?></h2>
-                <p><?php echo esc_html__('Insert into content or widget:', 'woocommerce-product-reviews'); ?></p>
+                <!-- ═══ Shortcodes ═══ -->
+                <h2>Шорткоды</h2>
                 <ul style="list-style:disc; margin-left:20px;">
-                    <li><strong><?php echo esc_html__('Editor login page:', 'woocommerce-product-reviews'); ?></strong> <code>[nr_editor_login]</code></li>
-                    <li><strong><?php echo esc_html__('Product page block:', 'woocommerce-product-reviews'); ?></strong> <code>[nr_product_reviews]</code> / <code>[nr_editor_note]</code></li>
-                    <li><code>[nr_latest_comments count="5" title="Latest reviews"]</code></li>
-                    <li><code>[nr_popular_comments count="5" title="Popular reviews"]</code></li>
-                    <li><code>[nr_latest_editor_notes count="5" title="Editor notes"]</code></li>
+                    <li><strong>Страница входа редактора:</strong> <code>[nr_editor_login]</code></li>
+                    <li><strong>Блок отзывов на странице товара:</strong> <code>[nr_product_reviews]</code> / <code>[nr_editor_note]</code></li>
+                    <li><code>[nr_latest_comments count="5" title="Последние отзывы"]</code></li>
+                    <li><code>[nr_popular_comments count="5" title="Популярные отзывы"]</code></li>
+                    <li><code>[nr_latest_editor_notes count="5" title="Примечания редактора"]</code></li>
                 </ul>
 
                 <p class="submit">
-                    <input type="submit" name="nr_save" class="button button-primary" value="<?php echo esc_attr__('Save', 'woocommerce-product-reviews'); ?>" />
+                    <input type="submit" name="nr_save" class="button button-primary" value="Сохранить" />
                 </p>
             </form>
         </div>
