@@ -17,8 +17,53 @@ class NR_Social {
     public function init() {
         add_action('wp_ajax_nr_social_login', [$this, 'ajax_login']);
         add_action('wp_ajax_nopriv_nr_social_login', [$this, 'ajax_login']);
+
+        // Clean callback URLs: /nr-auth/{provider}/
+        add_action('init', [$this, 'register_rewrite_rules']);
+        add_filter('query_vars', [$this, 'register_query_vars']);
+        add_action('template_redirect', [$this, 'handle_callback']);
+
+        // Legacy admin-ajax callback (backward compat)
         add_action('wp_ajax_nr_social_callback', [$this, 'callback']);
         add_action('wp_ajax_nopriv_nr_social_callback', [$this, 'callback']);
+    }
+
+    /**
+     * Register clean rewrite rules for OAuth callbacks.
+     * URL format: /nr-auth/{provider}/ — no query parameters.
+     */
+    public function register_rewrite_rules() {
+        add_rewrite_rule(
+            '^nr-auth/([a-z]+)/?$',
+            'index.php?nr_auth_provider=$matches[1]',
+            'top'
+        );
+    }
+
+    public function register_query_vars($vars) {
+        $vars[] = 'nr_auth_provider';
+        return $vars;
+    }
+
+    /**
+     * Handle OAuth callback via clean URL /nr-auth/{provider}/?code=...&state=...
+     */
+    public function handle_callback() {
+        $provider = get_query_var('nr_auth_provider');
+        if (!$provider) {
+            return;
+        }
+        // Reuse the same callback logic
+        $_GET['provider'] = sanitize_text_field($provider);
+        $this->callback();
+    }
+
+    /**
+     * Get clean callback URL for a provider. No query parameters in the base URL.
+     * The OAuth provider will append ?code=...&state=... on redirect.
+     */
+    public static function get_callback_url($provider) {
+        return home_url('/nr-auth/' . $provider . '/');
     }
 
     /**
@@ -86,7 +131,7 @@ class NR_Social {
         if (!$app_id) {
             wp_send_json_error(['message' => __('VK not configured.', 'woocommerce-product-reviews')]);
         }
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=vk');
+        $callback = self::get_callback_url('vk');
         $state = wp_create_nonce('nr_vk_' . $post_id);
         $verifier = bin2hex(random_bytes(32));
         $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
@@ -108,7 +153,7 @@ class NR_Social {
 
     private function vk_get_user($code, $data) {
         $app_id = NR_Core::instance()->get_option('vk_app_id');
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=vk');
+        $callback = self::get_callback_url('vk');
         $body = [
             'grant_type'    => 'authorization_code',
             'client_id'     => $app_id,
@@ -144,7 +189,7 @@ class NR_Social {
         if (!$app_id || !$secret) {
             wp_send_json_error(['message' => __('OK not configured.', 'woocommerce-product-reviews')]);
         }
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=ok');
+        $callback = self::get_callback_url('ok');
         $state = wp_create_nonce('nr_ok_' . $post_id);
         set_transient('nr_oauth_' . md5($state), ['provider' => 'ok', 'post_id' => $post_id, 'session_hash' => self::get_session_hash()], 600);
         $url = 'https://connect.ok.ru/oauth/authorize?' . http_build_query([
@@ -162,7 +207,7 @@ class NR_Social {
         $app_id  = $core->get_option('ok_app_id');
         $app_key = $core->get_option('ok_app_key');
         $secret  = $core->get_option('ok_secret');
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=ok');
+        $callback = self::get_callback_url('ok');
 
         $res = wp_remote_post('https://api.ok.ru/oauth/token.do', [
             'body' => [
@@ -219,7 +264,7 @@ class NR_Social {
         if (!$id || !$secret) {
             wp_send_json_error(['message' => __('Yandex not configured.', 'woocommerce-product-reviews')]);
         }
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=yandex');
+        $callback = self::get_callback_url('yandex');
         $state = wp_create_nonce('nr_ya_' . $post_id);
         set_transient('nr_oauth_' . md5($state), ['provider' => 'yandex', 'post_id' => $post_id, 'session_hash' => self::get_session_hash()], 600);
         $url = 'https://oauth.yandex.ru/authorize?' . http_build_query([
@@ -234,7 +279,7 @@ class NR_Social {
     private function yandex_get_user($code, $data) {
         $id = NR_Core::instance()->get_option('yandex_id');
         $secret = NR_Core::instance()->get_option('yandex_secret');
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=yandex');
+        $callback = self::get_callback_url('yandex');
         $res = wp_remote_post('https://oauth.yandex.ru/token', [
             'body' => [
                 'grant_type'    => 'authorization_code',
@@ -268,7 +313,7 @@ class NR_Social {
         if (!$id || !$secret) {
             wp_send_json_error(['message' => __('Google not configured.', 'woocommerce-product-reviews')]);
         }
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=google');
+        $callback = self::get_callback_url('google');
         $state = wp_create_nonce('nr_gg_' . $post_id);
         set_transient('nr_oauth_' . md5($state), ['provider' => 'google', 'post_id' => $post_id, 'session_hash' => self::get_session_hash()], 600);
         $url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
@@ -286,7 +331,7 @@ class NR_Social {
     private function google_get_user($code, $data) {
         $id = NR_Core::instance()->get_option('google_id');
         $secret = NR_Core::instance()->get_option('google_secret');
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=google');
+        $callback = self::get_callback_url('google');
         $res = wp_remote_post('https://oauth2.googleapis.com/token', [
             'body' => [
                 'grant_type'    => 'authorization_code',
@@ -357,7 +402,6 @@ class NR_Social {
 
     /**
      * Session hash for OAuth state binding.
-     * Uses browser cookies to bind OAuth flow to the initiating browser.
      */
     private static function get_session_hash() {
         $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';

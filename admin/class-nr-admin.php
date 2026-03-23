@@ -79,7 +79,7 @@ class NR_Admin {
 
     public function page() {
         $o = NR_Core::instance()->get_options();
-        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=');
+        $callback = home_url('/nr-auth/');
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__('WooCommerce Product Reviews - settings', 'woocommerce-product-reviews'); ?></h1>

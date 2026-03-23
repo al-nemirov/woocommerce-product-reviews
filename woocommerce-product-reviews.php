@@ -85,4 +85,10 @@ register_activation_hook(__FILE__, function () {
     if (class_exists('WooCommerce')) {
         NR_Core::instance()->activate();
     }
+    // Flush rewrite rules for clean OAuth callback URLs (/nr-auth/{provider}/)
+    flush_rewrite_rules();
+});
+
+register_deactivation_hook(__FILE__, function () {
+    flush_rewrite_rules();
 });
