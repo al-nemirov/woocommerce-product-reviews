@@ -366,3 +366,63 @@ msgstr "Not helpful"
 
 msgid "Already voted."
 msgstr "Already voted."
+
+msgid "Before you start:"
+msgstr "Before you start:"
+
+msgid "Go to Settings -> General -> check \"Anyone can register\"."
+msgstr "Go to Settings -> General -> check \"Anyone can register\"."
+
+msgid "Create an app on the provider site (links below)."
+msgstr "Create an app on the provider site (links below)."
+
+msgid "Copy the Redirect URI shown below and paste it into the app settings."
+msgstr "Copy the Redirect URI shown below and paste it into the app settings."
+
+msgid "Copy the app ID/secret from the provider and paste them here."
+msgstr "Copy the app ID/secret from the provider and paste them here."
+
+msgid "1. Go to"
+msgstr "1. Go to"
+
+msgid "Create app"
+msgstr "Create app"
+
+msgid "2. App type: Web. Platform: Web."
+msgstr "2. App type: Web. Platform: Web."
+
+msgid "3. In \"Redirect URI\" paste:"
+msgstr "3. In \"Redirect URI\" paste:"
+
+msgid "4. Copy \"App ID\" and paste above."
+msgstr "4. Copy \"App ID\" and paste above."
+
+msgid "developer portal"
+msgstr "developer portal"
+
+msgid "add app (type: External)."
+msgstr "add app (type: External)."
+
+msgid "2. In \"Redirect URI\" paste:"
+msgstr "2. In \"Redirect URI\" paste:"
+
+msgid "3. You will get 3 keys: Application ID, Application Key, Application Secret — paste all three above."
+msgstr "3. You will get 3 keys: Application ID, Application Key, Application Secret — paste all three above."
+
+msgid "2. Platform: Web services. In \"Callback URI\" paste:"
+msgstr "2. Platform: Web services. In \"Callback URI\" paste:"
+
+msgid "3. Access: check \"Login: email address\" and \"Login: user info\"."
+msgstr "3. Access: check \"Login: email address\" and \"Login: user info\"."
+
+msgid "4. Copy \"ClientID\" and \"Client secret\" — paste above."
+msgstr "4. Copy \"ClientID\" and \"Client secret\" — paste above."
+
+msgid "2. Create OAuth 2.0 Client ID (type: Web application)."
+msgstr "2. Create OAuth 2.0 Client ID (type: Web application)."
+
+msgid "3. In \"Authorized redirect URIs\" add:"
+msgstr "3. In \"Authorized redirect URIs\" add:"
+
+msgid "4. Copy \"Client ID\" and \"Client secret\" — paste above."
+msgstr "4. Copy \"Client ID\" and \"Client secret\" — paste above."

@@ -87,7 +87,15 @@ class NR_Admin {
                 <?php wp_nonce_field('nr_options', '_wpnonce'); ?>
 
                 <h2><?php echo esc_html__('Social login (VK, OK, Yandex, Google)', 'woocommerce-product-reviews'); ?></h2>
-                <p class="description"><?php echo esc_html__('To enable social login, turn on "Anyone can register" in Settings -> General.', 'woocommerce-product-reviews'); ?></p>
+                <div class="notice notice-info inline" style="margin:10px 0 16px;padding:10px 14px;">
+                    <p><strong><?php echo esc_html__('Before you start:', 'woocommerce-product-reviews'); ?></strong></p>
+                    <ol style="margin:4px 0 0 18px;">
+                        <li><?php echo esc_html__('Go to Settings -> General -> check "Anyone can register".', 'woocommerce-product-reviews'); ?></li>
+                        <li><?php echo esc_html__('Create an app on the provider site (links below).', 'woocommerce-product-reviews'); ?></li>
+                        <li><?php echo esc_html__('Copy the Redirect URI shown below and paste it into the app settings.', 'woocommerce-product-reviews'); ?></li>
+                        <li><?php echo esc_html__('Copy the app ID/secret from the provider and paste them here.', 'woocommerce-product-reviews'); ?></li>
+                    </ol>
+                </div>
 
                 <table class="form-table">
                     <tr>
@@ -95,7 +103,12 @@ class NR_Admin {
                         <td>
                             <label><input type="checkbox" name="nr_enable_vk" value="1" <?php checked(!empty($o['enable_vk'])); ?> /> <?php echo esc_html__('Enable VK login', 'woocommerce-product-reviews'); ?></label><br>
                             <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('VK application ID', 'woocommerce-product-reviews'); ?>" />
-                            <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>vk</code></p>
+                            <p class="description">
+                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://id.vk.com/about/business/go" target="_blank">VK ID &rarr; <?php echo esc_html__('Create app', 'woocommerce-product-reviews'); ?></a><br>
+                                <?php echo esc_html__('2. App type: Web. Platform: Web.', 'woocommerce-product-reviews'); ?><br>
+                                <?php echo esc_html__('3. In "Redirect URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>vk</code><br>
+                                <?php echo esc_html__('4. Copy "App ID" and paste above.', 'woocommerce-product-reviews'); ?>
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -105,7 +118,11 @@ class NR_Admin {
                             <input type="text" name="nr_ok_app_id" value="<?php echo esc_attr($o['ok_app_id'] ?? ''); ?>" class="regular-text" placeholder="Application ID" /><br>
                             <input type="text" name="nr_ok_app_key" value="<?php echo esc_attr($o['ok_app_key'] ?? ''); ?>" class="regular-text" placeholder="Application Key" /><br>
                             <input type="text" name="nr_ok_secret" value="<?php echo esc_attr($o['ok_secret'] ?? ''); ?>" class="regular-text" placeholder="Application Secret" />
-                            <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>ok</code></p>
+                            <p class="description">
+                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://ok.ru/vitrine/myuploaded" target="_blank">OK <?php echo esc_html__('developer portal', 'woocommerce-product-reviews'); ?></a> &rarr; <?php echo esc_html__('add app (type: External).', 'woocommerce-product-reviews'); ?><br>
+                                <?php echo esc_html__('2. In "Redirect URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>ok</code><br>
+                                <?php echo esc_html__('3. You will get 3 keys: Application ID, Application Key, Application Secret — paste all three above.', 'woocommerce-product-reviews'); ?>
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -114,7 +131,12 @@ class NR_Admin {
                             <label><input type="checkbox" name="nr_enable_yandex" value="1" <?php checked(!empty($o['enable_yandex'])); ?> /> <?php echo esc_html__('Enable Yandex login', 'woocommerce-product-reviews'); ?></label><br>
                             <input type="text" name="nr_yandex_id" value="<?php echo esc_attr($o['yandex_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application ID', 'woocommerce-product-reviews'); ?>" /><br>
                             <input type="text" name="nr_yandex_secret" value="<?php echo esc_attr($o['yandex_secret'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application secret', 'woocommerce-product-reviews'); ?>" />
-                            <p class="description">Callback: <code><?php echo esc_html($callback); ?>yandex</code></p>
+                            <p class="description">
+                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://oauth.yandex.ru/client/new" target="_blank">Yandex OAuth &rarr; <?php echo esc_html__('Create app', 'woocommerce-product-reviews'); ?></a><br>
+                                <?php echo esc_html__('2. Platform: Web services. In "Callback URI" paste:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>yandex</code><br>
+                                <?php echo esc_html__('3. Access: check "Login: email address" and "Login: user info".', 'woocommerce-product-reviews'); ?><br>
+                                <?php echo esc_html__('4. Copy "ClientID" and "Client secret" — paste above.', 'woocommerce-product-reviews'); ?>
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -123,7 +145,12 @@ class NR_Admin {
                             <label><input type="checkbox" name="nr_enable_google" value="1" <?php checked(!empty($o['enable_google'])); ?> /> <?php echo esc_html__('Enable Google login', 'woocommerce-product-reviews'); ?></label><br>
                             <input type="text" name="nr_google_id" value="<?php echo esc_attr($o['google_id'] ?? ''); ?>" class="regular-text" placeholder="Client ID" /><br>
                             <input type="text" name="nr_google_secret" value="<?php echo esc_attr($o['google_secret'] ?? ''); ?>" class="regular-text" placeholder="Client Secret" />
-                            <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>google</code></p>
+                            <p class="description">
+                                <?php echo esc_html__('1. Go to', 'woocommerce-product-reviews'); ?> <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console &rarr; Credentials</a><br>
+                                <?php echo esc_html__('2. Create OAuth 2.0 Client ID (type: Web application).', 'woocommerce-product-reviews'); ?><br>
+                                <?php echo esc_html__('3. In "Authorized redirect URIs" add:', 'woocommerce-product-reviews'); ?> <code><?php echo esc_html($callback); ?>google</code><br>
+                                <?php echo esc_html__('4. Copy "Client ID" and "Client secret" — paste above.', 'woocommerce-product-reviews'); ?>
+                            </p>
                         </td>
                     </tr>
                 </table>

@@ -366,3 +366,63 @@ msgstr "Не полезно"
 
 msgid "Already voted."
 msgstr "Вы уже голосовали."
+
+msgid "Before you start:"
+msgstr "Перед началом:"
+
+msgid "Go to Settings -> General -> check \"Anyone can register\"."
+msgstr "Перейдите в Настройки -> Общие -> установите «Любой может зарегистрироваться»."
+
+msgid "Create an app on the provider site (links below)."
+msgstr "Создайте приложение на сайте провайдера (ссылки ниже)."
+
+msgid "Copy the Redirect URI shown below and paste it into the app settings."
+msgstr "Скопируйте Redirect URI (показан ниже) и вставьте в настройки приложения."
+
+msgid "Copy the app ID/secret from the provider and paste them here."
+msgstr "Скопируйте ID/секрет приложения у провайдера и вставьте сюда."
+
+msgid "1. Go to"
+msgstr "1. Перейдите на"
+
+msgid "Create app"
+msgstr "Создать приложение"
+
+msgid "2. App type: Web. Platform: Web."
+msgstr "2. Тип приложения: Web. Платформа: Web."
+
+msgid "3. In \"Redirect URI\" paste:"
+msgstr "3. В «Redirect URI» вставьте:"
+
+msgid "4. Copy \"App ID\" and paste above."
+msgstr "4. Скопируйте «App ID» и вставьте выше."
+
+msgid "developer portal"
+msgstr "портал разработчика"
+
+msgid "add app (type: External)."
+msgstr "добавить приложение (тип: Внешнее)."
+
+msgid "2. In \"Redirect URI\" paste:"
+msgstr "2. В «Redirect URI» вставьте:"
+
+msgid "3. You will get 3 keys: Application ID, Application Key, Application Secret — paste all three above."
+msgstr "3. Вы получите 3 ключа: Application ID, Application Key, Application Secret — вставьте все три выше."
+
+msgid "2. Platform: Web services. In \"Callback URI\" paste:"
+msgstr "2. Платформа: Веб-сервисы. В «Callback URI» вставьте:"
+
+msgid "3. Access: check \"Login: email address\" and \"Login: user info\"."
+msgstr "3. Доступ: отметьте «Логин: адрес электронной почты» и «Логин: информация о пользователе»."
+
+msgid "4. Copy \"ClientID\" and \"Client secret\" — paste above."
+msgstr "4. Скопируйте «ClientID» и «Client secret» — вставьте выше."
+
+msgid "2. Create OAuth 2.0 Client ID (type: Web application)."
+msgstr "2. Создайте OAuth 2.0 Client ID (тип: Веб-приложение)."
+
+msgid "3. In \"Authorized redirect URIs\" add:"
+msgstr "3. В «Authorized redirect URIs» добавьте:"
+
+msgid "4. Copy \"Client ID\" and \"Client secret\" — paste above."
+msgstr "4. Скопируйте «Client ID» и «Client secret» — вставьте выше."
