@@ -1,0 +1,200 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Smart Product Reviews 1.1.0\n"
+"POT-Creation-Date: 2026-03-21 00:00+0000\n"
+"PO-Revision-Date: 2026-03-21 00:00+0000\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Cursor\n"
+"X-Domain: smart-product-reviews\n"
+
+msgid "Smart Product Reviews requires WooCommerce to be installed."
+msgstr "Smart Product Reviews requires WooCommerce to be installed."
+
+msgid "Settings saved."
+msgstr "Settings saved."
+
+msgid "Smart Product Reviews - settings"
+msgstr "Smart Product Reviews - settings"
+
+msgid "Login (VK, Yandex, site profile)"
+msgstr "Login (VK, Yandex, site profile)"
+
+msgid "To enable social login, turn on \"Anyone can register\" in Settings -> General."
+msgstr "To enable social login, turn on \"Anyone can register\" in Settings -> General."
+
+msgid "Enable VK login"
+msgstr "Enable VK login"
+
+msgid "VK application ID"
+msgstr "VK application ID"
+
+msgid "Enable Yandex login"
+msgstr "Enable Yandex login"
+
+msgid "Application ID"
+msgstr "Application ID"
+
+msgid "Application secret"
+msgstr "Application secret"
+
+msgid "Reviews"
+msgstr "Reviews"
+
+msgid "Editor"
+msgstr "Editor"
+
+msgid "Smilies in editor"
+msgstr "Smilies in editor"
+
+msgid "Reviews per page"
+msgstr "Reviews per page"
+
+msgid "Editor note login"
+msgstr "Editor note login"
+
+msgid "Create a separate WordPress user for editor notes and provide username/password to the editor."
+msgstr "Create a separate WordPress user for editor notes and provide username/password to the editor."
+
+msgid "Login page"
+msgstr "Login page"
+
+msgid "Create a page with shortcode [nr_editor_login] and send this URL to editors."
+msgstr "Create a page with shortcode [nr_editor_login] and send this URL to editors."
+
+msgid "Redirect after login"
+msgstr "Redirect after login"
+
+msgid "Leave empty to redirect to homepage."
+msgstr "Leave empty to redirect to homepage."
+
+msgid "Important:"
+msgstr "Important:"
+
+msgid "If page cache is enabled, disable cache for logged-in users or exclude product pages."
+msgstr "If page cache is enabled, disable cache for logged-in users or exclude product pages."
+
+msgid "Login lock"
+msgstr "Login lock"
+
+msgid "After 3 failed attempts the IP is blocked for 1 hour."
+msgstr "After 3 failed attempts the IP is blocked for 1 hour."
+
+msgid "Reset editor login lock"
+msgstr "Reset editor login lock"
+
+msgid "Lock reset successfully."
+msgstr "Lock reset successfully."
+
+msgid "Shortcodes"
+msgstr "Shortcodes"
+
+msgid "Insert into content or widget:"
+msgstr "Insert into content or widget:"
+
+msgid "Editor login page:"
+msgstr "Editor login page:"
+
+msgid "Product page block:"
+msgstr "Product page block:"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Access denied."
+msgstr "Access denied."
+
+msgid "Invalid product."
+msgstr "Invalid product."
+
+msgid "Editor note saved."
+msgstr "Editor note saved."
+
+msgid "Editor note"
+msgstr "Editor note"
+
+msgid "Leave a review"
+msgstr "Leave a review"
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "Review text must be at least 10 characters."
+msgstr "Review text must be at least 10 characters."
+
+msgid "Enter name and email or log in."
+msgstr "Enter name and email or log in."
+
+msgid "Save failed."
+msgstr "Save failed."
+
+msgid "Thank you! Your review has been submitted."
+msgstr "Thank you! Your review has been submitted."
+
+msgid "Editor note placeholder (visible on frontend only)."
+msgstr "Editor note placeholder (visible on frontend only)."
+
+msgid "No editor note yet."
+msgstr "No editor note yet."
+
+msgid "Edit note"
+msgstr "Edit note"
+
+msgid "Save note"
+msgstr "Save note"
+
+msgid "Logged in as %s."
+msgstr "Logged in as %s."
+
+msgid "Open any product page: at the bottom you will see the editor note block and the edit button."
+msgstr "Open any product page: at the bottom you will see the editor note block and the edit button."
+
+msgid "Open sample product"
+msgstr "Open sample product"
+
+msgid "Go to site"
+msgstr "Go to site"
+
+msgid "Log out"
+msgstr "Log out"
+
+msgid "Security check failed. Please try again."
+msgstr "Security check failed. Please try again."
+
+msgid "Enter login and password."
+msgstr "Enter login and password."
+
+msgid "Invalid login or password. Use the exact WordPress username from user profile."
+msgstr "Invalid login or password. Use the exact WordPress username from user profile."
+
+msgid "This user has no permission to edit editor notes."
+msgstr "This user has no permission to edit editor notes."
+
+msgid "Too many failed attempts. Try again in one hour."
+msgstr "Too many failed attempts. Try again in one hour."
+
+msgid "Administrator can reset the lock in plugin settings."
+msgstr "Administrator can reset the lock in plugin settings."
+
+msgid "Username"
+msgstr "Username"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "Remember me"
+msgstr "Remember me"
+
+msgid "Log in"
+msgstr "Log in"
+
+msgid "Popular reviews"
+msgstr "Popular reviews"
+
+msgid "Editor notes"
+msgstr "Editor notes"
+
+msgid "Latest reviews"
+msgstr "Latest reviews"

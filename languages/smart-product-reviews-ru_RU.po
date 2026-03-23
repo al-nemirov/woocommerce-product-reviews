@@ -1,0 +1,200 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Smart Product Reviews 1.1.0\n"
+"POT-Creation-Date: 2026-03-21 00:00+0000\n"
+"PO-Revision-Date: 2026-03-21 00:00+0000\n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Cursor\n"
+"X-Domain: smart-product-reviews\n"
+
+msgid "Smart Product Reviews requires WooCommerce to be installed."
+msgstr "Для Smart Product Reviews требуется установленный WooCommerce."
+
+msgid "Settings saved."
+msgstr "Настройки сохранены."
+
+msgid "Smart Product Reviews - settings"
+msgstr "Smart Product Reviews - настройки"
+
+msgid "Login (VK, Yandex, site profile)"
+msgstr "Вход (VK, Yandex, профиль сайта)"
+
+msgid "To enable social login, turn on \"Anyone can register\" in Settings -> General."
+msgstr "Чтобы включить вход через соцсети, активируйте «Любой может зарегистрироваться» в Настройки -> Общие."
+
+msgid "Enable VK login"
+msgstr "Включить вход через VK"
+
+msgid "VK application ID"
+msgstr "ID приложения VK"
+
+msgid "Enable Yandex login"
+msgstr "Включить вход через Yandex"
+
+msgid "Application ID"
+msgstr "ID приложения"
+
+msgid "Application secret"
+msgstr "Секрет приложения"
+
+msgid "Reviews"
+msgstr "Отзывы"
+
+msgid "Editor"
+msgstr "Редактор"
+
+msgid "Smilies in editor"
+msgstr "Смайлы в редакторе"
+
+msgid "Reviews per page"
+msgstr "Отзывов на странице"
+
+msgid "Editor note login"
+msgstr "Вход редактора примечаний"
+
+msgid "Create a separate WordPress user for editor notes and provide username/password to the editor."
+msgstr "Создайте отдельного пользователя WordPress для примечаний редактора и передайте ему логин/пароль."
+
+msgid "Login page"
+msgstr "Страница входа"
+
+msgid "Create a page with shortcode [nr_editor_login] and send this URL to editors."
+msgstr "Создайте страницу с шорткодом [nr_editor_login] и отправьте эту ссылку редакторам."
+
+msgid "Redirect after login"
+msgstr "Куда перенаправлять после входа"
+
+msgid "Leave empty to redirect to homepage."
+msgstr "Оставьте пустым для перенаправления на главную."
+
+msgid "Important:"
+msgstr "Важно:"
+
+msgid "If page cache is enabled, disable cache for logged-in users or exclude product pages."
+msgstr "Если включен кэш страниц, отключите кэш для залогиненных пользователей или исключите страницы товаров."
+
+msgid "Login lock"
+msgstr "Блокировка входа"
+
+msgid "After 3 failed attempts the IP is blocked for 1 hour."
+msgstr "После 3 неудачных попыток IP блокируется на 1 час."
+
+msgid "Reset editor login lock"
+msgstr "Сбросить блокировку входа редактора"
+
+msgid "Lock reset successfully."
+msgstr "Блокировка успешно сброшена."
+
+msgid "Shortcodes"
+msgstr "Шорткоды"
+
+msgid "Insert into content or widget:"
+msgstr "Вставьте в текст или виджет:"
+
+msgid "Editor login page:"
+msgstr "Страница входа редактора:"
+
+msgid "Product page block:"
+msgstr "Блок на странице товара:"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Access denied."
+msgstr "Доступ запрещен."
+
+msgid "Invalid product."
+msgstr "Неверный товар."
+
+msgid "Editor note saved."
+msgstr "Примечание редактора сохранено."
+
+msgid "Editor note"
+msgstr "Примечание редактора"
+
+msgid "Leave a review"
+msgstr "Оставить отзыв"
+
+msgid "Submit"
+msgstr "Отправить"
+
+msgid "Review text must be at least 10 characters."
+msgstr "Текст отзыва должен быть не менее 10 символов."
+
+msgid "Enter name and email or log in."
+msgstr "Введите имя и email или войдите."
+
+msgid "Save failed."
+msgstr "Ошибка сохранения."
+
+msgid "Thank you! Your review has been submitted."
+msgstr "Спасибо! Ваш отзыв отправлен."
+
+msgid "Editor note placeholder (visible on frontend only)."
+msgstr "Заглушка примечания редактора (видно только на сайте)."
+
+msgid "No editor note yet."
+msgstr "Примечание пока не добавлено."
+
+msgid "Edit note"
+msgstr "Редактировать примечание"
+
+msgid "Save note"
+msgstr "Сохранить примечание"
+
+msgid "Logged in as %s."
+msgstr "Вы вошли как %s."
+
+msgid "Open any product page: at the bottom you will see the editor note block and the edit button."
+msgstr "Откройте любую страницу товара: внизу будет блок примечания редактора и кнопка редактирования."
+
+msgid "Open sample product"
+msgstr "Открыть пример товара"
+
+msgid "Go to site"
+msgstr "На сайт"
+
+msgid "Log out"
+msgstr "Выйти"
+
+msgid "Security check failed. Please try again."
+msgstr "Ошибка проверки безопасности. Попробуйте снова."
+
+msgid "Enter login and password."
+msgstr "Введите логин и пароль."
+
+msgid "Invalid login or password. Use the exact WordPress username from user profile."
+msgstr "Неверный логин или пароль. Используйте точный логин из профиля WordPress."
+
+msgid "This user has no permission to edit editor notes."
+msgstr "У этого пользователя нет прав на редактирование примечаний."
+
+msgid "Too many failed attempts. Try again in one hour."
+msgstr "Слишком много неудачных попыток. Попробуйте снова через час."
+
+msgid "Administrator can reset the lock in plugin settings."
+msgstr "Администратор может сбросить блокировку в настройках плагина."
+
+msgid "Username"
+msgstr "Логин"
+
+msgid "Password"
+msgstr "Пароль"
+
+msgid "Remember me"
+msgstr "Запомнить меня"
+
+msgid "Log in"
+msgstr "Войти"
+
+msgid "Popular reviews"
+msgstr "Популярные отзывы"
+
+msgid "Editor notes"
+msgstr "Примечания редактора"
+
+msgid "Latest reviews"
+msgstr "Последние отзывы"

@@ -1,42 +1,12 @@
 <?php
-/**
- * Admin settings page.
- *
- * Registers the plugin menu page, handles settings save,
- * and provides the admin UI for configuring plugin options
- * and resetting editor login blocks.
- *
- * @package SmartProductReviews
- * @since   1.0.0
- */
-
 if (!defined('ABSPATH')) {
     exit;
 }
 
-/**
- * Class NR_Admin
- *
- * Singleton class for the WordPress admin settings interface.
- *
- * @since 1.0.0
- */
 class NR_Admin {
 
-    /**
-     * Singleton instance.
-     *
-     * @since 1.0.0
-     * @var NR_Admin|null
-     */
     private static $instance = null;
 
-    /**
-     * Get the singleton instance.
-     *
-     * @since  1.0.0
-     * @return NR_Admin
-     */
     public static function instance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -44,12 +14,6 @@ class NR_Admin {
         return self::$instance;
     }
 
-    /**
-     * Register admin hooks.
-     *
-     * @since  1.0.0
-     * @return void
-     */
     public function init() {
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_init', [$this, 'save']);
@@ -57,14 +21,7 @@ class NR_Admin {
     }
 
     /**
-     * Handle the "clear login blocks" admin action.
-     *
-     * Verifies nonce and capabilities, then clears all stored
-     * IP blocks for the editor login form. Redirects back to
-     * the settings page with a success indicator.
-     *
-     * @since  1.0.0
-     * @return void Redirects and exits when processing the action.
+     * Обработка нажатия «Сбросить блокировку входа редактора».
      */
     public function maybe_clear_login_blocks() {
         if (empty($_GET['nr_clear_login_blocks']) || !current_user_can('manage_options')) {
@@ -78,14 +35,6 @@ class NR_Admin {
         exit;
     }
 
-    /**
-     * Register the plugin admin menu page.
-     *
-     * Adds a top-level menu item "Smart Product Reviews" with a star icon.
-     *
-     * @since  1.0.0
-     * @return void
-     */
     public function menu() {
         add_menu_page(
             'Smart Product Reviews',
@@ -98,101 +47,114 @@ class NR_Admin {
         );
     }
 
-    /**
-     * Handle settings form submission.
-     *
-     * Validates nonce and capabilities, sanitizes input values,
-     * and saves plugin options to the database.
-     *
-     * @since  1.0.0
-     * @return void
-     */
     public function save() {
         if (!isset($_POST['nr_save']) || !current_user_can('manage_options') || !wp_verify_nonce($_POST['_wpnonce'], 'nr_options')) {
             return;
         }
         $opts = [
-            'editor_smilies'        => !empty($_POST['nr_editor_smilies']) ? 1 : 0,
-            'comments_per_page'     => max(5, min(50, (int) ($_POST['nr_comments_per_page'] ?? 10))),
+            'vk_app_id'      => sanitize_text_field($_POST['nr_vk_app_id'] ?? ''),
+            'yandex_id'      => sanitize_text_field($_POST['nr_yandex_id'] ?? ''),
+            'yandex_secret'  => sanitize_text_field($_POST['nr_yandex_secret'] ?? ''),
+            'enable_vk'      => !empty($_POST['nr_enable_vk']) ? 1 : 0,
+            'enable_yandex'  => !empty($_POST['nr_enable_yandex']) ? 1 : 0,
+            'editor_smilies' => !empty($_POST['nr_editor_smilies']) ? 1 : 0,
+            'comments_per_page' => max(5, min(50, (int) ($_POST['nr_comments_per_page'] ?? 10))),
             'editor_login_redirect' => esc_url_raw($_POST['nr_editor_login_redirect'] ?? ''),
         ];
         update_option('nr_options', $opts);
-        echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
+        echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'smart-product-reviews') . '</p></div>';
     }
 
-    /**
-     * Render the plugin settings page HTML.
-     *
-     * Displays the settings form with sections for reviews configuration,
-     * editor notes login setup, shortcode reference, and a save button.
-     *
-     * @since  1.0.0
-     * @return void
-     */
     public function page() {
-        $o = spr_instance()->get_options();
+        $o = NR_Core::instance()->get_options();
+        $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=');
         ?>
         <div class="wrap">
-            <h1>Smart Product Reviews — Settings</h1>
+            <h1><?php echo esc_html__('Smart Product Reviews - settings', 'smart-product-reviews'); ?></h1>
 
             <form method="post">
                 <?php wp_nonce_field('nr_options', '_wpnonce'); ?>
 
-                <h2>Reviews</h2>
+                <h2><?php echo esc_html__('Login (VK, Yandex, site profile)', 'smart-product-reviews'); ?></h2>
+                <p class="description"><?php echo esc_html__('To enable social login, turn on "Anyone can register" in Settings -> General.', 'smart-product-reviews'); ?></p>
+
                 <table class="form-table">
                     <tr>
-                        <th>Editor</th>
+                        <th>VK</th>
                         <td>
-                            <label><input type="checkbox" name="nr_editor_smilies" value="1" <?php checked(!empty($o['editor_smilies'])); ?> /> Enable emoji picker in review editor</label>
+                            <label><input type="checkbox" name="nr_enable_vk" value="1" <?php checked(!empty($o['enable_vk'])); ?> /> <?php echo esc_html__('Enable VK login', 'smart-product-reviews'); ?></label><br>
+                            <input type="text" name="nr_vk_app_id" value="<?php echo esc_attr($o['vk_app_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('VK application ID', 'smart-product-reviews'); ?>" />
+                            <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>vk</code></p>
                         </td>
                     </tr>
                     <tr>
-                        <th>Reviews per page</th>
+                        <th>Yandex</th>
+                        <td>
+                            <label><input type="checkbox" name="nr_enable_yandex" value="1" <?php checked(!empty($o['enable_yandex'])); ?> /> <?php echo esc_html__('Enable Yandex login', 'smart-product-reviews'); ?></label><br>
+                            <input type="text" name="nr_yandex_id" value="<?php echo esc_attr($o['yandex_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application ID', 'smart-product-reviews'); ?>" /><br>
+                            <input type="text" name="nr_yandex_secret" value="<?php echo esc_attr($o['yandex_secret'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application secret', 'smart-product-reviews'); ?>" />
+                            <p class="description">Callback: <code><?php echo esc_html($callback); ?>yandex</code></p>
+                        </td>
+                    </tr>
+                </table>
+
+                <h2><?php echo esc_html__('Reviews', 'smart-product-reviews'); ?></h2>
+                <table class="form-table">
+                    <tr>
+                        <th><?php echo esc_html__('Editor', 'smart-product-reviews'); ?></th>
+                        <td>
+                            <label><input type="checkbox" name="nr_editor_smilies" value="1" <?php checked(!empty($o['editor_smilies'])); ?> /> <?php echo esc_html__('Smilies in editor', 'smart-product-reviews'); ?></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php echo esc_html__('Reviews per page', 'smart-product-reviews'); ?></th>
                         <td>
                             <input type="number" name="nr_comments_per_page" value="<?php echo esc_attr($o['comments_per_page'] ?? 10); ?>" min="5" max="50" />
                         </td>
                     </tr>
                 </table>
 
-                <h2>Editor Notes Login</h2>
-                <p class="description">Create a separate WordPress user (Users &rarr; Add New): set a <strong>username</strong> and <strong>password</strong> for the editor. In the "Display Name" field, enter the name that will appear on notes. Role: <strong>Author</strong> or <strong>Editor</strong>.</p>
+                <h2><?php echo esc_html__('Editor note login', 'smart-product-reviews'); ?></h2>
+                <p class="description"><?php echo esc_html__('Create a separate WordPress user for editor notes and provide username/password to the editor.', 'smart-product-reviews'); ?></p>
                 <table class="form-table">
                     <tr>
-                        <th>Login page</th>
+                        <th><?php echo esc_html__('Login page', 'smart-product-reviews'); ?></th>
                         <td>
-                            <p>Create a page (e.g., "Editor Login"), insert the shortcode <code>[nr_editor_login]</code>. Share the link with your editor.</p>
+                            <p><?php echo esc_html__('Create a page with shortcode [nr_editor_login] and send this URL to editors.', 'smart-product-reviews'); ?></p>
                         </td>
                     </tr>
                     <tr>
-                        <th>Redirect after login</th>
+                        <th><?php echo esc_html__('Redirect after login', 'smart-product-reviews'); ?></th>
                         <td>
                             <input type="url" name="nr_editor_login_redirect" value="<?php echo esc_attr($o['editor_login_redirect'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(home_url('/')); ?>" />
-                            <p class="description">Leave empty to redirect to homepage.</p>
-                            <p class="description" style="margin-top:10px;"><strong>Note:</strong> If page caching is enabled, make sure logged-in users see uncached pages, otherwise the "Edit Note" button won't appear.</p>
+                            <p class="description"><?php echo esc_html__('Leave empty to redirect to homepage.', 'smart-product-reviews'); ?></p>
+                            <p class="description" style="margin-top:10px;"><strong><?php echo esc_html__('Important:', 'smart-product-reviews'); ?></strong> <?php echo esc_html__('If page cache is enabled, disable cache for logged-in users or exclude product pages.', 'smart-product-reviews'); ?></p>
                         </td>
                     </tr>
                     <tr>
-                        <th>Login blocking</th>
+                        <th><?php echo esc_html__('Login lock', 'smart-product-reviews'); ?></th>
                         <td>
-                            <p class="description">After 3 failed login attempts, the IP is blocked for 1 hour. To unblock the editor:</p>
-                            <p><a href="<?php echo esc_url(wp_nonce_url(add_query_arg('nr_clear_login_blocks', '1', admin_url('admin.php?page=smart-product-reviews')), 'nr_clear_login_blocks')); ?>" class="button">Reset editor login blocks</a></p>
+                            <p class="description"><?php echo esc_html__('After 3 failed attempts the IP is blocked for 1 hour.', 'smart-product-reviews'); ?></p>
+                            <p><a href="<?php echo esc_url(wp_nonce_url(add_query_arg('nr_clear_login_blocks', '1', admin_url('admin.php?page=smart-product-reviews')), 'nr_clear_login_blocks')); ?>" class="button"><?php echo esc_html__('Reset editor login lock', 'smart-product-reviews'); ?></a></p>
                             <?php if (!empty($_GET['nr_blocks_cleared'])) : ?>
-                                <p class="description" style="color:green;">Blocks cleared. The editor can log in again.</p>
+                                <p class="description" style="color:green;"><?php echo esc_html__('Lock reset successfully.', 'smart-product-reviews'); ?></p>
                             <?php endif; ?>
                         </td>
                     </tr>
                 </table>
 
-                <h2>Shortcodes</h2>
+                <h2><?php echo esc_html__('Shortcodes', 'smart-product-reviews'); ?></h2>
+                <p><?php echo esc_html__('Insert into content or widget:', 'smart-product-reviews'); ?></p>
                 <ul style="list-style:disc; margin-left:20px;">
-                    <li><strong>Editor login:</strong> <code>[nr_editor_login]</code> — login form. Optional: <code>[nr_editor_login redirect="https://site.com/shop/"]</code></li>
-                    <li><strong>Product page:</strong> <code>[nr_product_reviews]</code> — reviews block. <code>[nr_editor_note]</code> — editor note block.</li>
-                    <li><code>[nr_latest_comments count="5" title="Latest Reviews"]</code> — latest reviews</li>
-                    <li><code>[nr_popular_comments count="5" title="Popular Reviews"]</code> — popular reviews</li>
+                    <li><strong><?php echo esc_html__('Editor login page:', 'smart-product-reviews'); ?></strong> <code>[nr_editor_login]</code></li>
+                    <li><strong><?php echo esc_html__('Product page block:', 'smart-product-reviews'); ?></strong> <code>[nr_product_reviews]</code> / <code>[nr_editor_note]</code></li>
+                    <li><code>[nr_latest_comments count="5" title="Latest reviews"]</code></li>
+                    <li><code>[nr_popular_comments count="5" title="Popular reviews"]</code></li>
+                    <li><code>[nr_latest_editor_notes count="5" title="Editor notes"]</code></li>
                 </ul>
 
                 <p class="submit">
-                    <input type="submit" name="nr_save" class="button button-primary" value="Save Settings" />
+                    <input type="submit" name="nr_save" class="button button-primary" value="<?php echo esc_attr__('Save', 'smart-product-reviews'); ?>" />
                 </p>
             </form>
         </div>
