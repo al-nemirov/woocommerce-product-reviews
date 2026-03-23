@@ -335,7 +335,7 @@ class NR_Comments {
         if (!$post_id || get_post_type($post_id) !== 'product') {
             wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
         }
-        if (strlen($content) < 10) {
+        if (strlen($content ?? '') < 10) {
             wp_send_json_error(['message' => __('Review text must be at least 10 characters.', 'woocommerce-product-reviews')]);
         }
 
@@ -427,13 +427,13 @@ class NR_Comments {
     }
 
     /**
-     * Get comments as tree: top-level parents with children attached.
+     * Get comments as tree: returns array of ['comment' => WP_Comment, 'children' => [WP_Comment, ...]].
+     * No dynamic properties on WP_Comment — PHP 8.2 safe.
      */
     public static function get_comments_tree($post_id, $page = 1) {
         $per_page = (int) NR_Core::instance()->get_option('comments_per_page', 10);
         $offset = ($page - 1) * $per_page;
 
-        // Fetch top-level comments (reviews only)
         $parents = get_comments([
             'post_id' => $post_id,
             'type'    => 'review',
@@ -451,8 +451,7 @@ class NR_Comments {
 
         $parent_ids = wp_list_pluck($parents, 'comment_ID');
 
-        // Fetch all children for these parents in one query
-        $children = [];
+        $children_map = [];
         if (NR_Core::instance()->get_option('thread_depth', 1)) {
             $child_comments = get_comments([
                 'post_id'    => $post_id,
@@ -460,28 +459,34 @@ class NR_Comments {
                 'parent__in' => $parent_ids,
                 'orderby'    => 'comment_date_gmt',
                 'order'      => 'ASC',
-                'number'     => 0, // all children
+                'number'     => 0,
             ]);
             foreach ($child_comments as $child) {
-                $children[$child->comment_parent][] = $child;
+                $children_map[$child->comment_parent][] = $child;
             }
         }
 
-        // Attach children to parents
+        $tree = [];
         foreach ($parents as $parent) {
-            $parent->nr_children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
+            $tree[] = [
+                'comment'  => $parent,
+                'children' => isset($children_map[$parent->comment_ID]) ? $children_map[$parent->comment_ID] : [],
+            ];
         }
-
-        return $parents;
+        return $tree;
     }
 
     /**
-     * Render a single comment (with children if any).
+     * Render a single comment with optional children.
      */
-    public static function render_comment_html($comment) {
+    public static function render_comment_html($item, $is_child = false) {
+        $comment  = is_array($item) ? $item['comment'] : $item;
+        $children = is_array($item) ? $item['children'] : [];
         $rating = (int) get_comment_meta($comment->comment_ID, 'rating', true);
         $date = date_i18n(get_option('date_format'), strtotime($comment->comment_date));
         $thread_depth = (int) NR_Core::instance()->get_option('thread_depth', 1);
+        $likes    = (int) get_comment_meta($comment->comment_ID, '_nr_likes', true);
+        $dislikes = (int) get_comment_meta($comment->comment_ID, '_nr_dislikes', true);
 
         ob_start();
         ?>
@@ -492,21 +497,17 @@ class NR_Comments {
                 <span class="nr-date"><?php echo esc_html($date); ?></span>
             </div>
             <div class="nr-comment-content"><?php echo wpautop(esc_html($comment->comment_content)); ?></div>
-            <?php
-            $likes    = (int) get_comment_meta($comment->comment_ID, '_nr_likes', true);
-            $dislikes = (int) get_comment_meta($comment->comment_ID, '_nr_dislikes', true);
-            ?>
             <span class="nr-votes">
                 <button type="button" class="nr-vote nr-vote-up" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="up" title="<?php echo esc_attr__('Helpful', 'woocommerce-product-reviews'); ?>">&#128077; <span class="nr-vote-count"><?php echo $likes ?: ''; ?></span></button>
                 <button type="button" class="nr-vote nr-vote-down" data-comment-id="<?php echo (int) $comment->comment_ID; ?>" data-vote="down" title="<?php echo esc_attr__('Not helpful', 'woocommerce-product-reviews'); ?>">&#128078; <span class="nr-vote-count"><?php echo $dislikes ?: ''; ?></span></button>
             </span>
-            <?php if ($thread_depth && (int) $comment->comment_parent === 0) : ?>
+            <?php if ($thread_depth && !$is_child) : ?>
                 <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'woocommerce-product-reviews'); ?></button>
             <?php endif; ?>
-            <?php if (!empty($comment->nr_children)) : ?>
+            <?php if (!empty($children)) : ?>
                 <div class="nr-replies">
-                    <?php foreach ($comment->nr_children as $child) : ?>
-                        <?php echo self::render_comment_html($child); ?>
+                    <?php foreach ($children as $child) : ?>
+                        <?php echo self::render_comment_html($child, true); ?>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
@@ -518,7 +519,7 @@ class NR_Comments {
     // ═══ Note questions (chat under editor note) ═══
 
     /**
-     * Get note questions with replies for a product.
+     * Get note questions with replies. Returns ['comment' => WP_Comment, 'children' => [...]].
      */
     public static function get_note_questions($post_id) {
         $parents = get_comments([
@@ -542,20 +543,26 @@ class NR_Comments {
             'order'      => 'ASC',
             'number'     => 0,
         ]);
-        $children = [];
+        $children_map = [];
         foreach ($child_comments as $child) {
-            $children[$child->comment_parent][] = $child;
+            $children_map[$child->comment_parent][] = $child;
         }
+        $tree = [];
         foreach ($parents as $parent) {
-            $parent->nr_children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
+            $tree[] = [
+                'comment'  => $parent,
+                'children' => isset($children_map[$parent->comment_ID]) ? $children_map[$parent->comment_ID] : [],
+            ];
         }
-        return $parents;
+        return $tree;
     }
 
     /**
      * Render a single note question message (chat style).
      */
-    public static function render_note_question_html($comment) {
+    public static function render_note_question_html($item) {
+        $comment  = is_array($item) ? $item['comment'] : $item;
+        $children = is_array($item) ? $item['children'] : [];
         $user_obj = $comment->user_id ? get_user_by('id', $comment->user_id) : null;
         $is_editor = $user_obj && (user_can($user_obj, 'manage_options') || in_array('editor', (array) $user_obj->roles, true));
         $role_class = $is_editor ? 'nr-chat-editor' : 'nr-chat-customer';
@@ -575,10 +582,8 @@ class NR_Comments {
             <?php endif; ?>
         </div>
         <?php
-        if (!empty($comment->nr_children)) {
-            foreach ($comment->nr_children as $child) {
-                echo self::render_note_question_html($child);
-            }
+        foreach ($children as $child) {
+            echo self::render_note_question_html($child);
         }
         return ob_get_clean();
     }
@@ -596,7 +601,7 @@ class NR_Comments {
         if (!$post_id || get_post_type($post_id) !== 'product') {
             wp_send_json_error(['message' => __('Invalid product.', 'woocommerce-product-reviews')]);
         }
-        if (strlen($content) < 10) {
+        if (strlen($content ?? '') < 10) {
             wp_send_json_error(['message' => __('Question must be at least 10 characters.', 'woocommerce-product-reviews')]);
         }
 
@@ -640,8 +645,7 @@ class NR_Comments {
 
         $html = '';
         if ($comment && (int) $comment->comment_approved === 1) {
-            $comment->nr_children = [];
-            $html = self::render_note_question_html($comment);
+            $html = self::render_note_question_html(['comment' => $comment, 'children' => []]);
         }
 
         wp_send_json_success([
