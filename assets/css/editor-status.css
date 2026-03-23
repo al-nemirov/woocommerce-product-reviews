@@ -1,18 +1,12 @@
-/* Полоска «Вы вошли» — только для редактора примечаний; не перекрывает шапку */
-body.nr-has-editor-status-bar { padding-top: 44px !important; }
+body.nr-has-editor-status-bar { padding-top: 40px !important; }
 .nr-editor-status-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 999999;
-    background: #1e3a5f;
-    color: #fff;
-    padding: 8px 16px;
-    font-size: 14px;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999999;
+    background: #1e293b; color: #f1f5f9;
+    padding: 8px 20px; font-size: 13px; text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
-.nr-editor-status-bar__text { margin-right: 12px; }
-.nr-editor-status-bar__logout { color: #a8d4ff; text-decoration: underline; }
-.nr-editor-status-bar__logout:hover { color: #fff; }
+.nr-editor-status-bar__text { margin-right: 10px; }
+.nr-editor-status-bar__text strong { font-weight: 600; }
+.nr-editor-status-bar__logout { color: #93c5fd; text-decoration: none; font-weight: 500; }
+.nr-editor-status-bar__logout:hover { color: #fff; text-decoration: underline; }

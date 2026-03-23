@@ -1,74 +1,71 @@
 # Smart Product Reviews
 
-Плагин отзывов и рейтинга для WooCommerce с авторизацией через VK ID и Яндекс.
+WooCommerce review engine with social login, threaded replies, star ratings, editor notes, and flexible shortcodes.
+
+## Features
+
+- **Star ratings** (1-5) synced to WooCommerce product ratings
+- **Threaded replies** — one-level reply threads with inline AJAX forms
+- **Social login** — VK, Odnoklassniki (OK), Yandex, Google OAuth
+- **Editor notes** — separate TinyMCE-powered note per product, role-restricted
+- **AJAX everywhere** — reviews, replies, pagination, editor login, editor notes — zero reloads
+- **Shortcodes** with extended attributes: `orderby`, `template`, `show_rating`, `cache_ttl`, etc.
+- **Configurable rate limiting** in admin (N reviews per M minutes per IP)
+- **Transient caching** for widget shortcodes with versioned invalidation
+- **Full i18n** — all strings localizable via `smart-product-reviews` text domain
+
+## Shortcodes
+
+| Shortcode | Description |
+|-----------|-------------|
+| `[nr_product_reviews]` | Full reviews block (form + list + pagination) |
+| `[nr_editor_note]` | Editor note only |
+| `[nr_latest_comments count="5" orderby="latest"]` | Latest reviews widget |
+| `[nr_popular_comments count="5" orderby="popular"]` | Popular reviews (by reply count) |
+| `[nr_latest_comments orderby="rating" show_rating="1"]` | Top rated reviews |
+| `[nr_latest_editor_notes count="5"]` | Latest editor notes |
+| `[nr_editor_login]` | Editor login form (AJAX) |
+
+**Extended attributes:** `count`, `title`, `orderby` (latest/popular/rating), `order` (ASC/DESC), `product_id`, `template` (compact/full), `show_author`, `show_product`, `show_rating`, `cache_ttl`.
+
+## Requirements
+
+- WordPress 5.0+, PHP 7.2+, WooCommerce 3.0+
+- Elementor compatible (no render in editor mode)
+
+## Installation
+
+1. Upload to `wp-content/plugins/smart-product-reviews/`
+2. Activate in Plugins menu
+3. Configure: **Smart Product Reviews** in admin sidebar
+
+## Author
+
+Alexander Nemirov
+
+---
+
+# Smart Product Reviews (RU)
+
+Система отзывов и рейтингов для WooCommerce с соцсетями, ветками ответов, редакторскими примечаниями и гибкими шорткодами.
 
 ## Возможности
 
-### Отзывы и рейтинг
-- Рейтинг звёздами (1–5) с автосинхронизацией в WooCommerce
-- Редактор отзывов с поддержкой смайлов (вкл/выкл)
-- Пагинация отзывов (настраиваемое количество на странице)
-- Заменяет стандартную вкладку отзывов WooCommerce
-
-### Авторизация
-- Вход через профиль сайта (WordPress)
-- Вход через VK ID (OAuth)
-- Вход через Яндекс (OAuth)
-- Автоматическое создание пользователя при первом входе через соцсеть
-
-### Редактор примечаний
-- Отдельное поле примечания для редактора/автора на каждом товаре
-- TinyMCE-редактор с поддержкой HTML и медиа
-- Защищённая страница входа редактора (автогенерация при активации)
-- IP-блокировка при 3 неудачных попытках (сброс из админки)
-- Статус-бар для авторизованного редактора
-
-### Шорткоды
-- `[nr_product_reviews]` — форма отзывов + список на любой странице
-- `[nr_editor_note]` — блок примечания редактора
-- `[nr_latest_comments count="5" title="Последние отзывы"]` — последние отзывы
-- `[nr_popular_comments count="5" title="Популярные отзывы"]` — популярные отзывы
-- `[nr_editor_login]` — форма входа для редактора
-
-### Функции для темы
-- `<?php nr_product_reviews(); ?>` — вывод блока отзывов
-- `<?php nr_product_reviews(123); ?>` — для конкретного товара
-- `do_action('nr_single_product_reviews')` — хук
-
-### Совместимость
-- WordPress 5.0+, PHP 7.2+, WooCommerce 3.0+
-- Корректная работа с Elementor (не рендерится в редакторе)
-- Кэш-устойчивость (статус-бар через AJAX)
+- **Рейтинг звёздами** (1-5) с синхронизацией в WooCommerce
+- **Ветки ответов** — один уровень с inline AJAX-формой
+- **Соцсети** — VK, Одноклассники, Яндекс, Google OAuth
+- **Примечания редактора** — TinyMCE-поле на каждом товаре, доступ по роли
+- **Всё на AJAX** — отзывы, ответы, пагинация, логин, примечания — без перезагрузок
+- **Шорткоды** с расширенными атрибутами: `orderby`, `template`, `show_rating`, `cache_ttl` и др.
+- **Настраиваемый rate-limit** в админке (N отзывов за M минут на IP)
+- **Transient-кэш** виджетных шорткодов с версионной инвалидацией
+- **Полная локализация** — все строки через text domain `smart-product-reviews`
 
 ## Установка
 
-1. Скопируйте папку плагина в `wp-content/plugins/`
+1. Скопируйте в `wp-content/plugins/smart-product-reviews/`
 2. Активируйте в меню «Плагины»
 3. Настройки: **Smart Product Reviews** в боковом меню
-
-## Настройка VK ID
-
-1. [Создайте приложение VK ID](https://id.vk.com/about/business/go/docs/ru/vkid/latest/vk-id/connection/start-integration/create-app)
-2. Redirect URI: `https://ваш-сайт.ru/wp-admin/admin-ajax.php?action=nr_social_callback&provider=vk`
-3. ID приложения — в настройки плагина
-
-## Настройка Яндекс
-
-1. [Создайте OAuth-приложение](https://oauth.yandex.ru/)
-2. Callback URI: `https://ваш-сайт.ru/wp-admin/admin-ajax.php?action=nr_social_callback&provider=yandex`
-3. ID и секрет — в настройки плагина
-
-## Структура
-
-```
-smart-product-reviews/
-├── smart-product-reviews.php  — точка входа
-├── fix-comments-display.php   — хелпер для принудительного включения отзывов
-├── admin/                     — страница настроек
-├── includes/                  — ядро, комментарии, рейтинг, соцсети, шорткоды
-├── templates/                 — шаблон блока отзывов
-└── assets/                    — CSS и JS
-```
 
 ## Автор
 
