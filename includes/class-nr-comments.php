@@ -642,11 +642,13 @@ class NR_Comments {
                 <img class="nr-avatar" src="<?php echo esc_url($avatar_url); ?>" alt="" width="44" height="44" loading="lazy" />
             <?php endif; ?>
             <div class="nr-comment-body">
-                <div class="nr-comment-meta">
+                <div class="nr-comment-header">
                     <strong class="nr-author"><?php echo esc_html($comment->comment_author); ?></strong>
                     <?php if ($is_editor_comment) : ?>
                         <span class="nr-editor-badge"><?php echo esc_html__('Редактор', 'woocommerce-product-reviews'); ?></span>
                     <?php endif; ?>
+                </div>
+                <div class="nr-comment-meta">
                     <?php if ($rating > 0) echo NR_Rating::get_rating_html($rating); ?>
                     <span class="nr-date"><?php echo esc_html($date); ?></span>
                 </div>

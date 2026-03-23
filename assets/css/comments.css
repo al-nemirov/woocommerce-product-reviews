@@ -67,62 +67,71 @@
 .nr-form-message.success { color: #065f46; background: #ecfdf5; }
 .nr-form-message.error { color: #991b1b; background: #fef2f2; }
 
-/* ═══ Comments list ═══ */
+/* ═══ Comments list — Instagram-style ═══ */
 .nr-comments-list { list-style: none; padding: 0; margin: 0; }
-.nr-comment { padding: 1.25em 0; border-bottom: 1px solid #f3f4f6; display: flex; gap: 12px; }
+.nr-comment { padding: 14px 0; border-bottom: 1px solid #efefef; display: flex; gap: 12px; align-items: flex-start; }
 .nr-comment:last-child { border-bottom: none; }
-.nr-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: center 20%; flex-shrink: 0; margin-top: 2px; border: 2px solid #e5e7eb; }
+.nr-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center 20%; flex-shrink: 0; border: 1px solid #dbdbdb; }
 .nr-comment-body { flex: 1; min-width: 0; }
-.nr-comment-meta { margin-bottom: 0.35em; display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; }
-.nr-comment-meta .nr-stars { display: inline-flex; font-size: 0.85em; }
-.nr-author { font-weight: 600; color: #1f2937; font-size: 0.95em; }
-.nr-date { color: #9ca3af; font-size: 0.82em; }
-.nr-comment-content { line-height: 1.6; color: #374151; margin-bottom: 0.4em; }
-.nr-comment-content p { margin: 0 0 0.4em; }
-.nr-comment-actions { display: flex; align-items: center; gap: 12px; margin-top: 0.3em; }
+
+/* Line 1: Name + badge */
+.nr-comment-header { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.nr-author { font-weight: 600; color: #262626; font-size: 0.9em; line-height: 1.2; }
+.nr-editor-badge {
+    display: inline-block; padding: 1px 7px; border-radius: 3px;
+    background: #059377; color: #fff; font-size: 0.7em; font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* Line 2: Stars + date */
+.nr-comment-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.nr-comment-meta .nr-stars { display: inline-flex; font-size: 0.8em; letter-spacing: 0; }
+.nr-date { color: #8e8e8e; font-size: 0.78em; }
+
+/* Content */
+.nr-comment-content { line-height: 1.5; color: #262626; font-size: 0.9em; margin-bottom: 6px; }
+.nr-comment-content p { margin: 0 0 0.3em; }
+
+/* Actions row — compact like Instagram */
+.nr-comment-actions { display: flex; align-items: center; gap: 16px; }
 
 /* ═══ Editor/admin comment distinction ═══ */
-.nr-comment-editor { background: #ecfdf5; border-radius: 10px; padding: 1em 1em 1em 12px; margin: 0.25em 0; border-bottom-color: transparent; }
-.nr-comment-editor + .nr-comment { border-top: none; }
-.nr-editor-badge {
-    display: inline-block; padding: 1px 8px; border-radius: 4px;
-    background: #059377; color: #fff; font-size: 0.75em; font-weight: 600;
-    letter-spacing: 0.02em; vertical-align: middle;
-}
+.nr-comment-editor { background: #f0fdf4; border-radius: 8px; padding: 12px 12px 12px 12px; margin: 2px 0; border-bottom-color: transparent; }
 
 /* ═══ Reply threads ═══ */
-.nr-replies { margin: 0.75em 0 0 2em; border-left: 2px solid #e5e7eb; padding-left: 1em; }
-.nr-replies .nr-comment { padding: 0.75em 0; border-bottom: 1px solid #f9fafb; }
-.nr-replies .nr-comment-editor { padding: 0.75em 1em; }
+.nr-replies { margin: 4px 0 0 52px; padding-left: 0; }
+.nr-replies .nr-comment { padding: 10px 0; border-bottom: 1px solid #f5f5f5; gap: 10px; }
+.nr-replies .nr-avatar { width: 28px; height: 28px; }
+.nr-replies .nr-comment-editor { padding: 10px; }
 .nr-reply-btn {
-    background: none; border: 1px solid #d1d5db; padding: 4px 14px; border-radius: 6px;
-    cursor: pointer; font-size: 0.8em; color: #6b7280; margin-top: 0.5em;
-    transition: all 0.2s;
+    background: none; border: none; padding: 0;
+    cursor: pointer; font-size: 0.78em; color: #8e8e8e; font-weight: 600;
+    transition: color 0.2s;
 }
-.nr-reply-btn:hover { border-color: #07B290; color: #07B290; background: rgba(7,178,144,0.04); }
+.nr-reply-btn:hover { color: #262626; }
 
 /* Reply form inline */
-.nr-reply-form-wrap { margin: 0.75em 0 0 2em; padding: 1em; background: #f9fafb; border-radius: 10px; display: none; }
+.nr-reply-form-wrap { margin: 8px 0 0 52px; padding: 12px; background: #fafafa; border-radius: 8px; display: none; }
 .nr-reply-form-wrap.active { display: block; }
 .nr-reply-form-wrap textarea {
     width: 100%; max-width: 480px; padding: 10px; box-sizing: border-box;
-    border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9em;
+    border: 1px solid #dbdbdb; border-radius: 8px; font-size: 0.88em;
     resize: vertical; margin-bottom: 0.5em;
 }
 .nr-reply-form-wrap textarea:focus { border-color: #07B290; outline: none; }
-.nr-reply-form-wrap .nr-cancel-reply { background: none; border: none; color: #9ca3af; cursor: pointer; margin-left: 8px; font-size: 0.85em; }
-.nr-reply-form-wrap .nr-cancel-reply:hover { color: #ef4444; }
+.nr-reply-form-wrap .nr-cancel-reply { background: none; border: none; color: #8e8e8e; cursor: pointer; margin-left: 8px; font-size: 0.82em; }
+.nr-reply-form-wrap .nr-cancel-reply:hover { color: #ed4956; }
 
-/* ═══ Votes ═══ */
-.nr-votes { display: inline-flex; gap: 10px; margin-top: 0.4em; }
-.nr-vote { background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px 10px; cursor: pointer; font-size: 0.85em; transition: all 0.2s; }
-.nr-vote-up { color: #16a34a; }
-.nr-vote-up:hover { border-color: #16a34a; background: rgba(22,163,74,0.06); }
-.nr-vote-up.nr-voted { border-color: #16a34a; background: rgba(22,163,74,0.1); cursor: default; }
-.nr-vote-down { color: #dc2626; }
-.nr-vote-down:hover { border-color: #dc2626; background: rgba(220,38,38,0.06); }
-.nr-vote-down.nr-voted { border-color: #dc2626; background: rgba(220,38,38,0.1); cursor: default; }
-.nr-vote-count { margin-left: 2px; font-size: 0.9em; font-weight: 600; }
+/* ═══ Votes — minimal like Instagram ═══ */
+.nr-votes { display: inline-flex; align-items: center; gap: 12px; }
+.nr-vote { background: none; border: none; padding: 0; cursor: pointer; font-size: 0.88em; transition: transform 0.15s; display: inline-flex; align-items: center; gap: 3px; }
+.nr-vote:hover { transform: scale(1.1); }
+.nr-vote:active { transform: scale(0.95); }
+.nr-vote-up { color: #262626; }
+.nr-vote-up.nr-voted { color: #ed4956; }
+.nr-vote-down { color: #262626; }
+.nr-vote-down.nr-voted { color: #8e8e8e; }
+.nr-vote-count { font-size: 0.82em; font-weight: 600; color: #262626; }
 
 /* ═══ Pagination ═══ */
 .nr-pagination { margin-top: 1.5em; text-align: center; }
