@@ -469,7 +469,7 @@ class NR_Comments {
 
         // Attach children to parents
         foreach ($parents as $parent) {
-            $parent->children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
+            $parent->nr_children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
         }
 
         return $parents;
@@ -503,9 +503,9 @@ class NR_Comments {
             <?php if ($thread_depth && (int) $comment->comment_parent === 0) : ?>
                 <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'woocommerce-product-reviews'); ?></button>
             <?php endif; ?>
-            <?php if (!empty($comment->children)) : ?>
+            <?php if (!empty($comment->nr_children)) : ?>
                 <div class="nr-replies">
-                    <?php foreach ($comment->children as $child) : ?>
+                    <?php foreach ($comment->nr_children as $child) : ?>
                         <?php echo self::render_comment_html($child); ?>
                     <?php endforeach; ?>
                 </div>
@@ -547,7 +547,7 @@ class NR_Comments {
             $children[$child->comment_parent][] = $child;
         }
         foreach ($parents as $parent) {
-            $parent->children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
+            $parent->nr_children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
         }
         return $parents;
     }
@@ -575,8 +575,8 @@ class NR_Comments {
             <?php endif; ?>
         </div>
         <?php
-        if (!empty($comment->children)) {
-            foreach ($comment->children as $child) {
+        if (!empty($comment->nr_children)) {
+            foreach ($comment->nr_children as $child) {
                 echo self::render_note_question_html($child);
             }
         }
@@ -640,7 +640,7 @@ class NR_Comments {
 
         $html = '';
         if ($comment && (int) $comment->comment_approved === 1) {
-            $comment->children = [];
+            $comment->nr_children = [];
             $html = self::render_note_question_html($comment);
         }
 
