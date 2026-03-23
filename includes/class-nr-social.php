@@ -167,6 +167,9 @@ class NR_Social {
         if (!empty($data['code_verifier'])) {
             $body['code_verifier'] = $data['code_verifier'];
         }
+        if (!empty($data['device_id'])) {
+            $body['device_id'] = $data['device_id'];
+        }
         $res = wp_remote_post('https://id.vk.com/oauth2/auth', ['body' => $body]);
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
@@ -371,14 +374,19 @@ class NR_Social {
     // ── Общий callback ────────────────────────────────
 
     public function callback() {
-        $provider = isset($_GET['provider']) ? sanitize_text_field($_GET['provider']) : '';
-        $code = isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
-        $state = isset($_GET['state']) ? sanitize_text_field($_GET['state']) : '';
+        $provider  = isset($_GET['provider']) ? sanitize_text_field($_GET['provider']) : '';
+        $code      = isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
+        $state     = isset($_GET['state']) ? sanitize_text_field($_GET['state']) : '';
+        $device_id = isset($_GET['device_id']) ? sanitize_text_field($_GET['device_id']) : '';
 
         $data = get_transient('nr_oauth_' . md5($state));
         if (!$data || $data['provider'] !== $provider) {
             wp_redirect(home_url());
             exit;
+        }
+        // Pass device_id for VK ID v2
+        if ($device_id) {
+            $data['device_id'] = $device_id;
         }
         // Verify session binding to prevent forced-login attacks
         if (!empty($data['session_hash']) && $data['session_hash'] !== self::get_session_hash()) {
