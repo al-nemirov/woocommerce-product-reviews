@@ -15,6 +15,7 @@ class NR_GitHub_Updater {
     private $github_url;
     private $cache_key;
     private $cache_ttl = 21600; // 6 hours
+    private $force_check = false;
 
     public function __construct($plugin_file, $github_repo) {
         $this->plugin_file = $plugin_file;
@@ -27,10 +28,36 @@ class NR_GitHub_Updater {
         add_filter('plugins_api', [$this, 'plugin_info'], 10, 3);
         add_filter('upgrader_post_install', [$this, 'post_install'], 10, 3);
 
-        // Clear cache when WP force-checks ("Check again" button on Updates page)
-        if (is_admin() && isset($_GET['force-check'])) {
-            delete_transient($this->cache_key);
+        // Force-check: "Check again" button on Updates page or custom param
+        if (is_admin() && (isset($_GET['force-check']) || isset($_GET['nr_force_check']))) {
+            $this->force_check = true;
+            $this->flush_cache();
         }
+    }
+
+    /**
+     * Aggressively clear all layers of cache (transient + object cache + site transient).
+     */
+    private function flush_cache() {
+        // 1. Standard transient delete
+        delete_transient($this->cache_key);
+
+        // 2. Direct object cache delete (for Redis/Memcached)
+        wp_cache_delete($this->cache_key, 'transient');
+        wp_cache_delete('timeout_' . $this->cache_key, 'transient');
+
+        // 3. Also try site transients (multisite compat)
+        delete_site_transient($this->cache_key);
+        wp_cache_delete($this->cache_key, 'site-transient');
+        wp_cache_delete('timeout_' . $this->cache_key, 'site-transient');
+
+        // 4. Direct DB fallback
+        global $wpdb;
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name IN (%s, %s)",
+            '_transient_' . $this->cache_key,
+            '_transient_timeout_' . $this->cache_key
+        ));
     }
 
     /**
@@ -115,11 +142,16 @@ class NR_GitHub_Updater {
 
     /**
      * Fetch latest release info from GitHub (cached).
+     * On force-check: skip cache entirely, always fetch fresh.
      */
     private function get_remote_info() {
-        $cached = get_transient($this->cache_key);
-        if ($cached !== false) {
-            return $cached;
+        // Skip cache on force-check
+        if (!$this->force_check) {
+            $cached = get_transient($this->cache_key);
+            // Only use cache if it's a valid array WITH version key
+            if (is_array($cached) && !empty($cached['version'])) {
+                return $cached;
+            }
         }
 
         $response = wp_remote_get($this->github_url . '/releases/latest', [
@@ -127,18 +159,16 @@ class NR_GitHub_Updater {
                 'Accept'     => 'application/vnd.github.v3+json',
                 'User-Agent' => 'WordPress/' . get_bloginfo('version'),
             ],
-            'timeout' => 10,
+            'timeout' => 15,
         ]);
 
         if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-            // Cache failure for 1 hour to avoid hammering
-            set_transient($this->cache_key, [], 3600);
+            // Don't cache failures — let next check try again
             return null;
         }
 
         $data = json_decode(wp_remote_retrieve_body($response), true);
         if (empty($data['tag_name'])) {
-            set_transient($this->cache_key, [], 3600);
             return null;
         }
 
