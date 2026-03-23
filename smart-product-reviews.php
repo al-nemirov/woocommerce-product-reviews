@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Smart Product Reviews
- * Description: Reviews and rating for WooCommerce. Login: site, VK, Yandex. Editor notes and shortcodes.
- * Version: 1.2.0
+ * Description: Reviews and rating for WooCommerce. Social login: VK, OK, Yandex, Google. Threaded replies, pagination, editor notes and shortcodes.
+ * Version: 2.0.0
  * Author: Alexander Nemirov
  * Text Domain: smart-product-reviews
  * Domain Path: /languages
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('NR_VERSION', '1.2.0');
+define('NR_VERSION', '2.0.0');
 define('NR_PATH', plugin_dir_path(__FILE__));
 define('NR_URL', plugin_dir_url(__FILE__));
 

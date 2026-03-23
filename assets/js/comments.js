@@ -2,7 +2,7 @@
     $(function() {
         if (typeof nrData === 'undefined' || !nrData.ajax_url) return;
 
-        // Примечание редактора — сохранение через TinyMCE
+        // ═══ Editor note — TinyMCE save ═══
         var $noteForm = $('#nr-editor-note-form');
         if ($noteForm.length) {
             var notePostId = $noteForm.data('post-id');
@@ -12,7 +12,6 @@
             var $content = $box.find('.nr-editor-note-content');
             var $editBtn = $box.find('.nr-edit-note');
 
-            // Открыть/закрыть форму по кнопке
             $editBtn.off('click.nr').on('click.nr', function() {
                 $noteForm.toggle();
                 $noteMsg.hide();
@@ -30,7 +29,7 @@
                     content = $('#' + editorId).val() || '';
                 }
                 $noteMsg.hide();
-                $noteForm.find('.nr-save-note').prop('disabled', true).text('Сохранение…');
+                $noteForm.find('.nr-save-note').prop('disabled', true).text('Saving...');
                 $.post(nrData.ajax_url, {
                     action: 'nr_save_editor_note',
                     nonce: nrData.editor_note_nonce || '',
@@ -38,25 +37,25 @@
                     content: content
                 }, null, 'json').done(function(r) {
                     if (r.success) {
-                        // Обновляем текст примечания на странице
                         if ($content.length) {
                             var $author = $content.find('.nr-editor-note-by').first();
                             var authorHtml = $author.length ? $author[0].outerHTML : '';
                             $content.html(authorHtml + content);
                         }
-                        $noteMsg.removeClass('error').addClass('success').text(r.data && r.data.message ? r.data.message : 'Сохранено.').show();
+                        $noteMsg.removeClass('error').addClass('success').text(r.data && r.data.message ? r.data.message : 'Saved.').show();
                         $noteForm.hide();
                     } else {
-                        $noteMsg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Ошибка').show();
+                        $noteMsg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Error').show();
                     }
                 }).fail(function() {
-                    $noteMsg.removeClass('success').addClass('error').text('Ошибка сети').show();
+                    $noteMsg.removeClass('success').addClass('error').text('Network error').show();
                 }).always(function() {
-                    $noteForm.find('.nr-save-note').prop('disabled', false).text('Сохранить примечание');
+                    $noteForm.find('.nr-save-note').prop('disabled', false).text('Save note');
                 });
             });
         }
 
+        // ═══ Review form ═══
         var $form = $('#nr-comment-form');
         if (!$form.length) return;
 
@@ -65,30 +64,35 @@
         var $msg = $form.find('.nr-form-message');
         var $rating = $form.find('.nr-stars-edit');
         var $ratingInput = $form.find('input[name="rating"]');
+        var $parentInput = $form.find('input[name="comment_parent"]');
 
+        // Star rating click
         $rating.off('click.nr').on('click.nr', '.nr-star', function() {
             var v = $(this).data('v');
             $rating.data('rating', v);
             $ratingInput.val(v);
-            $rating.find('.nr-star').removeClass('active').each(function(i) {
-                if (i < v) $(this).addClass('active');
+            $rating.find('.nr-star').each(function(i) {
+                $(this).toggleClass('active', i < v);
             });
         });
 
+        // Submit review
         $form.off('submit.nr').on('submit.nr', function(e) {
             e.preventDefault();
             $msg.hide();
             var data = {
                 action: 'nr_submit_comment',
-                nonce: typeof nrData !== 'undefined' ? nrData.nonce : '',
+                nonce: nrData.nonce || '',
                 post_id: postId,
                 content: $form.find('[name="content"]').val(),
-                rating: $ratingInput.val() || 0
+                rating: $ratingInput.val() || 0,
+                comment_parent: $parentInput.val() || 0
             };
             if ($form.find('[name="author"]').length) {
                 data.author = $form.find('[name="author"]').val();
                 data.email = $form.find('[name="email"]').val();
             }
+            $form.find('.nr-submit').prop('disabled', true);
             $.post(nrData.ajax_url, data, null, 'json')
                 .done(function(r) {
                     if (r.success) {
@@ -96,18 +100,126 @@
                         $form.find('[name="content"]').val('');
                         $ratingInput.val(0);
                         $rating.data('rating', 0);
-                        if (r.data.comment_id) {
-                            $msg.text('Спасибо! Отзыв отправлен. Обновите страницу, чтобы увидеть его.');
-                        }
+                        $rating.find('.nr-star').removeClass('active');
+                        $parentInput.val(0);
+                        $('.nr-reply-form-wrap.active').removeClass('active');
                     } else {
-                        $msg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Ошибка').show();
+                        $msg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Error').show();
                     }
                 })
                 .fail(function() {
-                    $msg.removeClass('success').addClass('error').text('Ошибка сети').show();
+                    $msg.removeClass('success').addClass('error').text('Network error').show();
+                })
+                .always(function() {
+                    $form.find('.nr-submit').prop('disabled', false);
                 });
         });
 
+        // ═══ Reply button ═══
+        $(document).off('click.nr-reply', '.nr-reply-btn').on('click.nr-reply', '.nr-reply-btn', function() {
+            var commentId = $(this).data('comment-id');
+            var $comment = $(this).closest('.nr-comment');
+
+            // Remove any existing reply forms
+            $('.nr-reply-form-wrap').remove();
+
+            // Create inline reply form
+            var replyHtml = '<div class="nr-reply-form-wrap active">' +
+                '<textarea name="reply_content" rows="3" placeholder="Your reply..." required></textarea>' +
+                '<p>' +
+                '<button type="button" class="nr-submit nr-submit-reply" data-parent-id="' + commentId + '">Reply</button>' +
+                '<button type="button" class="nr-cancel-reply">Cancel</button>' +
+                '</p>' +
+                '<p class="nr-form-message" style="display:none;"></p>' +
+                '</div>';
+            $comment.after(replyHtml);
+        });
+
+        // Cancel reply
+        $(document).off('click.nr-cancel', '.nr-cancel-reply').on('click.nr-cancel', '.nr-cancel-reply', function() {
+            $(this).closest('.nr-reply-form-wrap').remove();
+        });
+
+        // Submit reply
+        $(document).off('click.nr-submit-reply', '.nr-submit-reply').on('click.nr-submit-reply', '.nr-submit-reply', function() {
+            var $btn = $(this);
+            var $wrap = $btn.closest('.nr-reply-form-wrap');
+            var $replyMsg = $wrap.find('.nr-form-message');
+            var parentId = $btn.data('parent-id');
+            var content = $wrap.find('textarea').val();
+
+            if (!content || content.length < 10) {
+                $replyMsg.removeClass('success').addClass('error').text('Reply must be at least 10 characters.').show();
+                return;
+            }
+
+            var data = {
+                action: 'nr_submit_comment',
+                nonce: nrData.nonce || '',
+                post_id: postId,
+                content: content,
+                rating: 0,
+                comment_parent: parentId
+            };
+            if ($form.find('[name="author"]').length) {
+                data.author = $form.find('[name="author"]').val();
+                data.email = $form.find('[name="email"]').val();
+            }
+
+            $btn.prop('disabled', true);
+            $replyMsg.hide();
+
+            $.post(nrData.ajax_url, data, null, 'json')
+                .done(function(r) {
+                    if (r.success) {
+                        $replyMsg.removeClass('error').addClass('success').text(r.data.message).show();
+                        $wrap.find('textarea').val('');
+                        setTimeout(function() { $wrap.remove(); }, 2000);
+                    } else {
+                        $replyMsg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Error').show();
+                    }
+                })
+                .fail(function() {
+                    $replyMsg.removeClass('success').addClass('error').text('Network error').show();
+                })
+                .always(function() {
+                    $btn.prop('disabled', false);
+                });
+        });
+
+        // ═══ Load more (pagination) ═══
+        $(document).off('click.nr-loadmore', '.nr-load-more').on('click.nr-loadmore', '.nr-load-more', function() {
+            var $btn = $(this);
+            var $reviews = $('#nr-reviews');
+            var currentPage = parseInt($reviews.data('page'), 10) || 1;
+            var totalPages = parseInt($reviews.data('total-pages'), 10) || 1;
+            var nextPage = currentPage + 1;
+
+            if (nextPage > totalPages) {
+                $btn.parent().addClass('nr-hidden');
+                return;
+            }
+
+            $btn.prop('disabled', true).text('Loading...');
+
+            $.get(nrData.ajax_url, {
+                action: 'nr_load_comments',
+                post_id: postId,
+                page: nextPage
+            }, null, 'json').done(function(r) {
+                if (r.success && r.data.html) {
+                    $('#nr-comments-list').append(r.data.html);
+                    $reviews.data('page', nextPage);
+                    if (nextPage >= r.data.total_pages) {
+                        $btn.parent().addClass('nr-hidden');
+                    }
+                }
+            }).always(function() {
+                $btn.prop('disabled', false).text('Load more reviews');
+            });
+        });
+
+        // ═══ Social login buttons ═══
         $(document).off('click.nr', '.nr-btn[data-provider]').on('click.nr', '.nr-btn[data-provider]', function() {
             var provider = $(this).data('provider');
             var pid = $(this).data('post-id');
@@ -119,7 +231,7 @@
                 if (r.success && r.data && r.data.url) {
                     window.location.href = r.data.url;
                 } else {
-                    alert(r.data && r.data.message ? r.data.message : 'Ошибка входа');
+                    alert(r.data && r.data.message ? r.data.message : 'Login error');
                 }
             });
         });

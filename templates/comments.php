@@ -28,12 +28,31 @@ if ($can_edit) {
     wp_enqueue_media();
     wp_enqueue_style('nr-comments', NR_URL . 'assets/css/comments.css', [], NR_VERSION);
 }
+
+// Rating data
+$avg_rating   = (float) get_post_meta($post_id, '_nr_rating_avg', true);
+$rating_count = (int) get_post_meta($post_id, '_nr_rating_count', true);
+$is_logged_in = is_user_logged_in();
+$thread_depth = (int) NR_Core::instance()->get_option('thread_depth', 1);
+$per_page     = (int) NR_Core::instance()->get_option('comments_per_page', 10);
+
+// Comments tree (page 1)
+$comments_tree = NR_Comments::get_comments_tree($post_id, 1);
+$total_parents = (int) get_comments([
+    'post_id' => $post_id,
+    'status'  => 'approve',
+    'parent'  => 0,
+    'count'   => true,
+]);
+$total_pages = max(1, (int) ceil($total_parents / $per_page));
 ?>
+
+<!-- ═══ Editor note ═══ -->
 <div id="nr-editor-note" class="nr-editor-note">
     <h3 class="nr-title"><?php echo esc_html__('Editor note', 'smart-product-reviews'); ?></h3>
 
     <div class="nr-editor-note-content">
-        <?php if ($editor_note_author) : ?><p class="nr-editor-note-by">Примечание: <strong><?php echo esc_html($editor_note_author); ?></strong></p><?php endif; ?>
+        <?php if ($editor_note_author) : ?><p class="nr-editor-note-by"><?php echo esc_html__('Note:', 'smart-product-reviews'); ?> <strong><?php echo esc_html($editor_note_author); ?></strong></p><?php endif; ?>
         <?php echo $editor_note ? wp_kses_post($editor_note) : '<p class="nr-no-note">' . esc_html__('No editor note yet.', 'smart-product-reviews') . '</p>'; ?>
     </div>
     <?php if ($can_edit) : ?>
@@ -64,4 +83,72 @@ if ($can_edit) {
             <p class="nr-form-message" style="display:none;"></p>
         </form>
     <?php endif; ?>
+</div>
+
+<!-- ═══ Reviews section ═══ -->
+<div id="nr-reviews" class="nr-reviews" data-post-id="<?php echo (int) $post_id; ?>" data-page="1" data-total-pages="<?php echo (int) $total_pages; ?>">
+
+    <!-- Rating summary -->
+    <?php if ($rating_count > 0) : ?>
+    <div class="nr-product-rating">
+        <?php echo NR_Rating::get_rating_html($avg_rating); ?>
+        <span class="nr-rating-count"><?php echo esc_html(sprintf(__('%s reviews', 'smart-product-reviews'), $rating_count)); ?></span>
+    </div>
+    <?php endif; ?>
+
+    <!-- Review form -->
+    <h3 class="nr-title"><?php echo esc_html__('Leave a review', 'smart-product-reviews'); ?></h3>
+
+    <div class="nr-form-wrap">
+        <form id="nr-comment-form" class="nr-form" data-post-id="<?php echo (int) $post_id; ?>">
+            <input type="hidden" name="comment_parent" value="0" />
+
+            <div class="nr-rating-input">
+                <label><?php echo esc_html__('Rating:', 'smart-product-reviews'); ?></label>
+                <span class="nr-stars-edit" data-rating="0">
+                    <span class="nr-star" data-v="1">&#9733;</span>
+                    <span class="nr-star" data-v="2">&#9733;</span>
+                    <span class="nr-star" data-v="3">&#9733;</span>
+                    <span class="nr-star" data-v="4">&#9733;</span>
+                    <span class="nr-star" data-v="5">&#9733;</span>
+                </span>
+                <input type="hidden" name="rating" value="0" />
+            </div>
+
+            <p>
+                <textarea name="content" rows="4" placeholder="<?php echo esc_attr__('Your review...', 'smart-product-reviews'); ?>" required></textarea>
+            </p>
+
+            <?php if (!$is_logged_in) : ?>
+                <!-- Social login buttons -->
+                <?php echo NR_Social::render_buttons($post_id); ?>
+
+                <p class="nr-or"><?php echo esc_html__('or leave a review as a guest:', 'smart-product-reviews'); ?></p>
+                <p>
+                    <input type="text" name="author" placeholder="<?php echo esc_attr__('Name', 'smart-product-reviews'); ?>" required />
+                    <input type="email" name="email" placeholder="<?php echo esc_attr__('Email', 'smart-product-reviews'); ?>" required />
+                </p>
+            <?php endif; ?>
+
+            <p>
+                <button type="submit" class="nr-submit"><?php echo esc_html__('Submit review', 'smart-product-reviews'); ?></button>
+            </p>
+            <p class="nr-form-message" style="display:none;"></p>
+        </form>
+    </div>
+
+    <!-- Comments list -->
+    <div id="nr-comments-list" class="nr-comments-list">
+        <?php foreach ($comments_tree as $comment) : ?>
+            <?php echo NR_Comments::render_comment_html($comment); ?>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Pagination -->
+    <?php if ($total_pages > 1) : ?>
+    <div class="nr-pagination" data-post-id="<?php echo (int) $post_id; ?>">
+        <button type="button" class="nr-load-more nr-submit"><?php echo esc_html__('Load more reviews', 'smart-product-reviews'); ?></button>
+    </div>
+    <?php endif; ?>
+
 </div>

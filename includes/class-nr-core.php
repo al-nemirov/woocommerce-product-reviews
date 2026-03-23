@@ -22,12 +22,12 @@ final class NR_Core {
 
     public function init() {
         require_once NR_PATH . 'includes/class-nr-comments.php';
-        // require_once NR_PATH . 'includes/class-nr-social.php'; // Disabled: social login (VK/Yandex) not needed yet
+        require_once NR_PATH . 'includes/class-nr-social.php';
         require_once NR_PATH . 'includes/class-nr-shortcodes.php';
         require_once NR_PATH . 'includes/class-nr-rating.php';
 
         NR_Comments::instance()->init();
-        // NR_Social::instance()->init(); // Disabled: social login
+        NR_Social::instance()->init();
         NR_Shortcodes::instance()->init();
         NR_Rating::instance()->init();
 
@@ -114,6 +114,14 @@ final class NR_Core {
             'yandex_secret' => '',
             'enable_vk'     => 0,
             'enable_yandex' => 0,
+            'enable_ok'     => 0,
+            'ok_app_id'     => '',
+            'ok_app_key'    => '',
+            'ok_secret'     => '',
+            'enable_google' => 0,
+            'google_id'     => '',
+            'google_secret' => '',
+            'thread_depth'  => 1,
             'editor_smilies' => 1,
             'comments_per_page' => 10,
             'editor_login_redirect' => '',

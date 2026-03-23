@@ -1,3 +1,4 @@
+/* ═══ Editor note ═══ */
 .nr-reviews { margin: 24px 0; padding: 20px 0; border-top: 1px solid #ddd; }
 .nr-editor-note { margin: 24px 0; padding: 20px 0; border-top: 1px solid #ddd; }
 .nr-editor-note .nr-editor-note-content { line-height: 1.6; }
@@ -7,37 +8,74 @@
 .nr-editor-note .nr-editor-note-form .wp-editor-wrap { max-width: 100%; }
 .nr-editor-note .nr-save-note { margin-top: 12px; }
 .nr-title { margin-bottom: 16px; font-size: 1.25em; }
+
+/* ═══ Social login buttons ═══ */
 .nr-social-login { margin-bottom: 16px; }
 .nr-connect-label { margin-right: 8px; }
-.nr-btn { padding: 8px 16px; margin-right: 8px; cursor: pointer; border: none; border-radius: 4px; }
+.nr-btn { padding: 8px 16px; margin-right: 8px; margin-bottom: 4px; cursor: pointer; border: none; border-radius: 4px; font-size: 0.95em; transition: opacity 0.2s; }
+.nr-btn:hover { opacity: 0.85; }
 .nr-vk { background: #07B290; color: #fff; }
-.nr-yandex { background: #f00; color: #fff; }
-.nr-or { color: #666; font-size: 0.95em; }
+.nr-ok { background: #EE8208; color: #fff; }
+.nr-yandex { background: #FC3F1D; color: #fff; }
+.nr-google { background: #4285F4; color: #fff; }
+.nr-or { color: #666; font-size: 0.95em; margin: 8px 0; }
+
+/* ═══ Rating ═══ */
 .nr-product-rating { margin-bottom: 16px; }
 .nr-stars { color: #ddd; }
 .nr-stars .nr-full { color: #ffc107; }
 .nr-stars .nr-half { color: #ffc107; opacity: 0.7; }
 .nr-rating-count { color: #666; font-size: 0.9em; margin-left: 6px; }
+
+/* ═══ Review form ═══ */
 .nr-form-wrap { margin-bottom: 24px; }
-.nr-form textarea { width: 100%; max-width: 600px; padding: 8px; }
-.nr-form input[type="text"], .nr-form input[type="email"] { width: 100%; max-width: 300px; padding: 6px; }
+.nr-form textarea { width: 100%; max-width: 600px; padding: 8px; box-sizing: border-box; }
+.nr-form input[type="text"], .nr-form input[type="email"] { width: 100%; max-width: 300px; padding: 6px; margin-right: 8px; box-sizing: border-box; }
+.nr-rating-input { margin-bottom: 8px; }
+.nr-rating-input label { margin-right: 8px; font-weight: 600; }
 .nr-rating-input .nr-stars-edit { cursor: pointer; color: #ddd; font-size: 24px; }
+.nr-rating-input .nr-stars-edit .nr-star { transition: color 0.15s; }
 .nr-rating-input .nr-stars-edit .nr-star:hover { color: #ffc107; }
 .nr-rating-input .nr-stars-edit[data-rating="1"] .nr-star:nth-child(1),
 .nr-rating-input .nr-stars-edit[data-rating="2"] .nr-star:nth-child(-n+2),
 .nr-rating-input .nr-stars-edit[data-rating="3"] .nr-star:nth-child(-n+3),
 .nr-rating-input .nr-stars-edit[data-rating="4"] .nr-star:nth-child(-n+4),
 .nr-rating-input .nr-stars-edit[data-rating="5"] .nr-star { color: #ffc107; }
-.nr-submit { padding: 10px 20px; background: #07B290; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+.nr-submit { padding: 10px 20px; background: #07B290; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+.nr-submit:hover { background: #059377; }
+.nr-submit:disabled { opacity: 0.6; cursor: default; }
 .nr-form-message { margin-top: 8px; }
 .nr-form-message.success { color: green; }
 .nr-form-message.error { color: #c00; }
+
+/* ═══ Comments list ═══ */
 .nr-comments-list { list-style: none; padding: 0; margin: 0; }
 .nr-comment { padding: 16px 0; border-bottom: 1px solid #eee; }
 .nr-comment-meta { margin-bottom: 6px; }
 .nr-comment-meta .nr-stars { display: inline-block; margin-right: 8px; }
+.nr-author { margin-right: 6px; }
 .nr-date { color: #666; font-size: 0.9em; margin-left: 8px; }
 .nr-comment-content { line-height: 1.5; }
+
+/* ═══ Reply threads ═══ */
+.nr-replies { margin-left: 32px; border-left: 2px solid #e8e8e8; padding-left: 16px; }
+.nr-replies .nr-comment { padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.nr-reply-btn { background: none; border: 1px solid #ccc; padding: 4px 12px; border-radius: 3px; cursor: pointer; font-size: 0.85em; color: #555; margin-top: 6px; transition: border-color 0.2s; }
+.nr-reply-btn:hover { border-color: #07B290; color: #07B290; }
+
+/* Reply form (inline, hidden by default) */
+.nr-reply-form-wrap { margin-top: 10px; margin-left: 32px; padding: 12px; background: #fafafa; border-radius: 6px; display: none; }
+.nr-reply-form-wrap.active { display: block; }
+.nr-reply-form-wrap textarea { width: 100%; max-width: 500px; padding: 8px; box-sizing: border-box; }
+.nr-reply-form-wrap .nr-cancel-reply { background: none; border: none; color: #999; cursor: pointer; margin-left: 8px; font-size: 0.9em; }
+.nr-reply-form-wrap .nr-cancel-reply:hover { color: #c00; }
+
+/* ═══ Pagination ═══ */
+.nr-pagination { margin-top: 20px; text-align: center; }
+.nr-load-more { min-width: 200px; }
+.nr-pagination.nr-hidden { display: none; }
+
+/* ═══ Widgets ═══ */
 .nr-widget { margin: 16px 0; }
 .nr-widget-title { font-size: 1.1em; margin-bottom: 10px; }
 .nr-widget .nr-comment-list { list-style: none; padding: 0; }

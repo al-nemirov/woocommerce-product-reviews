@@ -57,9 +57,18 @@ class NR_Admin {
             'yandex_secret'  => sanitize_text_field($_POST['nr_yandex_secret'] ?? ''),
             'enable_vk'      => !empty($_POST['nr_enable_vk']) ? 1 : 0,
             'enable_yandex'  => !empty($_POST['nr_enable_yandex']) ? 1 : 0,
+            'enable_ok'      => !empty($_POST['nr_enable_ok']) ? 1 : 0,
+            'ok_app_id'      => sanitize_text_field($_POST['nr_ok_app_id'] ?? ''),
+            'ok_app_key'     => sanitize_text_field($_POST['nr_ok_app_key'] ?? ''),
+            'ok_secret'      => sanitize_text_field($_POST['nr_ok_secret'] ?? ''),
+            'enable_google'  => !empty($_POST['nr_enable_google']) ? 1 : 0,
+            'google_id'      => sanitize_text_field($_POST['nr_google_id'] ?? ''),
+            'google_secret'  => sanitize_text_field($_POST['nr_google_secret'] ?? ''),
+            'thread_depth'   => max(0, min(1, (int) ($_POST['nr_thread_depth'] ?? 1))),
             'editor_smilies' => !empty($_POST['nr_editor_smilies']) ? 1 : 0,
             'comments_per_page' => max(5, min(50, (int) ($_POST['nr_comments_per_page'] ?? 10))),
             'editor_login_redirect' => esc_url_raw($_POST['nr_editor_login_redirect'] ?? ''),
+            'editor_login_page_id' => (int) NR_Core::instance()->get_option('editor_login_page_id', 0),
         ];
         update_option('nr_options', $opts);
         echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'smart-product-reviews') . '</p></div>';
@@ -75,7 +84,7 @@ class NR_Admin {
             <form method="post">
                 <?php wp_nonce_field('nr_options', '_wpnonce'); ?>
 
-                <h2><?php echo esc_html__('Login (VK, Yandex, site profile)', 'smart-product-reviews'); ?></h2>
+                <h2><?php echo esc_html__('Social login (VK, OK, Yandex, Google)', 'smart-product-reviews'); ?></h2>
                 <p class="description"><?php echo esc_html__('To enable social login, turn on "Anyone can register" in Settings -> General.', 'smart-product-reviews'); ?></p>
 
                 <table class="form-table">
@@ -88,12 +97,31 @@ class NR_Admin {
                         </td>
                     </tr>
                     <tr>
+                        <th><?php echo esc_html__('Odnoklassniki (OK)', 'smart-product-reviews'); ?></th>
+                        <td>
+                            <label><input type="checkbox" name="nr_enable_ok" value="1" <?php checked(!empty($o['enable_ok'])); ?> /> <?php echo esc_html__('Enable OK login', 'smart-product-reviews'); ?></label><br>
+                            <input type="text" name="nr_ok_app_id" value="<?php echo esc_attr($o['ok_app_id'] ?? ''); ?>" class="regular-text" placeholder="Application ID" /><br>
+                            <input type="text" name="nr_ok_app_key" value="<?php echo esc_attr($o['ok_app_key'] ?? ''); ?>" class="regular-text" placeholder="Application Key" /><br>
+                            <input type="text" name="nr_ok_secret" value="<?php echo esc_attr($o['ok_secret'] ?? ''); ?>" class="regular-text" placeholder="Application Secret" />
+                            <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>ok</code></p>
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Yandex</th>
                         <td>
                             <label><input type="checkbox" name="nr_enable_yandex" value="1" <?php checked(!empty($o['enable_yandex'])); ?> /> <?php echo esc_html__('Enable Yandex login', 'smart-product-reviews'); ?></label><br>
                             <input type="text" name="nr_yandex_id" value="<?php echo esc_attr($o['yandex_id'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application ID', 'smart-product-reviews'); ?>" /><br>
                             <input type="text" name="nr_yandex_secret" value="<?php echo esc_attr($o['yandex_secret'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr__('Application secret', 'smart-product-reviews'); ?>" />
                             <p class="description">Callback: <code><?php echo esc_html($callback); ?>yandex</code></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Google</th>
+                        <td>
+                            <label><input type="checkbox" name="nr_enable_google" value="1" <?php checked(!empty($o['enable_google'])); ?> /> <?php echo esc_html__('Enable Google login', 'smart-product-reviews'); ?></label><br>
+                            <input type="text" name="nr_google_id" value="<?php echo esc_attr($o['google_id'] ?? ''); ?>" class="regular-text" placeholder="Client ID" /><br>
+                            <input type="text" name="nr_google_secret" value="<?php echo esc_attr($o['google_secret'] ?? ''); ?>" class="regular-text" placeholder="Client Secret" />
+                            <p class="description">Redirect URI: <code><?php echo esc_html($callback); ?>google</code></p>
                         </td>
                     </tr>
                 </table>
@@ -110,6 +138,12 @@ class NR_Admin {
                         <th><?php echo esc_html__('Reviews per page', 'smart-product-reviews'); ?></th>
                         <td>
                             <input type="number" name="nr_comments_per_page" value="<?php echo esc_attr($o['comments_per_page'] ?? 10); ?>" min="5" max="50" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php echo esc_html__('Reply threads', 'smart-product-reviews'); ?></th>
+                        <td>
+                            <label><input type="checkbox" name="nr_thread_depth" value="1" <?php checked(!empty($o['thread_depth'])); ?> /> <?php echo esc_html__('Enable one-level reply threads', 'smart-product-reviews'); ?></label>
                         </td>
                     </tr>
                 </table>

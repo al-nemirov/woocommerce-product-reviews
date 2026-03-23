@@ -21,6 +21,8 @@ class NR_Comments {
         add_action('wp_ajax_nr_save_editor_note', [$this, 'ajax_save_editor_note']);
         add_action('wp_ajax_nr_submit_comment', [$this, 'ajax_submit']);
         add_action('wp_ajax_nopriv_nr_submit_comment', [$this, 'ajax_submit']);
+        add_action('wp_ajax_nr_load_comments', [$this, 'ajax_load_comments']);
+        add_action('wp_ajax_nopriv_nr_load_comments', [$this, 'ajax_load_comments']);
         add_action('wp_ajax_nr_editor_status', [$this, 'ajax_editor_status']);
         add_action('wp_ajax_nopriv_nr_editor_status', [$this, 'ajax_editor_status']);
         add_action('template_redirect', [$this, 'maybe_save_editor_note_form']);
@@ -158,7 +160,7 @@ class NR_Comments {
     public function replace_reviews_tab($tabs) {
         unset($tabs['reviews']);
         $tabs['nr_reviews'] = [
-            'title'    => __('Editor note', 'smart-product-reviews'),
+            'title'    => __('Reviews', 'smart-product-reviews'),
             'priority' => 30,
             'callback' => function () {
                 $file = NR_PATH . 'templates/comments.php';
@@ -202,9 +204,10 @@ class NR_Comments {
         wp_enqueue_style('nr-comments', NR_URL . 'assets/css/comments.css', [], NR_VERSION);
         wp_enqueue_script('nr-comments', NR_URL . 'assets/js/comments.js', ['jquery'], NR_VERSION, true);
         wp_localize_script('nr-comments', 'nrData', [
-            'ajax_url'       => admin_url('admin-ajax.php'),
-            'nonce'         => wp_create_nonce('nr_comment'),
+            'ajax_url'          => admin_url('admin-ajax.php'),
+            'nonce'             => wp_create_nonce('nr_comment'),
             'editor_note_nonce' => wp_create_nonce('nr_save_editor_note'),
+            'thread_depth'      => (int) NR_Core::instance()->get_option('thread_depth', 1),
         ]);
     }
 
@@ -244,9 +247,10 @@ class NR_Comments {
             wp_send_json_error(['message' => __('Too many reviews. Please try again later.', 'smart-product-reviews')]);
         }
 
-        $post_id = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
-        $content = isset($_POST['content']) ? sanitize_textarea_field( wp_unslash( $_POST['content'] ) ) : '';
-        $rating  = isset($_POST['rating']) ? (int) $_POST['rating'] : 0;
+        $post_id       = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
+        $content       = isset($_POST['content']) ? sanitize_textarea_field( wp_unslash( $_POST['content'] ) ) : '';
+        $rating        = isset($_POST['rating']) ? (int) $_POST['rating'] : 0;
+        $comment_parent = isset($_POST['comment_parent']) ? (int) $_POST['comment_parent'] : 0;
 
         if (!$post_id || get_post_type($post_id) !== 'product') {
             wp_send_json_error(['message' => __('Invalid product.', 'smart-product-reviews')]);
@@ -263,6 +267,14 @@ class NR_Comments {
             wp_send_json_error(['message' => __('Enter name and email or log in.', 'smart-product-reviews')]);
         }
 
+        // Validate parent: only allow 1 level of replies
+        if ($comment_parent > 0) {
+            $parent_comment = get_comment($comment_parent);
+            if (!$parent_comment || (int) $parent_comment->comment_parent !== 0) {
+                $comment_parent = 0; // prevent deeper nesting
+            }
+        }
+
         // Use wp_new_comment() — respects WordPress moderation, triggers comment_post hook for rating sync
         $comment_data = [
             'comment_post_ID'      => $post_id,
@@ -270,6 +282,7 @@ class NR_Comments {
             'comment_author_email' => $email,
             'comment_content'      => $content,
             'comment_type'         => 'review',
+            'comment_parent'       => $comment_parent,
             'user_id'              => $user->ID,
         ];
 
@@ -303,6 +316,117 @@ class NR_Comments {
         ]);
     }
 
+    /**
+     * AJAX: load comments page (for pagination).
+     */
+    public function ajax_load_comments() {
+        $post_id = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
+        $page    = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+        if (!$post_id || get_post_type($post_id) !== 'product') {
+            wp_send_json_error(['message' => 'Invalid product.']);
+        }
+        $tree = self::get_comments_tree($post_id, $page);
+        $html = '';
+        foreach ($tree as $comment) {
+            $html .= self::render_comment_html($comment);
+        }
+        $per_page = (int) NR_Core::instance()->get_option('comments_per_page', 10);
+        $total = (int) get_comments([
+            'post_id' => $post_id,
+            'status'  => 'approve',
+            'parent'  => 0,
+            'count'   => true,
+        ]);
+        wp_send_json_success([
+            'html'       => $html,
+            'page'       => $page,
+            'total_pages' => max(1, (int) ceil($total / $per_page)),
+        ]);
+    }
+
+    /**
+     * Get comments as tree: top-level parents with children attached.
+     */
+    public static function get_comments_tree($post_id, $page = 1) {
+        $per_page = (int) NR_Core::instance()->get_option('comments_per_page', 10);
+        $offset = ($page - 1) * $per_page;
+
+        // Fetch top-level comments
+        $parents = get_comments([
+            'post_id' => $post_id,
+            'status'  => 'approve',
+            'parent'  => 0,
+            'orderby' => 'comment_date_gmt',
+            'order'   => 'DESC',
+            'number'  => $per_page,
+            'offset'  => $offset,
+        ]);
+
+        if (empty($parents)) {
+            return [];
+        }
+
+        $parent_ids = wp_list_pluck($parents, 'comment_ID');
+
+        // Fetch all children for these parents in one query
+        $children = [];
+        if (NR_Core::instance()->get_option('thread_depth', 1)) {
+            $child_comments = get_comments([
+                'post_id'    => $post_id,
+                'status'     => 'approve',
+                'parent__in' => $parent_ids,
+                'orderby'    => 'comment_date_gmt',
+                'order'      => 'ASC',
+                'number'     => 0, // all children
+            ]);
+            foreach ($child_comments as $child) {
+                $children[$child->comment_parent][] = $child;
+            }
+        }
+
+        // Attach children to parents
+        foreach ($parents as $parent) {
+            $parent->children = isset($children[$parent->comment_ID]) ? $children[$parent->comment_ID] : [];
+        }
+
+        return $parents;
+    }
+
+    /**
+     * Render a single comment (with children if any).
+     */
+    public static function render_comment_html($comment) {
+        $rating = (int) get_comment_meta($comment->comment_ID, 'rating', true);
+        $date = date_i18n(get_option('date_format'), strtotime($comment->comment_date));
+        $thread_depth = (int) NR_Core::instance()->get_option('thread_depth', 1);
+
+        ob_start();
+        ?>
+        <div class="nr-comment" id="comment-<?php echo (int) $comment->comment_ID; ?>">
+            <div class="nr-comment-meta">
+                <?php if ($rating > 0) echo NR_Rating::get_rating_html($rating); ?>
+                <strong class="nr-author"><?php echo esc_html($comment->comment_author); ?></strong>
+                <span class="nr-date"><?php echo esc_html($date); ?></span>
+            </div>
+            <div class="nr-comment-content"><?php echo wpautop(esc_html($comment->comment_content)); ?></div>
+            <?php if ($thread_depth && (int) $comment->comment_parent === 0) : ?>
+                <button type="button" class="nr-reply-btn" data-comment-id="<?php echo (int) $comment->comment_ID; ?>"><?php echo esc_html__('Reply', 'smart-product-reviews'); ?></button>
+            <?php endif; ?>
+            <?php if (!empty($comment->children)) : ?>
+                <div class="nr-replies">
+                    <?php foreach ($comment->children as $child) : ?>
+                        <?php echo self::render_comment_html($child); ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * @deprecated Use get_comments_tree() instead.
+     */
     public static function get_comments_list($post_id, $args = []) {
         $defaults = [
             'post_id' => $post_id,
