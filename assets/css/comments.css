@@ -71,7 +71,7 @@
 .nr-comments-list { list-style: none; padding: 0; margin: 0; }
 .nr-comment { padding: 1.25em 0; border-bottom: 1px solid #f3f4f6; display: flex; gap: 12px; }
 .nr-comment:last-child { border-bottom: none; }
-.nr-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 2px; }
+.nr-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: center 20%; flex-shrink: 0; margin-top: 2px; border: 2px solid #e5e7eb; }
 .nr-comment-body { flex: 1; min-width: 0; }
 .nr-comment-meta { margin-bottom: 0.35em; display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; }
 .nr-comment-meta .nr-stars { display: inline-flex; font-size: 0.85em; }

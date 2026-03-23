@@ -639,7 +639,7 @@ class NR_Comments {
         ?>
         <div class="<?php echo esc_attr($comment_class); ?>" id="comment-<?php echo (int) $comment->comment_ID; ?>">
             <?php if ($avatar_url) : ?>
-                <img class="nr-avatar" src="<?php echo esc_url($avatar_url); ?>" alt="" width="40" height="40" loading="lazy" />
+                <img class="nr-avatar" src="<?php echo esc_url($avatar_url); ?>" alt="" width="44" height="44" loading="lazy" />
             <?php endif; ?>
             <div class="nr-comment-body">
                 <div class="nr-comment-meta">
