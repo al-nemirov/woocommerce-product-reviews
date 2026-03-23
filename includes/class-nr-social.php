@@ -139,7 +139,7 @@ class NR_Social {
             'provider' => 'vk', 'post_id' => $post_id, 'code_verifier' => $verifier,
             'session_hash' => self::get_session_hash(),
         ], 600);
-        $url = 'https://id.vk.ru/authorize?' . http_build_query([
+        $url = 'https://id.vk.com/authorize?' . http_build_query([
             'client_id'            => $app_id,
             'redirect_uri'         => $callback,
             'response_type'        => 'code',
@@ -163,16 +163,19 @@ class NR_Social {
         if (!empty($data['code_verifier'])) {
             $body['code_verifier'] = $data['code_verifier'];
         }
-        $res = wp_remote_post('https://id.vk.ru/oauth2/auth', ['body' => $body]);
+        $res = wp_remote_post('https://id.vk.com/oauth2/auth', ['body' => $body]);
         if (is_wp_error($res)) return $res;
         $body = json_decode(wp_remote_retrieve_body($res), true);
         if (empty($body['access_token'])) {
             return new WP_Error('nr_vk', __('VK: no access token', 'woocommerce-product-reviews'));
         }
         $uid = isset($body['user_id']) ? $body['user_id'] : '';
-        $user_res = wp_remote_get('https://id.vk.ru/userinfo?access_token=' . urlencode($body['access_token']));
+        $user_res = wp_remote_post('https://id.vk.com/oauth2/user_info', [
+            'body' => ['access_token' => $body['access_token'], 'client_id' => $app_id],
+        ]);
         if (is_wp_error($user_res)) return $user_res;
         $user = json_decode(wp_remote_retrieve_body($user_res), true);
+        if (isset($user['user'])) $user = $user['user'];
         $email = isset($user['email']) ? $user['email'] : ($uid ? $uid . '@vk.id' : '');
         $name = trim((isset($user['given_name']) ? $user['given_name'] : '') . ' ' . (isset($user['family_name']) ? $user['family_name'] : ''));
         if (!$name && isset($user['name'])) $name = $user['name'];
