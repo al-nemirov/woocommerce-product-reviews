@@ -103,10 +103,14 @@
 
 /* ═══ Votes ═══ */
 .nr-votes { display: inline-flex; gap: 10px; margin-top: 0.4em; }
-.nr-vote { background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px 10px; cursor: pointer; font-size: 0.85em; color: #6b7280; transition: all 0.2s; }
-.nr-vote:hover { border-color: #07B290; color: #07B290; }
-.nr-vote.nr-voted { border-color: #07B290; color: #07B290; background: rgba(7,178,144,0.05); cursor: default; }
-.nr-vote-count { margin-left: 2px; font-size: 0.9em; }
+.nr-vote { background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px 10px; cursor: pointer; font-size: 0.85em; transition: all 0.2s; }
+.nr-vote-up { color: #16a34a; }
+.nr-vote-up:hover { border-color: #16a34a; background: rgba(22,163,74,0.06); }
+.nr-vote-up.nr-voted { border-color: #16a34a; background: rgba(22,163,74,0.1); cursor: default; }
+.nr-vote-down { color: #dc2626; }
+.nr-vote-down:hover { border-color: #dc2626; background: rgba(220,38,38,0.06); }
+.nr-vote-down.nr-voted { border-color: #dc2626; background: rgba(220,38,38,0.1); cursor: default; }
+.nr-vote-count { margin-left: 2px; font-size: 0.9em; font-weight: 600; }
 
 /* ═══ Note questions (chat) ═══ */
 .nr-note-questions { margin: 1.5em 0; padding-top: 1.5em; border-top: 1px solid #e5e7eb; }
