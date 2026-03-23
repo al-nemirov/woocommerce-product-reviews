@@ -214,22 +214,9 @@ class NR_Shortcodes {
             ]);
         }
 
-        $product_ids = get_posts([
-            'post_type'      => 'product',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'post_status'    => 'publish',
-        ]);
-        $comments = [];
-        if (!empty($product_ids)) {
-            $comments = get_comments([
-                'post_id' => $product_ids,
-                'status'  => 'approve',
-                'number'  => (int) $atts['count'],
-                'orderby' => 'comment_date_gmt',
-                'order'   => 'DESC',
-            ]);
-        }
+        // Popular = top-level comments with highest reply count
+        $limit = max(1, (int) $atts['count']);
+        $comments = self::get_product_comments_by_popularity($limit);
 
         ob_start();
         echo '<div class="nr-widget nr-popular-comments">';
@@ -247,6 +234,25 @@ class NR_Shortcodes {
         return ob_get_clean();
     }
 
+    /**
+     * Get product comments sorted by reply count (popularity).
+     */
+    private static function get_product_comments_by_popularity($limit = 5) {
+        global $wpdb;
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT c.*, COUNT(r.comment_ID) AS reply_count
+             FROM {$wpdb->comments} c
+             INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID AND p.post_type = 'product'
+             LEFT JOIN {$wpdb->comments} r ON r.comment_parent = c.comment_ID AND r.comment_approved = '1'
+             WHERE c.comment_approved = '1' AND c.comment_parent = 0
+             GROUP BY c.comment_ID
+             ORDER BY reply_count DESC, c.comment_date_gmt DESC
+             LIMIT %d",
+            $limit
+        ));
+        return $results ?: [];
+    }
+
     public function latest_comments($atts) {
         $atts = shortcode_atts([
             'count' => 5,
@@ -261,23 +267,8 @@ class NR_Shortcodes {
             ]);
         }
 
-        $product_ids = get_posts([
-            'post_type'      => 'product',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'post_status'    => 'publish',
-        ]);
-        if (empty($product_ids)) {
-            $comments = [];
-        } else {
-            $comments = get_comments([
-                'post_id' => $product_ids,
-                'status'   => 'approve',
-                'number'   => (int) $atts['count'],
-                'orderby'  => 'comment_date_gmt',
-                'order'    => 'DESC',
-            ]);
-        }
+        // Direct SQL join avoids loading all product IDs
+        $comments = self::get_latest_product_comments((int) $atts['count']);
 
         ob_start();
         echo '<div class="nr-widget nr-latest-comments">';
@@ -293,6 +284,24 @@ class NR_Shortcodes {
         }
         echo '</ul></div>';
         return ob_get_clean();
+    }
+
+    /**
+     * Get latest approved comments on products via efficient SQL join.
+     */
+    private static function get_latest_product_comments($limit = 5) {
+        global $wpdb;
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT c.*
+             FROM {$wpdb->comments} c
+             INNER JOIN {$wpdb->posts} p ON c.comment_post_ID = p.ID
+                AND p.post_type = 'product' AND p.post_status = 'publish'
+             WHERE c.comment_approved = '1'
+             ORDER BY c.comment_date_gmt DESC
+             LIMIT %d",
+            $limit
+        ));
+        return $results ?: [];
     }
 
     /**

@@ -58,11 +58,19 @@ class NR_Social {
     }
 
     public function ajax_login() {
+        check_ajax_referer('nr_social_login', 'nonce');
+
         if (!get_option('users_can_register')) {
             wp_send_json_error(['message' => __('Registration is disabled.', 'smart-product-reviews')]);
         }
         $provider = isset($_POST['provider']) ? sanitize_text_field($_POST['provider']) : '';
         $post_id  = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
+
+        // Verify provider is enabled in settings
+        $enabled = self::get_enabled_providers();
+        if (!in_array($provider, $enabled, true)) {
+            wp_send_json_error(['message' => __('This login provider is not enabled.', 'smart-product-reviews')]);
+        }
 
         $method = $provider . '_redirect';
         if (method_exists($this, $method)) {
@@ -83,7 +91,8 @@ class NR_Social {
         $verifier = bin2hex(random_bytes(32));
         $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
         set_transient('nr_oauth_' . md5($state), [
-            'provider' => 'vk', 'post_id' => $post_id, 'code_verifier' => $verifier
+            'provider' => 'vk', 'post_id' => $post_id, 'code_verifier' => $verifier,
+            'session_hash' => self::get_session_hash(),
         ], 600);
         $url = 'https://id.vk.ru/authorize?' . http_build_query([
             'client_id'            => $app_id,
@@ -137,7 +146,7 @@ class NR_Social {
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=ok');
         $state = wp_create_nonce('nr_ok_' . $post_id);
-        set_transient('nr_oauth_' . md5($state), ['provider' => 'ok', 'post_id' => $post_id], 600);
+        set_transient('nr_oauth_' . md5($state), ['provider' => 'ok', 'post_id' => $post_id, 'session_hash' => self::get_session_hash()], 600);
         $url = 'https://connect.ok.ru/oauth/authorize?' . http_build_query([
             'client_id'     => $app_id,
             'redirect_uri'  => $callback,
@@ -212,7 +221,7 @@ class NR_Social {
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=yandex');
         $state = wp_create_nonce('nr_ya_' . $post_id);
-        set_transient('nr_oauth_' . md5($state), ['provider' => 'yandex', 'post_id' => $post_id], 600);
+        set_transient('nr_oauth_' . md5($state), ['provider' => 'yandex', 'post_id' => $post_id, 'session_hash' => self::get_session_hash()], 600);
         $url = 'https://oauth.yandex.ru/authorize?' . http_build_query([
             'client_id'     => $id,
             'redirect_uri'  => $callback,
@@ -261,7 +270,7 @@ class NR_Social {
         }
         $callback = admin_url('admin-ajax.php?action=nr_social_callback&provider=google');
         $state = wp_create_nonce('nr_gg_' . $post_id);
-        set_transient('nr_oauth_' . md5($state), ['provider' => 'google', 'post_id' => $post_id], 600);
+        set_transient('nr_oauth_' . md5($state), ['provider' => 'google', 'post_id' => $post_id, 'session_hash' => self::get_session_hash()], 600);
         $url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
             'client_id'     => $id,
             'redirect_uri'  => $callback,
@@ -318,6 +327,12 @@ class NR_Social {
             wp_redirect(home_url());
             exit;
         }
+        // Verify session binding to prevent forced-login attacks
+        if (!empty($data['session_hash']) && $data['session_hash'] !== self::get_session_hash()) {
+            delete_transient('nr_oauth_' . md5($state));
+            wp_redirect(home_url());
+            exit;
+        }
         delete_transient('nr_oauth_' . md5($state));
         $post_id = (int) $data['post_id'];
 
@@ -338,14 +353,50 @@ class NR_Social {
         exit;
     }
 
-    // ── Помощник: найти или создать пользователя ──────
+    // ── Helpers ─────────────────────────────────────────
 
+    /**
+     * Session hash for OAuth state binding.
+     * Uses browser cookies to bind OAuth flow to the initiating browser.
+     */
+    private static function get_session_hash() {
+        $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+        $ua = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+        return md5($ip . '|' . $ua . '|' . NONCE_SALT);
+    }
+
+    /**
+     * Find existing user by provider UID or email, or create new one.
+     */
     private function get_or_create_user($email, $name, $provider, $provider_uid) {
+        // First try to find by provider UID (strong binding)
+        if ($provider_uid) {
+            $existing = get_users([
+                'meta_key'   => 'nr_social_uid_' . $provider,
+                'meta_value' => $provider_uid,
+                'number'     => 1,
+                'fields'     => 'ID',
+            ]);
+            if (!empty($existing)) {
+                return (int) $existing[0];
+            }
+        }
+
+        // Fallback to email
         $user_id = email_exists($email);
         if ($user_id) {
+            // Store provider UID for future lookups
+            if ($provider_uid) {
+                update_user_meta($user_id, 'nr_social_uid_' . $provider, $provider_uid);
+            }
             return $user_id;
         }
+
+        // Create new user
         $login = sanitize_user(str_replace(' ', '_', $name), true);
+        if (!$login) {
+            $login = $provider . '_user';
+        }
         if (username_exists($login)) {
             $login = $login . '_' . substr(md5($email), 0, 6);
         }
@@ -355,6 +406,9 @@ class NR_Social {
         }
         wp_update_user(['ID' => $user_id, 'display_name' => $name]);
         update_user_meta($user_id, 'nr_social_provider', $provider);
+        if ($provider_uid) {
+            update_user_meta($user_id, 'nr_social_uid_' . $provider, $provider_uid);
+        }
         return $user_id;
     }
 }

@@ -16,8 +16,11 @@ class NR_Rating {
 
     public function init() {
         add_action('comment_post', [$this, 'sync_rating'], 10, 3);
-        // ensure_rating_meta removed from runtime — was writing DB on every page load
-        // Run once via WP-CLI or activation if needed for legacy comments
+        add_action('transition_comment_status', [$this, 'on_status_change'], 10, 3);
+        add_action('deleted_comment', [$this, 'on_comment_deleted'], 10, 2);
+        add_action('trashed_comment', [$this, 'on_comment_trashed'], 10, 2);
+        add_action('untrashed_comment', [$this, 'on_comment_untrashed'], 10, 2);
+        add_action('edit_comment', [$this, 'on_comment_edited'], 10, 2);
     }
 
     public function sync_rating($comment_id, $approved, $commentdata) {
@@ -31,6 +34,40 @@ class NR_Rating {
             if ($comment && get_post_type($comment->comment_post_ID) === 'product') {
                 $this->update_product_rating($comment->comment_post_ID);
             }
+        }
+    }
+
+    /**
+     * Recalculate when comment status changes (approve/unapprove/spam/trash).
+     */
+    public function on_status_change($new_status, $old_status, $comment) {
+        if ($comment && get_post_type($comment->comment_post_ID) === 'product') {
+            self::update_product_rating($comment->comment_post_ID);
+        }
+    }
+
+    public function on_comment_deleted($comment_id, $comment) {
+        if ($comment && get_post_type($comment->comment_post_ID) === 'product') {
+            self::update_product_rating($comment->comment_post_ID);
+        }
+    }
+
+    public function on_comment_trashed($comment_id, $comment) {
+        if ($comment && get_post_type($comment->comment_post_ID) === 'product') {
+            self::update_product_rating($comment->comment_post_ID);
+        }
+    }
+
+    public function on_comment_untrashed($comment_id, $comment) {
+        if ($comment && get_post_type($comment->comment_post_ID) === 'product') {
+            self::update_product_rating($comment->comment_post_ID);
+        }
+    }
+
+    public function on_comment_edited($comment_id, $data) {
+        $comment = get_comment($comment_id);
+        if ($comment && get_post_type($comment->comment_post_ID) === 'product') {
+            self::update_product_rating($comment->comment_post_ID);
         }
     }
 

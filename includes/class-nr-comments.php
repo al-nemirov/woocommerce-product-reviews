@@ -29,7 +29,7 @@ class NR_Comments {
         add_filter('comment_form_defaults', [$this, 'form_defaults'], 10, 1);
         add_filter('woocommerce_product_tabs', [$this, 'replace_reviews_tab'], 98);
         add_shortcode('nr_product_reviews', [$this, 'shortcode_product_reviews']);
-        add_shortcode('nr_editor_note', [$this, 'shortcode_product_reviews']);
+        add_shortcode('nr_editor_note', [$this, 'shortcode_editor_note']);
         add_action('nr_single_product_reviews', [$this, 'render_product_reviews']);
     }
 
@@ -116,6 +116,50 @@ class NR_Comments {
             return '';
         }
         return $this->render_product_reviews_html($product_id);
+    }
+
+    /**
+     * Shortcode [nr_editor_note] — renders only the editor note block.
+     */
+    public function shortcode_editor_note($atts) {
+        $atts = shortcode_atts(['id' => 0], $atts, 'nr_editor_note');
+        $product_id = (int) $atts['id'];
+        if (!$product_id && is_singular('product')) {
+            $product_id = get_the_ID();
+        }
+        if (!$product_id || get_post_type($product_id) !== 'product') {
+            return '';
+        }
+        return $this->render_editor_note_html($product_id);
+    }
+
+    /**
+     * Render only the editor note block for a product.
+     */
+    public function render_editor_note_html($product_id) {
+        $product_id = (int) $product_id;
+        if (!$product_id || get_post_type($product_id) !== 'product') {
+            return '';
+        }
+        $this->assets(true);
+        $file = NR_PATH . 'templates/editor-note.php';
+        if (!file_exists($file)) {
+            return '';
+        }
+        global $post;
+        $saved_post = $post;
+        $post = get_post($product_id);
+        if (!$post) {
+            $post = $saved_post;
+            return '';
+        }
+        setup_postdata($post);
+        ob_start();
+        include $file;
+        $html = ob_get_clean();
+        wp_reset_postdata();
+        $post = $saved_post;
+        return $html;
     }
 
     /**
@@ -206,8 +250,23 @@ class NR_Comments {
         wp_localize_script('nr-comments', 'nrData', [
             'ajax_url'          => admin_url('admin-ajax.php'),
             'nonce'             => wp_create_nonce('nr_comment'),
+            'social_nonce'      => wp_create_nonce('nr_social_login'),
             'editor_note_nonce' => wp_create_nonce('nr_save_editor_note'),
             'thread_depth'      => (int) NR_Core::instance()->get_option('thread_depth', 1),
+            'i18n'              => [
+                'saving'         => __('Saving...', 'smart-product-reviews'),
+                'save_note'      => __('Save note', 'smart-product-reviews'),
+                'saved'          => __('Saved.', 'smart-product-reviews'),
+                'error'          => __('Error', 'smart-product-reviews'),
+                'network_error'  => __('Network error', 'smart-product-reviews'),
+                'reply'          => __('Reply', 'smart-product-reviews'),
+                'cancel'         => __('Cancel', 'smart-product-reviews'),
+                'reply_placeholder' => __('Your reply...', 'smart-product-reviews'),
+                'reply_min_length'  => __('Reply must be at least 10 characters.', 'smart-product-reviews'),
+                'loading'        => __('Loading...', 'smart-product-reviews'),
+                'load_more'      => __('Load more reviews', 'smart-product-reviews'),
+                'login_error'    => __('Login error', 'smart-product-reviews'),
+            ],
         ]);
     }
 

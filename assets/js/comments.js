@@ -29,7 +29,7 @@
                     content = $('#' + editorId).val() || '';
                 }
                 $noteMsg.hide();
-                $noteForm.find('.nr-save-note').prop('disabled', true).text('Saving...');
+                $noteForm.find('.nr-save-note').prop('disabled', true).text(nrData.i18n ? nrData.i18n.saving : 'Saving...');
                 $.post(nrData.ajax_url, {
                     action: 'nr_save_editor_note',
                     nonce: nrData.editor_note_nonce || '',
@@ -42,15 +42,15 @@
                             var authorHtml = $author.length ? $author[0].outerHTML : '';
                             $content.html(authorHtml + content);
                         }
-                        $noteMsg.removeClass('error').addClass('success').text(r.data && r.data.message ? r.data.message : 'Saved.').show();
+                        $noteMsg.removeClass('error').addClass('success').text(r.data && r.data.message ? r.data.message : (nrData.i18n ? nrData.i18n.saved : 'Saved.')).show();
                         $noteForm.hide();
                     } else {
-                        $noteMsg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Error').show();
+                        $noteMsg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : (nrData.i18n ? nrData.i18n.error : 'Error')).show();
                     }
                 }).fail(function() {
-                    $noteMsg.removeClass('success').addClass('error').text('Network error').show();
+                    $noteMsg.removeClass('success').addClass('error').text(nrData.i18n ? nrData.i18n.network_error : 'Network error').show();
                 }).always(function() {
-                    $noteForm.find('.nr-save-note').prop('disabled', false).text('Save note');
+                    $noteForm.find('.nr-save-note').prop('disabled', false).text(nrData.i18n ? nrData.i18n.save_note : 'Save note');
                 });
             });
         }
@@ -104,11 +104,11 @@
                         $parentInput.val(0);
                         $('.nr-reply-form-wrap.active').removeClass('active');
                     } else {
-                        $msg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Error').show();
+                        $msg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : (nrData.i18n ? nrData.i18n.error : 'Error')).show();
                     }
                 })
                 .fail(function() {
-                    $msg.removeClass('success').addClass('error').text('Network error').show();
+                    $msg.removeClass('success').addClass('error').text(nrData.i18n ? nrData.i18n.network_error : 'Network error').show();
                 })
                 .always(function() {
                     $form.find('.nr-submit').prop('disabled', false);
@@ -124,11 +124,12 @@
             $('.nr-reply-form-wrap').remove();
 
             // Create inline reply form
+            var i = nrData.i18n || {};
             var replyHtml = '<div class="nr-reply-form-wrap active">' +
-                '<textarea name="reply_content" rows="3" placeholder="Your reply..." required></textarea>' +
+                '<textarea name="reply_content" rows="3" placeholder="' + (i.reply_placeholder || 'Your reply...') + '" required></textarea>' +
                 '<p>' +
-                '<button type="button" class="nr-submit nr-submit-reply" data-parent-id="' + commentId + '">Reply</button>' +
-                '<button type="button" class="nr-cancel-reply">Cancel</button>' +
+                '<button type="button" class="nr-submit nr-submit-reply" data-parent-id="' + commentId + '">' + (i.reply || 'Reply') + '</button>' +
+                '<button type="button" class="nr-cancel-reply">' + (i.cancel || 'Cancel') + '</button>' +
                 '</p>' +
                 '<p class="nr-form-message" style="display:none;"></p>' +
                 '</div>';
@@ -149,7 +150,7 @@
             var content = $wrap.find('textarea').val();
 
             if (!content || content.length < 10) {
-                $replyMsg.removeClass('success').addClass('error').text('Reply must be at least 10 characters.').show();
+                $replyMsg.removeClass('success').addClass('error').text(nrData.i18n ? nrData.i18n.reply_min_length : 'Reply must be at least 10 characters.').show();
                 return;
             }
 
@@ -176,11 +177,11 @@
                         $wrap.find('textarea').val('');
                         setTimeout(function() { $wrap.remove(); }, 2000);
                     } else {
-                        $replyMsg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : 'Error').show();
+                        $replyMsg.removeClass('success').addClass('error').text(r.data && r.data.message ? r.data.message : (nrData.i18n ? nrData.i18n.error : 'Error')).show();
                     }
                 })
                 .fail(function() {
-                    $replyMsg.removeClass('success').addClass('error').text('Network error').show();
+                    $replyMsg.removeClass('success').addClass('error').text(nrData.i18n ? nrData.i18n.network_error : 'Network error').show();
                 })
                 .always(function() {
                     $btn.prop('disabled', false);
@@ -200,7 +201,7 @@
                 return;
             }
 
-            $btn.prop('disabled', true).text('Loading...');
+            $btn.prop('disabled', true).text(nrData.i18n ? nrData.i18n.loading : 'Loading...');
 
             $.get(nrData.ajax_url, {
                 action: 'nr_load_comments',
@@ -215,7 +216,7 @@
                     }
                 }
             }).always(function() {
-                $btn.prop('disabled', false).text('Load more reviews');
+                $btn.prop('disabled', false).text(nrData.i18n ? nrData.i18n.load_more : 'Load more reviews');
             });
         });
 
@@ -225,13 +226,14 @@
             var pid = $(this).data('post-id');
             $.post(nrData.ajax_url, {
                 action: 'nr_social_login',
+                nonce: nrData.social_nonce || '',
                 provider: provider,
                 post_id: pid
             }).done(function(r) {
                 if (r.success && r.data && r.data.url) {
                     window.location.href = r.data.url;
                 } else {
-                    alert(r.data && r.data.message ? r.data.message : 'Login error');
+                    alert(r.data && r.data.message ? r.data.message : (nrData.i18n ? nrData.i18n.login_error : 'Login error'));
                 }
             });
         });
