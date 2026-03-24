@@ -163,3 +163,17 @@
 .nr-widget-item a:hover { color: #07B290; }
 .nr-widget-item .nr-stars { margin-right: 4px; }
 .nr-meta { display: block; color: #9ca3af; font-size: 0.8em; margin-top: 2px; }
+
+/* ═══ Editor note badge (catalog & single) ═══ */
+.nr-editor-note-icon { font-size: 0.85em; }
+.nr-editor-note-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: #059377; font-size: 0.85em; font-weight: 500;
+    text-decoration: none; margin-bottom: 0.5em;
+}
+.nr-editor-note-link:hover { color: #047857; text-decoration: underline; }
+
+/* Badge in product loop/catalog */
+.woocommerce ul.products li.product .nr-editor-note-icon {
+    display: block; margin-top: 4px; font-size: 0.8em; line-height: 1;
+}

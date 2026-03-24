@@ -34,6 +34,12 @@ final class NR_Core {
         // Не индексировать секретную страницу входа редактора
         add_action('wp_head', [$this, 'noindex_editor_login_page']);
 
+        // Переопределяем текст рейтинга WooCommerce и добавляем значок примечания
+        add_filter('woocommerce_product_get_rating_html', [$this, 'custom_rating_html'], 10, 3);
+        add_filter('woocommerce_locate_template', [$this, 'override_wc_templates'], 10, 3);
+        add_action('woocommerce_after_shop_loop_item_title', [$this, 'editor_note_badge_in_loop'], 6);
+        add_action('woocommerce_single_product_summary', [$this, 'editor_note_badge_single'], 6);
+
         if (is_admin()) {
             require_once NR_PATH . 'admin/class-nr-admin.php';
             NR_Admin::instance()->init();
@@ -127,6 +133,83 @@ final class NR_Core {
     public static function get_editor_note_title() {
         $title = self::instance()->get_option('editor_note_title', '');
         return $title ? $title : __('Примечание редактора', 'woocommerce-product-reviews');
+    }
+
+    /**
+     * Переопределяем HTML рейтинга WooCommerce: убираем "клиента/пользователя".
+     */
+    public function custom_rating_html($html, $rating, $count) {
+        if ($rating <= 0) {
+            return $html;
+        }
+        $label = sprintf('Рейтинг %s из 5', number_format_i18n($rating, 2));
+        $width = ($rating / 5) * 100;
+        $html  = '<div class="star-rating" role="img" aria-label="' . esc_attr($label) . '">';
+        $html .= '<span style="width:' . esc_attr($width) . '%">' . esc_html($label) . '</span>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Русское склонение: 1 отзыв, 2 отзыва, 5 отзывов.
+     */
+    public static function plural_reviews($count) {
+        $count = (int) $count;
+        $mod10 = $count % 10;
+        $mod100 = $count % 100;
+        if ($mod10 === 1 && $mod100 !== 11) {
+            return $count . ' отзыв';
+        }
+        if ($mod10 >= 2 && $mod10 <= 4 && ($mod100 < 10 || $mod100 >= 20)) {
+            return $count . ' отзыва';
+        }
+        return $count . ' отзывов';
+    }
+
+    /**
+     * Подменяем шаблон rating.php из WooCommerce на наш.
+     */
+    public function override_wc_templates($template, $template_name, $template_path) {
+        if ($template_name === 'single-product/rating.php') {
+            $plugin_template = NR_PATH . 'templates/single-product/rating.php';
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
+            }
+        }
+        return $template;
+    }
+
+    /**
+     * Значок примечания редактора в списке товаров (каталог/архив).
+     */
+    public function editor_note_badge_in_loop() {
+        global $product;
+        if (!$product) {
+            return;
+        }
+        $note = get_post_meta($product->get_id(), '_nr_editor_note', true);
+        if (!is_string($note) || trim(wp_strip_all_tags($note)) === '') {
+            return;
+        }
+        echo '<span class="nr-editor-note-icon" title="' . esc_attr__('Есть примечание редактора', 'woocommerce-product-reviews') . '">📝</span>';
+    }
+
+    /**
+     * Значок примечания редактора на странице товара (под заголовком).
+     */
+    public function editor_note_badge_single() {
+        global $product;
+        if (!$product) {
+            return;
+        }
+        $note = get_post_meta($product->get_id(), '_nr_editor_note', true);
+        if (!is_string($note) || trim(wp_strip_all_tags($note)) === '') {
+            return;
+        }
+        echo '<a href="#nr-editor-note" class="nr-editor-note-link" title="' . esc_attr__('Перейти к примечанию редактора', 'woocommerce-product-reviews') . '">';
+        echo '<span class="nr-editor-note-icon">📝</span> ';
+        echo '<span>' . esc_html__('Примечание редактора', 'woocommerce-product-reviews') . '</span>';
+        echo '</a>';
     }
 
     private function default_options() {
