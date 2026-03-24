@@ -56,7 +56,7 @@ class NR_Comments {
      * Include review type in the default admin comments list.
      */
     public function admin_include_custom_types($query) {
-        if (!is_admin() || !$query->query_vars_changed) {
+        if (!is_admin() || empty($query->query_vars)) {
             return;
         }
         global $pagenow;
